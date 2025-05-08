@@ -1,9 +1,13 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Welcome</title>
-</head>
-<body>
-<h1>Welcome to <?= htmlspecialchars($name) ?>!</h1>
-</body>
-</html>
+<h1>Hello, {{ $name }}</h1>
+
+@if ($name === 'John')
+<p>Welcome back!</p>
+@else
+<p>Nice to meet you.</p>
+@endif
+
+@foreach (['apple', 'banana'] as $fruit)
+<li>{{ $fruit }}</li>
+@endforeach
+
+@include('partials.footer')
