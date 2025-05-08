@@ -2,29 +2,34 @@
 
 namespace Core\Routing;
 
+use Core\Http\Kernel;
+
 class Router
 {
-    private array $routes = [];
+    protected array $routes = [];
 
-    public function get(string $uri, string $controller): void
+    public function get(string $uri, $action): Route
     {
-        $this->routes[] = new Route($uri, $controller);
+        $route = new Route('GET', $uri, $action);
+        $this->routes[] = $route;
+        return $route;
     }
 
-    public function dispatch(string $requestUri): mixed
+    public function dispatch(string $method, string $uri)
     {
-        $requestUri = parse_url($requestUri, PHP_URL_PATH);
-
         foreach ($this->routes as $route) {
-            if ($route->uri === $requestUri) {
-                [$controllerClass, $method] = explode('@', $route->controller);
-                $controller = new $controllerClass();
-                return $controller->$method();
+            if ($route->method === $method && $route->uri === $uri) {
+                $handler = function () use ($route) {
+                    [$class, $method] = $route->action;
+                    return (new $class)->$method();
+                };
+
+                $kernel = new Kernel($route->middleware);
+                return $kernel->handle($handler);
             }
         }
 
         http_response_code(404);
-        echo '404 Not Found';
-        return null;
+        echo "404 Not Found";
     }
 }

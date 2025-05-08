@@ -1,12 +1,13 @@
 <?php
 
 use Core\Support\Env;
+use Core\Support\ExceptionHandler;
 
 require_once __DIR__ . '/../vendor/autoload.php';
-require_once __DIR__ . '/../core/Support/helpers.php';
 
 Env::load();
+ExceptionHandler::register();
 
-$router = require __DIR__ . '/../app/Http/Routes/web.php';
+require_once __DIR__ . '/../core/Support/helpers.php';
 
-return $router;
+require __DIR__ . '/../app/Http/Routes/web.php';

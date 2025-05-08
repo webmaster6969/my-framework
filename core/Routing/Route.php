@@ -4,14 +4,21 @@ namespace Core\Routing;
 
 class Route
 {
-    public string $uri;
-    public string $controller;
     public string $method;
+    public string $uri;
+    public $action;
+    public array $middleware = [];
 
-    public function __construct(string $uri, string $controller, string $method = 'index')
+    public function __construct(string $method, string $uri, $action)
     {
-        $this->uri = $uri;
-        $this->controller = $controller;
         $this->method = $method;
+        $this->uri = $uri;
+        $this->action = $action;
+    }
+
+    public function middleware(array $middleware): self
+    {
+        $this->middleware = $middleware;
+        return $this;
     }
 }
