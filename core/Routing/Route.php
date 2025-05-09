@@ -21,4 +21,16 @@ class Route
         $this->middleware = $middleware;
         return $this;
     }
+
+    public function match(string $requestUri): array|false
+    {
+        $pattern = preg_replace('#\{([\w]+)\}#', '(?P<$1>[^/]+)', $this->uri);
+        $pattern = "#^{$pattern}$#";
+
+        if (preg_match($pattern, $requestUri, $matches)) {
+            return array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
+        }
+
+        return false;
+    }
 }

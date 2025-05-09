@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\ApiController;
 use App\Http\Middleware\AuthMiddleware;
 use Core\Routing\Router;
 
@@ -10,5 +11,10 @@ $router->get('/admin', [HomeController::class, 'index'])
     ->middleware([AuthMiddleware::class]);
 
 $router->get('/', [HomeController::class, 'index']);
+
+$router->get('/users/{id}', [ApiController::class, 'index']);
+$router->post('/users', [ApiController::class, 'store']);
+$router->put('/users/1', [ApiController::class, 'update']);
+$router->delete('/users/1', [ApiController::class, 'destroy']);
 
 $router->dispatch($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);
