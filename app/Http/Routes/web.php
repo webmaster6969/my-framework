@@ -7,14 +7,19 @@ use Core\Routing\Router;
 
 $router = new Router();
 
+$router->group([
+    'prefix' => '/admin',
+    'middleware' => [AuthMiddleware::class],
+], function ($router) {
+    $router->get('/users/{id}', [HomeController::class, 'index']);
+});
+
 $router->get('/admin', [HomeController::class, 'index'])
     ->middleware([AuthMiddleware::class]);
 
 $router->get('/', [HomeController::class, 'index']);
 
 $router->get('/users/{id}', [ApiController::class, 'index']);
-$router->post('/users', [ApiController::class, 'store']);
-$router->put('/users/1', [ApiController::class, 'update']);
-$router->delete('/users/1', [ApiController::class, 'destroy']);
+
 
 $router->dispatch($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_URI']);
