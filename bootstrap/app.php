@@ -2,8 +2,11 @@
 
 use Core\Support\Env;
 use Core\Support\ExceptionHandler;
+use Core\Support\Session;
 
 require_once __DIR__ . '/../vendor/autoload.php';
+
+Session::start();
 
 Env::load();
 ExceptionHandler::register();

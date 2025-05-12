@@ -16,3 +16,14 @@ if (!function_exists('view')) {
         include $viewPath;
     }
 }
+
+if (!function_exists('session')) {
+    function session(?string $key = null, mixed $default = null): mixed
+    {
+        if ($key === null) {
+            return $_SESSION ?? [];
+        }
+
+        return $_SESSION[$key] ?? $default;
+    }
+}
