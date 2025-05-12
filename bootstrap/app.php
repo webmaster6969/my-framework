@@ -2,7 +2,7 @@
 
 use Core\Support\Env;
 use Core\Support\ExceptionHandler;
-use Core\Support\Session;
+use Core\Support\Session\Session;
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
