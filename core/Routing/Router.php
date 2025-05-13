@@ -3,6 +3,7 @@
 namespace Core\Routing;
 
 use Core\Http\Kernel;
+use Core\Http\Request;
 
 class Router
 {
@@ -74,18 +75,18 @@ class Router
         $this->groupAttributes = $previousGroup;
     }
 
-    public function dispatch(string $method, string $uri)
+    public function dispatch(Request $request)
     {
         foreach ($this->routes as $route) {
-            if ($route->method === $method) {
-                $params = $route->match($uri);
+            if ($route->method === $request->method()) {
+                $params = $route->match($request->path());
 
                 if ($params !== false) {
                     $handler = function () use ($route, $params) {
                         [$class, $method] = $route->action;
                         return (new $class)->$method(...array_values($params));
-                    };
 
+                    };
                     $kernel = new Kernel($route->middleware);
                     return $kernel->handle($handler);
                 }
