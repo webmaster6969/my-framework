@@ -2,31 +2,21 @@
 
 use Core\Database\DB;
 use Core\Support\Env;
-use Core\Support\ExceptionHandler;
-use Core\Support\Session\Session;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMSetup;
+use Doctrine\ORM\Tools\Console\ConsoleRunner;
+use Doctrine\ORM\Tools\Console\EntityManagerProvider\SingleManagerProvider;
 
-require_once __DIR__ . '/../vendor/autoload.php';
-
-Session::start();
+require_once __DIR__ . '/vendor/autoload.php';
 
 Env::load();
-ExceptionHandler::register();
-
-require_once __DIR__ . '/../core/Support/helpers.php';
 
 // Create a simple "default" Doctrine ORM configuration for Attributes
 $config = ORMSetup::createAttributeMetadataConfiguration(
-    paths: [__DIR__ . '/../database/entities'],
+    paths: [__DIR__ . '/database/entities'],
     isDevMode: true,
 );
-// or if you prefer XML
-// $config = ORMSetup::createXMLMetadataConfiguration(
-//    paths: [__DIR__ . '/config/xml'],
-//    isDevMode: true,
-//);
 
 // configuring the database connection
 $connection = DriverManager::getConnection([
@@ -39,7 +29,12 @@ $connection = DriverManager::getConnection([
     'port' => Env::get('DB_PORT'),
 ], $config);
 
+
+
 // obtaining the entity manager
 $entityManager = new EntityManager($connection, $config);
 DB::setEntityManager($entityManager);
-require __DIR__ . '/../app/Http/Routes/web.php';
+
+ConsoleRunner::run(
+    new SingleManagerProvider(DB::getEntityManager())
+);

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Core\Database\DB;
 use Core\Http\Request;
 use Core\Support\Session\Session;
 use Core\View\View;
@@ -25,12 +26,17 @@ class AuthController
         echo $view->render('auth.login');
     }
 
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function login()
     {
         $email = Request::object()->input('email');
         $password = Request::object()->input('password');
 
-        if ($email === 'admin@admin.ru' && $password === 'admin') {
+        $user = DB::raw('SELECT * FROM users WHERE email = :email AND password = :password', ['email' => $email, 'password' => $password]);
+
+        if (!empty($user)) {
             Session::set('auth', true);
             Session::set('name', 'John');
             header('Location: /hello');
@@ -47,6 +53,7 @@ class AuthController
 
         if (empty($session)) {
             header('Location: /login');
+            exit();
         }
         $view = new View();
         echo $view->render('auth.hello', ['name' => Session::get('name')]);
