@@ -28,4 +28,4 @@ $router->post('/login', [AuthController::class, 'login']);
 $router->get('/hello', [AuthController::class, 'hello']);
 
 
-$router->dispatch(Request::object());
+$router->dispatch(new Request());

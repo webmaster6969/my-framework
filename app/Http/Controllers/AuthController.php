@@ -6,6 +6,7 @@ use Core\Database\DB;
 use Core\Http\Request;
 use Core\Support\Session\Session;
 use Core\View\View;
+use Database\entities\User;
 use Exception;
 
 class AuthController
@@ -27,14 +28,16 @@ class AuthController
     }
 
     /**
-     * @throws \Doctrine\DBAL\Exception
      */
     public function login()
     {
-        $email = Request::object()->input('email');
-        $password = Request::object()->input('password');
+        $email = Request::input('email');
+        $password = Request::input('password');
 
-        $user = DB::raw('SELECT * FROM users WHERE email = :email AND password = :password', ['email' => $email, 'password' => $password]);
+        // $user = DB::raw('SELECT * FROM users WHERE email = :email AND password = :password', ['email' => $email, 'password' => $password]);
+        $user = DB::getEntityManager()
+            ->getRepository(User::class)
+            ->findOneBy(['email' => $email, 'password' => $password]);
 
         if (!empty($user)) {
             Session::set('auth', true);

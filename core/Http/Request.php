@@ -13,15 +13,6 @@ class Request
     protected string $body;
     protected static ?Request $request = null;
 
-    public static function object(): Request
-    {
-        if (static::$request !== null) {
-            return static::$request;
-        }
-        static::$request = new Request();
-        return static::$request;
-    }
-
     public function __construct()
     {
         $this->get     = $_GET;
@@ -33,34 +24,34 @@ class Request
         $this->body    = file_get_contents('php://input');
     }
 
-    public function method(): string
+    public static function method(): string
     {
-        return strtoupper($this->server['REQUEST_METHOD'] ?? 'GET');
+        return strtoupper(static::$request->server['REQUEST_METHOD'] ?? 'GET');
     }
 
-    public function path(): string
+    public static function path(): string
     {
-        $uri = $this->server['REQUEST_URI'] ?? '/';
+        $uri = static::$request->server['REQUEST_URI'] ?? '/';
         return strtok($uri, '?');
     }
 
-    public function input(string $key, $default = null): mixed
+    public static function input(string $key, $default = null): mixed
     {
-        return $this->post[$key] ?? $this->get[$key] ?? $default;
+        return static::$request->post[$key] ?? static::$request->get[$key] ?? $default;
     }
 
-    public function all(): array
+    public static function all(): array
     {
-        return array_merge($this->get, $this->post);
+        return array_merge(static::$request->get, static::$request->post);
     }
 
-    public function header(string $key): ?string
+    public static function header(string $key): ?string
     {
-        return $this->headers[$key] ?? null;
+        return static::$request->headers[$key] ?? null;
     }
 
-    public function body(): string
+    public static function body(): string
     {
-        return $this->body;
+        return static::$request->body;
     }
 }
