@@ -12,6 +12,7 @@
     "doctrine/orm": "^3.3",
     "doctrine/annotations": "^2.0",
     "doctrine/dbal": "^4.2",
-    "symfony/cache": "^7.2"
+    "symfony/cache": "^7.2",
+    "ext-openssl": "*"
   }
 }

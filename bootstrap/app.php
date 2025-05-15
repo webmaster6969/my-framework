@@ -19,7 +19,7 @@ require_once __DIR__ . '/../core/Support/helpers.php';
 
 // Create a simple "default" Doctrine ORM configuration for Attributes
 $config = ORMSetup::createAttributeMetadataConfiguration(
-    paths: [__DIR__ . '/../database/entities'],
+    paths: [__DIR__ . '/../database/Entities'],
     isDevMode: true,
 );
 // or if you prefer XML

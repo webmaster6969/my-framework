@@ -6,7 +6,7 @@ use Core\Database\DB;
 use Core\Http\Request;
 use Core\Support\Session\Session;
 use Core\View\View;
-use Database\entities\User;
+use Database\Entities\User;
 use Exception;
 
 class AuthController
@@ -34,7 +34,6 @@ class AuthController
         $email = Request::input('email');
         $password = Request::input('password');
 
-        // $user = DB::raw('SELECT * FROM users WHERE email = :email AND password = :password', ['email' => $email, 'password' => $password]);
         $user = DB::getEntityManager()
             ->getRepository(User::class)
             ->findOneBy(['email' => $email, 'password' => $password]);
