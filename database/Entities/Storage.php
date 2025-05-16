@@ -2,6 +2,7 @@
 
 namespace Database\Entities;
 
+use Core\Support\Crypt;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -74,7 +75,7 @@ class Storage
         }
 
         try {
-            return decrypt($this->encryptedDescription);
+            return Crypt::decrypt($this->encryptedDescription);
         } catch (\Exception $e) {
             return '';
         }
@@ -82,7 +83,7 @@ class Storage
 
     public function setDescription(string $description): void
     {
-        $this->encryptedDescription = encrypt($description);
+        $this->encryptedDescription = Crypt::encrypt($description);
     }
 
     public function getPin(): ?string

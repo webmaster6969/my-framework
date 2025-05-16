@@ -1,6 +1,7 @@
 <?php
 
 use Core\Database\DB;
+use Core\Support\Crypt;
 use Core\Support\Env;
 use Core\Support\ExceptionHandler;
 use Core\Support\Session\Session;
@@ -11,11 +12,12 @@ use Doctrine\ORM\ORMSetup;
 require_once __DIR__ . '/../vendor/autoload.php';
 
 Session::start();
+new Crypt(Env::get('ENCRYPTION_KEY'));
 
 Env::load();
 ExceptionHandler::register();
 
-require_once __DIR__ . '/../core/Support/helpers.php';
+require_once __DIR__ . '/../core/Support/Helpers.php';
 
 // Create a simple "default" Doctrine ORM configuration for Attributes
 $config = ORMSetup::createAttributeMetadataConfiguration(
