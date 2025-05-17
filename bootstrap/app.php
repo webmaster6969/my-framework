@@ -12,9 +12,9 @@ use Doctrine\ORM\ORMSetup;
 require_once __DIR__ . '/../vendor/autoload.php';
 
 Session::start();
-new Crypt(Env::get('ENCRYPTION_KEY'));
 
 Env::load();
+new Crypt(Env::get('ENCRYPTION_KEY'));
 ExceptionHandler::register();
 
 require_once __DIR__ . '/../core/Support/Helpers.php';

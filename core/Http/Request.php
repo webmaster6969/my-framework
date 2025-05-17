@@ -22,6 +22,8 @@ class Request
         $this->files   = $_FILES;
         $this->headers = function_exists('getallheaders') ? getallheaders() : [];
         $this->body    = file_get_contents('php://input');
+
+        static::$request = $this;
     }
 
     public static function method(): string

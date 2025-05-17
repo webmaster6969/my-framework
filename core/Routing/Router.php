@@ -78,7 +78,7 @@ class Router
     public function dispatch(Request $request)
     {
         foreach ($this->routes as $route) {
-            if ($route->method === $request->method()) {
+            if ($route->method === $request->method() && $route->uri === $request->path()) {
                 $params = $route->match($request->path());
 
                 if ($params !== false) {

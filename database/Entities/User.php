@@ -28,14 +28,45 @@ class User
     #[ORM\Column(type: "datetime")]
     private \DateTime $updated_at;
 
-    public function __construct(string $name, string $email, string $password)
+    /**
+     * @throws \DateMalformedStringException
+     */
+    public function __construct(string $name, string $email, string $password, string $created_at, string $updated_at)
     {
         $this->name       = $name;
         $this->email      = $email;
         $this->password   = $password;
-        $this->created_at = new \DateTime();
-        $this->updated_at = new \DateTime();
+        $this->created_at = new \DateTime($created_at);
+        $this->updated_at = new \DateTime($updated_at);
     }
 
-    // Здесь можно добавить геттеры/сеттеры при необходимости
+    public function getId(): int
+    {
+        return $this->id;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function getEmail(): string
+    {
+        return $this->email;
+    }
+
+    public function getCreatedAt(): \DateTime
+    {
+        return $this->created_at;
+    }
+
+    public function getUpdatedAt(): \DateTime
+    {
+        return $this->updated_at;
+    }
+
+    public function getPassword(): string
+    {
+        return $this->password;
+    }
 }

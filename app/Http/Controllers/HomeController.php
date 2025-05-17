@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use Core\Http\Request;
+use Core\Support\Auth;
 use Core\View\View;
 use Exception;
 
@@ -12,7 +14,25 @@ class HomeController
      */
     public function index()
     {
+        $user = Auth::user();
+
+        if (empty($user)) {
+            header('Location: /login');
+            exit();
+        }
         $view = new View();
-        echo $view->render('home', ['name' => 'John']);
+        echo $view->render('auth.hello', ['name' => $user->getName()]);
+    }
+
+    public function hello()
+    {
+        $user = Auth::user();
+
+        if (empty($user)) {
+            header('Location: /login');
+            exit();
+        }
+        $view = new View();
+        echo $view->render('auth.hello', ['name' => $user->getName()]);
     }
 }

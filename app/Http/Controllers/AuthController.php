@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use Core\Database\DB;
 use Core\Http\Request;
+use Core\Support\Auth;
+use Core\Support\Csrf;
 use Core\Support\Session\Session;
 use Core\View\View;
-use Database\Entities\User;
+use DateMalformedStringException;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
 use Exception;
 
 class AuthController
@@ -27,20 +30,18 @@ class AuthController
         echo $view->render('auth.login');
     }
 
-    /**
-     */
     public function login()
     {
         $email = Request::input('email');
         $password = Request::input('password');
+        $csrfToken = Request::input('csrf_token');
 
-        $user = DB::getEntityManager()
-            ->getRepository(User::class)
-            ->findOneBy(['email' => $email, 'password' => $password]);
+        if (!Csrf::check($csrfToken)) {
+            header('Location: /login');
+            exit;
+        }
 
-        if (!empty($user)) {
-            Session::set('auth', true);
-            Session::set('name', 'John');
+        if (Auth::auth($email, $password)) {
             header('Location: /hello');
             exit;
         }
@@ -49,15 +50,36 @@ class AuthController
         exit;
     }
 
-    public function hello()
+    /**
+     * @throws DateMalformedStringException
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
+    public function register(): bool
     {
-        $session = Session::get('auth', false);
+        $name = Request::input('name');
+        $email = Request::input('email');
+        $password = Request::input('password');
+        $csrfToken = Request::input('csrf_token');
 
-        if (empty($session)) {
-            header('Location: /login');
-            exit();
+        if (!Csrf::check($csrfToken)) {
+            header('Location: /register');
+            exit;
         }
+
+        $password = password_hash($password, PASSWORD_BCRYPT);
+        if (Auth::register($name, $email, $password)) {
+            header('Location: /hello');
+            exit;
+        }
+
+        header('Location: /login');
+        exit;
+    }
+
+    public function registerForm()
+    {
         $view = new View();
-        echo $view->render('auth.hello', ['name' => Session::get('name')]);
+        echo $view->render('auth.register');
     }
 }
