@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use Core\Http\Request;
-use Core\Support\Auth;
-use Core\Support\Csrf;
+use Core\Support\Auth\Auth;
+use Core\Support\Csrf\Csrf;
 use Core\Support\Session\Session;
 use Core\View\View;
 use DateMalformedStringException;
@@ -81,5 +81,12 @@ class AuthController
     {
         $view = new View();
         echo $view->render('auth.register');
+    }
+
+    public function logout()
+    {
+        Auth::logout();
+        header('Location: /login');
+        exit;
     }
 }

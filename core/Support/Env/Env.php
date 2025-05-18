@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Core\Support;
+namespace Core\Support\Env;
 
 use Exception;
 
@@ -11,7 +11,7 @@ class Env
     /**
      * @throws Exception
      */
-    public static function load(string $path = __DIR__ . '/../../.env'): void
+    public static function load(string $path = __DIR__ . '/../../../.env'): void
     {
         if (!file_exists($path)) {
             throw new Exception(".env file not found at: {$path}");

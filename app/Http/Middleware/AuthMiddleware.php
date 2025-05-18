@@ -3,7 +3,7 @@
 namespace App\Http\Middleware;
 
 use Core\Http\Middleware\MiddlewareInterface;
-use Core\Support\Auth;
+use Core\Support\Auth\Auth;
 
 class AuthMiddleware implements MiddlewareInterface
 {

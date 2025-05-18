@@ -1,9 +1,9 @@
 <?php
 
 use Core\Database\DB;
-use Core\Support\Crypt;
-use Core\Support\Env;
-use Core\Support\ExceptionHandler;
+use Core\Support\Crypt\Crypt;
+use Core\Support\Env\Env;
+use Core\Support\Exception\ExceptionHandler;
 use Core\Support\Session\Session;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityManager;
@@ -17,7 +17,7 @@ Env::load();
 new Crypt(Env::get('ENCRYPTION_KEY'));
 ExceptionHandler::register();
 
-require_once __DIR__ . '/../core/Support/Helpers.php';
+require_once __DIR__ . '/../core/Support/Helpers/Helpers.php';
 
 // Create a simple "default" Doctrine ORM configuration for Attributes
 $config = ORMSetup::createAttributeMetadataConfiguration(

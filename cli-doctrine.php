@@ -1,7 +1,7 @@
 <?php
 
 use Core\Database\DB;
-use Core\Support\Env;
+use Core\Support\Env\Env;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMSetup;

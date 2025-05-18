@@ -1,6 +1,6 @@
 <?php
 
-namespace Core\Support;
+namespace Core\Support\Exception;
 
 class ExceptionHandler
 {

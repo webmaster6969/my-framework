@@ -17,6 +17,7 @@ $router->group([
     $router->get('/users/{id}', [HomeController::class, 'index']);
     $router->get('/hello', [HomeController::class, 'hello']);
     $router->get('/', [HomeController::class, 'index']);
+    $router->get('/logout', [AuthController::class, 'logout']);
 });
 
 $router->group([

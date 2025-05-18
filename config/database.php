@@ -1,6 +1,6 @@
 <?php
 
-use Core\Support\Env;
+use Core\Support\Env\Env;
 
 return [
     'driver'   => 'pdo_mysql',

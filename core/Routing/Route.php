@@ -4,16 +4,21 @@ namespace Core\Routing;
 
 class Route
 {
-    public string $method;
-    public string $uri;
-    public $action;
-    public array $middleware = [];
+    public readonly string $method;
+    public readonly string $uri;
+    public readonly array $action;
+    public array $middleware {
+        get {
+            return $this->middleware;
+        }
+    }
 
-    public function __construct(string $method, string $uri, $action)
+    public function __construct(string $method, string $uri, array $action)
     {
         $this->method = $method;
         $this->uri = $uri;
         $this->action = $action;
+        $this->middleware = [];
     }
 
     public function middleware(array $middleware): self
@@ -33,4 +38,5 @@ class Route
 
         return false;
     }
+
 }

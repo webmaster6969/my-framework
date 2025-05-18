@@ -1,6 +1,6 @@
 <?php
 
-namespace Core\Support;
+namespace Core\Support\Auth;
 
 use Core\Database\DB;
 use Core\Support\Session\Session;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Core\Support;
+namespace Core\Support\Csrf;
 
 use Core\Support\Session\Session;
 use Random\RandomException;

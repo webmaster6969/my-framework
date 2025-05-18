@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use Core\Http\Request;
-use Core\Support\Auth;
+use Core\Support\Auth\Auth;
 use Core\View\View;
 use Exception;
 
