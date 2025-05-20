@@ -1,6 +1,7 @@
 <?php
 
 use Core\Database\DB;
+use Core\Support\App\App;
 use Core\Support\Crypt\Crypt;
 use Core\Support\Env\Env;
 use Core\Support\Exception\ExceptionHandler;
@@ -14,10 +15,9 @@ require_once __DIR__ . '/../vendor/autoload.php';
 Session::start();
 
 Env::load();
+App::init(Env::get('APP_PATH'));
 new Crypt(Env::get('ENCRYPTION_KEY'));
 ExceptionHandler::register();
-
-require_once __DIR__ . '/../core/Support/Helpers/Helpers.php';
 
 // Create a simple "default" Doctrine ORM configuration for Attributes
 $config = ORMSetup::createAttributeMetadataConfiguration(

@@ -25,12 +25,12 @@ class Storage
         $this->root = rtrim($root, '/');
     }
 
-    protected static function path($file): string
+    protected static function path(File $file): string
     {
-        return static::$disk->root . '/' . ltrim($file, '/');
+        return static::$disk->root . '/' . ltrim($file->path(), '/');
     }
 
-    public function put($file, $contents): bool
+    public function put(File $file, $contents): bool
     {
         $path = static::$disk->path($file);
         $dir = dirname($path);
@@ -43,11 +43,11 @@ class Storage
     /**
      * @throws Exception
      */
-    public function get($file): false|string
+    public function getContents($file): false|string
     {
         $path = static::$disk->path($file);
         if (!file_exists($path)) {
-            throw new Exception("File [$file] does not exist.");
+            throw new Exception("File [" . static::$disk->path($file) . "] does not exist.");
         }
         return file_get_contents($path);
     }
@@ -57,9 +57,14 @@ class Storage
         return file_exists($this->path($file));
     }
 
-    public function delete($file)
+    public function delete($file): bool
     {
         $path = $this->path($file);
-        return file_exists($path) ? unlink($path) : false;
+        return file_exists($path) && unlink($path);
+    }
+
+    public function move(IFile $source, string $destination): bool
+    {
+        return $source->move($this->root . '/' . $destination. '/' . $source->getClientOriginalName());
     }
 }

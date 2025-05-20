@@ -37,6 +37,11 @@ class Request
         return strtok($uri, '?');
     }
 
+    public static function file(string $key): mixed
+    {
+        return static::$request->files[$key] ?? null;
+    }
+
     public static function input(string $key, $default = null): mixed
     {
         return static::$request->post[$key] ?? static::$request->get[$key] ?? $default;

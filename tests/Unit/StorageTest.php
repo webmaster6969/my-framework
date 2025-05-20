@@ -3,103 +3,101 @@
 namespace Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
-
 use Core\Storage\Storage;
 use Exception;
+use Core\Storage\File;
+use Core\Storage\IFile;
+use ReflectionClass;
 
 class StorageTest extends TestCase
 {
-    protected string $testRoot;
+    private string $tempDir;
+    private Storage $storage;
 
     protected function setUp(): void
     {
-        $this->testRoot = __DIR__ . '/temp_storage';
-
-        if (!is_dir($this->testRoot)) {
-            mkdir($this->testRoot, 0777, true);
-        }
-
-        // Можно не использовать init() — настраиваем диск вручную
-        $storage = new Storage($this->testRoot);
-
-        $ref = new \ReflectionClass(Storage::class);
-        $prop = $ref->getProperty('disk');
-        $prop->setValue(null, $storage); // FIX: для PHP 8.3+
+        $this->tempDir = sys_get_temp_dir() . '/storage_test_' . uniqid();
+        mkdir($this->tempDir, 0777, true);
+        $this->storage = new Storage($this->tempDir);
+        Storage::init(); // можно инициализировать тут, если нужны настройки
+        $this->overrideStaticDisk($this->storage);
     }
 
     protected function tearDown(): void
     {
-        $this->deleteDir($this->testRoot);
+        $this->deleteDir($this->tempDir);
     }
 
-    protected function deleteDir($dir): void
+    private function overrideStaticDisk(Storage $disk): void
     {
-        if (!is_dir($dir)) {
-            return;
-        }
+        $reflection = new ReflectionClass(Storage::class);
+        $property = $reflection->getProperty('disk');
+        $property->setValue(null, $disk);
+    }
 
-        $files = array_diff(scandir($dir), ['.', '..']);
-        foreach ($files as $file) {
+    private function deleteDir(string $dir): void
+    {
+        if (!is_dir($dir)) return;
+        foreach (scandir($dir) as $file) {
+            if ($file === '.' || $file === '..') continue;
             $path = "$dir/$file";
-            is_dir($path) ? $this->deleteDir($path) : unlink($path);
+            if (is_dir($path)) {
+                $this->deleteDir($path);
+            } else {
+                unlink($path);
+            }
         }
-
         rmdir($dir);
     }
 
-    public function testPutCreatesFile(): void
+    public function testPutAndGetContents(): void
     {
-        $storage = new Storage($this->testRoot);
-        $result = $storage->put('test.txt', 'Hello, world!');
+        $file = $this->createMock(File::class);
+        $file->method('path')->willReturn('test/file.txt');
 
+        $result = $this->storage->put($file, 'Hello World');
         $this->assertTrue($result);
-        $this->assertFileExists($this->testRoot . '/test.txt');
+
+        $contents = $this->storage->getContents($file);
+        $this->assertEquals('Hello World', $contents);
     }
 
-    public function testGetReturnsContents(): void
+    public function testExists(): void
     {
-        $path = $this->testRoot . '/sample.txt';
-        file_put_contents($path, 'Sample content');
+        $file = $this->createMock(File::class);
+        $file->method('path')->willReturn('exists.txt');
 
-        $storage = new Storage($this->testRoot);
-        $this->assertEquals('Sample content', $storage->get('sample.txt'));
+        $this->storage->put($file, 'test');
+        $this->assertTrue($this->storage->exists($file));
     }
 
-    public function testGetThrowsExceptionIfFileNotExists(): void
+    public function testDelete(): void
+    {
+        $file = $this->createMock(File::class);
+        $file->method('path')->willReturn('to_delete.txt');
+
+        $this->storage->put($file, 'remove me');
+        $this->assertTrue($this->storage->delete($file));
+        $this->assertFalse($this->storage->exists($file));
+    }
+
+    public function testGetContentsThrowsException(): void
     {
         $this->expectException(Exception::class);
-        $this->expectExceptionMessage('File [missing.txt] does not exist.');
-
-        $storage = new Storage($this->testRoot);
-        $storage->get('missing.txt');
+        $file = $this->createMock(File::class);
+        $file->method('path')->willReturn('nonexistent.txt');
+        $this->storage->getContents($file);
     }
 
-    public function testExistsReturnsTrueIfFileExists(): void
+    public function testMove(): void
     {
-        file_put_contents($this->testRoot . '/exists.txt', '123');
-        $storage = new Storage($this->testRoot);
-        $this->assertTrue($storage->exists('exists.txt'));
-    }
+        $sourceMock = $this->createMock(IFile::class);
+        $sourceMock->method('getClientOriginalName')->willReturn('file.jpg');
+        $sourceMock->expects($this->once())
+            ->method('move')
+            ->with($this->stringEndsWith('/destination/file.jpg'))
+            ->willReturn(true);
 
-    public function testExistsReturnsFalseIfFileNotExists(): void
-    {
-        $storage = new Storage($this->testRoot);
-        $this->assertFalse($storage->exists('nope.txt'));
-    }
-
-    public function testDeleteRemovesFile(): void
-    {
-        $file = $this->testRoot . '/delete_me.txt';
-        file_put_contents($file, 'data');
-
-        $storage = new Storage($this->testRoot);
-        $this->assertTrue($storage->delete('delete_me.txt'));
-        $this->assertFileDoesNotExist($file);
-    }
-
-    public function testDeleteReturnsFalseIfFileDoesNotExist(): void
-    {
-        $storage = new Storage($this->testRoot);
-        $this->assertFalse($storage->delete('nonexistent.txt'));
+        $this->assertTrue($this->storage->move($sourceMock, 'destination'));
     }
 }

@@ -22,7 +22,6 @@ class ExceptionHandler
             echo "<p><strong>File:</strong> " . $e->getFile() . " (Line " . $e->getLine() . ")</p>";
             echo "<pre>" . $e->getTraceAsString() . "</pre>";
         } else {
-            error_log($e); // log into Apache error log
             echo "Something went wrong.";
         }
     }
