@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\domain\Auth\Presentation\HTTP;
 
+use App\domain\Auth\Application\Repositories\UserRepositories;
+use App\domain\Auth\Service\AuthService;
 use Core\Http\Request;
-use Core\Support\Auth\Auth;
 use Core\Support\Csrf\Csrf;
 use Core\Support\Session\Session;
 use Core\View\View;
@@ -41,7 +42,10 @@ class AuthController
             exit;
         }
 
-        if (Auth::auth($email, $password)) {
+        $authService = new AuthService(new UserRepositories());
+        $user = $authService->login($email, $password);
+
+        if ($user) {
             header('Location: /hello');
             exit;
         }
@@ -67,13 +71,14 @@ class AuthController
             exit;
         }
 
-        $password = password_hash($password, PASSWORD_BCRYPT);
-        if (Auth::register($name, $email, $password)) {
+        $authService = new AuthService(new UserRepositories());
+        if ($user = $authService->register($name, $email, $password)) {
+            $authService->login($user->getEmail(), $user->getPassword());
             header('Location: /hello');
             exit;
         }
 
-        header('Location: /login');
+        header('Location: /register');
         exit;
     }
 
@@ -85,7 +90,8 @@ class AuthController
 
     public function logout()
     {
-        Auth::logout();
+        $authService = new AuthService(new UserRepositories());
+        $authService->logout();
         header('Location: /login');
         exit;
     }

@@ -1,10 +1,9 @@
 <?php
 
-use App\Http\Controllers\AuthController;
+use App\domain\Auth\Presentation\HTTP\AuthController;
+use App\domain\Auth\Presentation\Middleware\AuthMiddleware;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\ApiController;
 use App\Http\Controllers\StorageController;
-use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\GuestMiddleware;
 use Core\Http\Request;
 use Core\Routing\Router;

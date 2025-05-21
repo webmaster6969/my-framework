@@ -2,9 +2,9 @@
 
 namespace Core\Support\Auth;
 
+use App\domain\Auth\Domain\Model\Entities\User;
 use Core\Database\DB;
 use Core\Support\Session\Session;
-use Database\Entities\User;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
 

@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Core\Support\Auth\Auth;
+use App\domain\Auth\Application\Repositories\UserRepositories;
+use App\domain\Auth\Service\AuthService;
 use Core\View\View;
 use Exception;
 
@@ -13,19 +14,22 @@ class HomeController
      */
     public function index()
     {
-        $user = Auth::user();
+        $authService = new AuthService(new UserRepositories());
+        $user = $authService->getUser();
 
         if (empty($user)) {
             header('Location: /login');
             exit();
         }
+
         $view = new View();
         echo $view->render('auth.hello', ['name' => $user->getName()]);
     }
 
     public function hello()
     {
-        $user = Auth::user();
+        $authService = new AuthService(new UserRepositories());
+        $user = $authService->getUser();
 
         if (empty($user)) {
             header('Location: /login');
