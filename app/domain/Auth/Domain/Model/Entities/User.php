@@ -28,6 +28,9 @@ class User
     #[ORM\Column(type: "string", length: 255)]
     private string $password;
 
+    #[ORM\Column(type: "string", length: 255, nullable: true)]
+    private ?string $google2faSecret;
+
     #[ORM\Column(type: "string", length: 50, nullable: true)]
     private ?string $telegramChatId;
 
@@ -105,5 +108,10 @@ class User
     public function getPassword(): string
     {
         return $this->password;
+    }
+
+    public function getGoogle2faSecret(): ?string
+    {
+        return $this->google2faSecret;
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use App\domain\Auth\Presentation\HTTP\AuthController;
+use App\domain\Auth\Presentation\HTTP\TotpController;
 use App\domain\Auth\Presentation\Middleware\AuthMiddleware;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\StorageController;
@@ -20,6 +21,7 @@ $router->group([
     $router->get('/hello', [HomeController::class, 'hello']);
     $router->get('/', [HomeController::class, 'index']);
     $router->get('/logout', [AuthController::class, 'logout']);
+    $router->get('/totp', [TotpController::class, 'index']);
 });
 
 $router->group([

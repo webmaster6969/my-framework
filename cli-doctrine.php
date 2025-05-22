@@ -14,7 +14,11 @@ Env::load();
 
 // Create a simple "default" Doctrine ORM configuration for Attributes
 $config = ORMSetup::createAttributeMetadataConfiguration(
-    paths: [__DIR__ . '/database/Entities'],
+    paths: [
+        __DIR__ . '/app/domain/Auth/Domain/Model/Entities',
+        __DIR__ . '/app/domain/Notification/Domain/Model/Entities',
+        __DIR__ . '/app/domain/Task/Domain/Model/Entities',
+    ],
     isDevMode: true,
 );
 

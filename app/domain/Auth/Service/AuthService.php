@@ -46,7 +46,7 @@ class AuthService
         if (empty($userId)) {
             return null;
         }
-        
+
         return $this->userRepositories->findById(Session::get('user_id'));
     }
 }
