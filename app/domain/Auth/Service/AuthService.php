@@ -49,4 +49,24 @@ class AuthService
 
         return $this->userRepositories->findById(Session::get('user_id'));
     }
+
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
+    public function enableTwoFactor(string $google2faSecret): bool
+    {
+        $user = $this->getUser();
+        return $this->userRepositories->enableTwoFactor($user, $google2faSecret);
+    }
+
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
+    public function disableTwoFactor(string $google2faSecret): bool
+    {
+        $user = $this->getUser();
+        return $this->userRepositories->disableTwoFactor($user);
+    }
 }

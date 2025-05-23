@@ -1,5 +1,5 @@
 <?php
-$token = \Core\Support\Csrf\Csrf::token();
+    $token = \Core\Support\Csrf\Csrf::token();
 ?>
 <form action="/register" method="post">
     <input type="hidden" name="csrf_token" value="<?php echo $token; ?>">

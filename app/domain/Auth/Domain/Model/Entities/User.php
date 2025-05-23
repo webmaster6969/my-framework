@@ -114,4 +114,14 @@ class User
     {
         return $this->google2faSecret;
     }
+
+    public function setName(string $name): void
+    {
+        $this->name = $name;
+    }
+
+    public function setGoogle2faSecret(?string $google2faSecret): void
+    {
+        $this->google2faSecret = $google2faSecret;
+    }
 }

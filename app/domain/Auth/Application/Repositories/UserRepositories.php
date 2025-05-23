@@ -57,4 +57,28 @@ class UserRepositories implements UserRepositoryInterface
     {
         // TODO: Implement delete() method.
     }
+
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
+    public function enableTwoFactor(User $user, string $google2faSecret): bool
+    {
+        $user->setGoogle2faSecret($google2faSecret);
+        DB::getEntityManager()->persist($user);
+        DB::getEntityManager()->flush();
+        return true;
+    }
+
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
+    public function disableTwoFactor(User $user): bool
+    {
+        $user->setGoogle2faSecret(null);
+        DB::getEntityManager()->persist($user);
+        DB::getEntityManager()->flush();
+        return true;
+    }
 }

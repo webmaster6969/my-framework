@@ -7,16 +7,18 @@ use App\domain\Auth\Service\AuthService;
 use Core\Http\Middleware\MiddlewareInterface;
 use Core\Support\Session\Session;
 
-class AuthMiddleware implements MiddlewareInterface
+class TwoFactoryMiddleware implements MiddlewareInterface
 {
     public function handle(callable $next): mixed
     {
         $authService = new AuthService(new UserRepositories());
         $user = $authService->getUser();
 
-        if (empty($user)) {
-            header('Location: /login');
-            exit();
+        if (!empty($user->getGoogle2faSecret())) {
+            if (Session::get('two_factor_auth') !== true) {
+                header('Location: /two-factory-auth');
+                exit();
+            }
         }
 
         return $next();

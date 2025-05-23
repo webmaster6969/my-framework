@@ -11,4 +11,6 @@ interface UserRepositoryInterface
     public function findById(int $id): ?User;
     public function update(User $user);
     public function delete(User $user);
+    public function enableTwoFactor(User $user, string $google2faSecret): bool;
+    public function disableTwoFactor(User $user): bool;
 }

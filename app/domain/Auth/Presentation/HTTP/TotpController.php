@@ -7,6 +7,7 @@ use App\domain\Auth\Service\AuthService;
 use Core\Http\Request;
 use Core\Support\Csrf\Csrf;
 use Core\Support\Session\Session;
+use Core\Totp\TotpException;
 use Core\Totp\TotpFactory;
 use Core\View\View;
 use DateMalformedStringException;
@@ -30,10 +31,16 @@ class TotpController
     {
         $totp = TotpFactory::create();
 
-        //$authService = new AuthService(new UserRepositories());
-        //$user = $authService->getUser();
-        //$secretKey = $user->getGoogle2faSecret();
-        $secretKey = $totp->generateSecret();
+        $newSecretKey = false;
+        $authService = new AuthService(new UserRepositories());
+        $user = $authService->getUser();
+
+        if (empty($user->getGoogle2faSecret())) {
+            $newSecretKey = true;
+            $secretKey = $totp->generateSecret();
+        } else {
+            $secretKey = $user->getGoogle2faSecret();
+        }
 
         $imageString = '';
         if (!empty($secretKey)) {
@@ -60,9 +67,94 @@ class TotpController
         }
 
         $view = new View();
-        echo $view->render('auth.totp', [
+        echo $view->render('two-factory.index', [
             'image' => $imageString,
-            'secret' => $secretKey
+            'secret' => $secretKey,
+            'newSecretKey' => $newSecretKey,
         ]);
+    }
+
+    public function enableTwoFactor()
+    {
+        $newSecret = Request::input('secret');
+        $csrfToken = Request::input('csrf_token');
+
+        if (!Csrf::check($csrfToken)) {
+            header('Location: /register');
+            exit;
+        }
+
+        $authService = new AuthService(new UserRepositories());
+        $authService->enableTwoFactor($newSecret);
+        header('Location: /two-factory');
+        exit;
+    }
+
+    public function newAndEnableTwoFactor()
+    {
+        $totp = TotpFactory::create();
+        $csrfToken = Request::input('csrf_token');
+
+        if (!Csrf::check($csrfToken)) {
+            header('Location: /register');
+            exit;
+        }
+
+        $authService = new AuthService(new UserRepositories());
+        $authService->enableTwoFactor($totp->generateSecret());
+        header('Location: /two-factory');
+        exit;
+    }
+
+    /**
+     * @throws OptimisticLockException
+     * @throws TotpException
+     * @throws ORMException
+     */
+    public function disableTwoFactor()
+    {
+        $totp = TotpFactory::create();
+        $csrfToken = Request::input('csrf_token');
+
+        if (!Csrf::check($csrfToken)) {
+            header('Location: /register');
+            exit;
+        }
+
+        $authService = new AuthService(new UserRepositories());
+        $authService->disableTwoFactor($totp->generateSecret());
+        header('Location: /two-factory');
+        exit;
+    }
+
+    public function twoFactoryAuth()
+    {
+        $view = new View();
+        echo $view->render('two-factory.input');
+    }
+
+    public function twoFactoryAuthCheck()
+    {
+        $csrfToken = Request::input('csrf_token');
+
+        if (!Csrf::check($csrfToken)) {
+            header('Location: /register');
+            exit;
+        }
+
+        $secret = Request::input('secret');
+
+        $authService = new AuthService(new UserRepositories());
+        $user = $authService->getUser();
+        $totp = TotpFactory::create();
+
+        if (!$totp->verifyCode($user->getGoogle2faSecret(), $secret)) {
+            header('Location: /two-factory-auth');
+            exit;
+        }
+
+        Session::set('two_factor_auth', true);
+        header('Location: /hello');
+        exit;
     }
 }
