@@ -23,12 +23,29 @@ class AuthController
         $session = Session::get('auth', false);
 
         if (!empty($session)) {
-            header('Location: /hello');
+            header('Location: /profile');
             exit;
         }
 
         $view = new View();
         echo $view->render('auth.login');
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function profile()
+    {
+        $authService = new AuthService(new UserRepositories());
+        $user = $authService->getUser();
+
+        if (empty($user)) {
+            header('Location: /login');
+            exit;
+        }
+
+        $view = new View();
+        echo $view->render('auth.profile', ['user' => $user]);
     }
 
     public function login()
@@ -46,7 +63,7 @@ class AuthController
         $user = $authService->login($email, $password);
 
         if ($user) {
-            header('Location: /hello');
+            header('Location: /profile');
             exit;
         }
 
@@ -74,7 +91,7 @@ class AuthController
         $authService = new AuthService(new UserRepositories());
         if ($user = $authService->register($name, $email, $password)) {
             $authService->login($user->getEmail(), $user->getPassword());
-            header('Location: /hello');
+            header('Location: /profile');
             exit;
         }
 

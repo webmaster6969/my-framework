@@ -14,6 +14,6 @@ class TaskController
     {
         $view = new View();
 
-        echo $view->render('task.index');
+        echo $view->render('tasks.index');
     }
 }

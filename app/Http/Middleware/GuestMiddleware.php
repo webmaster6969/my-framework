@@ -14,7 +14,7 @@ class GuestMiddleware implements MiddlewareInterface
         $user = $authService->getUser();
 
         if (!empty($user)) {
-            header('Location: /hello');
+            header('Location: /profile');
             exit();
         }
 

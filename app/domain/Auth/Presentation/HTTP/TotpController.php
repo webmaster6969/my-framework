@@ -154,7 +154,7 @@ class TotpController
         }
 
         Session::set('two_factor_auth', true);
-        header('Location: /hello');
+        header('Location: /profile');
         exit;
     }
 }

@@ -35,7 +35,10 @@ class View
 
     protected function compileTemplate(string $template): string
     {
-        $template = preg_replace('/{{\s*\$(\w+)\s*}}/', '<?= htmlspecialchars($$1) ?>', $template);
+        // Поддержка выражений вида {{ $user->name }}
+        $template = preg_replace_callback('/{{\s*(.+?)\s*}}/', function ($matches) {
+            return '<?= htmlspecialchars(' . $matches[1] . ') ?>';
+        }, $template);
 
         // Управляющие конструкции
         $template = preg_replace('/@if\s*\((.*?)\)/', '<?php if ($1): ?>', $template);
@@ -53,4 +56,5 @@ class View
 
         return $template;
     }
+
 }
