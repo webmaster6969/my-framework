@@ -86,6 +86,7 @@ class TotpController
 
         $authService = new AuthService(new UserRepositories());
         $authService->enableTwoFactor($newSecret);
+        Session::set('two_factor_auth', true);
         header('Location: /two-factory');
         exit;
     }
