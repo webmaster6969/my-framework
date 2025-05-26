@@ -1,5 +1,5 @@
 <?php
-    $token = \Core\Support\Csrf\Csrf::token();
+$token = \Core\Support\Csrf\Csrf::token();
 ?>
 
 @include('partials.header')

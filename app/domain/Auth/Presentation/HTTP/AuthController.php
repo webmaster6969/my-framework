@@ -31,23 +31,6 @@ class AuthController
         echo $view->render('auth.login');
     }
 
-    /**
-     * @throws Exception
-     */
-    public function profile()
-    {
-        $authService = new AuthService(new UserRepositories());
-        $user = $authService->getUser();
-
-        if (empty($user)) {
-            header('Location: /login');
-            exit;
-        }
-
-        $view = new View();
-        echo $view->render('auth.profile', ['user' => $user]);
-    }
-
     public function login()
     {
         $email = Request::input('email');

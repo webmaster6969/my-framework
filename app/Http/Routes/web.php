@@ -1,6 +1,7 @@
 <?php
 
 use App\domain\Auth\Presentation\HTTP\AuthController;
+use App\domain\Auth\Presentation\HTTP\ProfileController;
 use App\domain\Auth\Presentation\HTTP\TotpController;
 use App\domain\Auth\Presentation\Middleware\AuthMiddleware;
 use App\domain\Auth\Presentation\Middleware\TwoFactoryMiddleware;
@@ -18,7 +19,8 @@ $router->group([
 ], function (Router $router) {
     $router->get('/storage', [StorageController::class, 'index']);
     $router->post('/storage', [StorageController::class, 'uplode']);
-    $router->get('/profile', [AuthController::class, 'profile']);
+    $router->get('/profile', [ProfileController::class, 'index']);
+    $router->post('/profile/update', [ProfileController::class, 'update']);
     $router->get('/', [TaskController::class, 'index']);
     $router->get('/logout', [AuthController::class, 'logout']);
     $router->get('/two-factory', [TotpController::class, 'index']);

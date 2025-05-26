@@ -48,9 +48,14 @@ class UserRepositories implements UserRepositoryInterface
             ->find($id);
     }
 
-    public function update(User $user)
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
+    public function update(User $user): void
     {
-        // TODO: Implement update() method.
+        DB::getEntityManager()->persist($user);
+        DB::getEntityManager()->flush();
     }
 
     public function delete(User $user)
