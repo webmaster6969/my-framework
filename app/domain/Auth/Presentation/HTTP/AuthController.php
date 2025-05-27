@@ -3,6 +3,7 @@
 namespace App\domain\Auth\Presentation\HTTP;
 
 use App\domain\Auth\Application\Repositories\UserRepositories;
+use App\domain\Auth\Application\UseCases\Commands\LoginCommand;
 use App\domain\Auth\Service\AuthService;
 use Core\Http\Request;
 use Core\Support\Csrf\Csrf;
@@ -42,10 +43,9 @@ class AuthController
             exit;
         }
 
-        $authService = new AuthService(new UserRepositories());
-        $user = $authService->login($email, $password);
+        $loginCommand = new LoginCommand(new UserRepositories(), $email, $password)->execute();
 
-        if ($user) {
+        if ($loginCommand) {
             header('Location: /profile');
             exit;
         }
