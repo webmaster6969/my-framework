@@ -3,11 +3,14 @@
 namespace App\domain\Auth\Presentation\HTTP;
 
 use App\domain\Auth\Application\Repositories\UserRepositories;
-use App\domain\Auth\Service\AuthService;
-use App\domain\Auth\Service\ProfileService;
+use App\domain\Auth\Application\UseCases\Commands\UpdateUserCommand;
+use App\domain\Auth\Application\UseCases\Queries\FindUserQuery;
 use Core\Http\Request;
 use Core\Support\Csrf\Csrf;
+use Core\Support\Session\Session;
 use Core\View\View;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
 use Exception;
 
 class ProfileController
@@ -17,8 +20,7 @@ class ProfileController
      */
     public function index()
     {
-        $authService = new AuthService(new UserRepositories());
-        $user = $authService->getUser();
+        $user = new FindUserQuery(new UserRepositories(), Session::get('user_id'))->handle();
 
         if (empty($user)) {
             header('Location: /login');
@@ -29,6 +31,10 @@ class ProfileController
         echo $view->render('auth.profile', ['user' => $user]);
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
     public function update()
     {
         $name = Request::input('name');
@@ -39,11 +45,11 @@ class ProfileController
             exit;
         }
 
-        $authService = new AuthService(new UserRepositories());
-        $user = $authService->getUser();
+        $findUserQuery = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
+        $user = $findUserQuery->handle();
         $user->setName($name);
-        $authService = new ProfileService(new UserRepositories());
-        $authService->update($user);
+        $updateUserCommand = new UpdateUserCommand(new UserRepositories(), $user);
+        $user = $updateUserCommand->execute();
 
         header('Location: /profile');
         exit;

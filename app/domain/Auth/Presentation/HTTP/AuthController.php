@@ -4,7 +4,9 @@ namespace App\domain\Auth\Presentation\HTTP;
 
 use App\domain\Auth\Application\Repositories\UserRepositories;
 use App\domain\Auth\Application\UseCases\Commands\LoginCommand;
-use App\domain\Auth\Service\AuthService;
+use App\domain\Auth\Application\UseCases\Commands\LogoutCommand;
+use App\domain\Auth\Application\UseCases\Commands\RegisterCommand;
+use App\domain\Auth\Application\UseCases\Queries\FindUserQuery;
 use Core\Http\Request;
 use Core\Support\Csrf\Csrf;
 use Core\Support\Session\Session;
@@ -21,9 +23,10 @@ class AuthController
      */
     public function index()
     {
-        $session = Session::get('auth', false);
 
-        if (!empty($session)) {
+        $user = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
+
+        if (!empty($user->handle())) {
             header('Location: /profile');
             exit;
         }
@@ -43,9 +46,9 @@ class AuthController
             exit;
         }
 
-        $loginCommand = new LoginCommand(new UserRepositories(), $email, $password)->execute();
+        $loginCommand = new LoginCommand(new UserRepositories(), $email, $password);
 
-        if ($loginCommand) {
+        if (!empty($loginCommand->execute())) {
             header('Location: /profile');
             exit;
         }
@@ -71,14 +74,17 @@ class AuthController
             exit;
         }
 
-        $authService = new AuthService(new UserRepositories());
-        if ($user = $authService->register($name, $email, $password)) {
-            $authService->login($user->getEmail(), $user->getPassword());
+        $registerCommand = new RegisterCommand(new UserRepositories(), $name, $email, $password);
+        $registerCommand->execute();
+
+        $loginCommand = new LoginCommand(new UserRepositories(), $email, $password);
+
+        if ($loginCommand->execute()) {
             header('Location: /profile');
             exit;
         }
 
-        header('Location: /register');
+        header('Location: /login');
         exit;
     }
 
@@ -90,9 +96,11 @@ class AuthController
 
     public function logout()
     {
-        $authService = new AuthService(new UserRepositories());
-        $authService->logout();
-        header('Location: /login');
-        exit;
+        $logout = new LogoutCommand()->execute();
+
+        if ($logout) {
+            header('Location: /login');
+            exit;
+        }
     }
 }

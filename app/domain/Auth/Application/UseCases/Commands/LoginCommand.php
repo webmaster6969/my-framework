@@ -3,12 +3,12 @@
 namespace App\domain\Auth\Application\UseCases\Commands;
 
 use App\domain\Auth\Application\Repositories\UserRepositories;
+use App\domain\Auth\Domain\Model\Entities\User;
 use App\domain\Common\Domain\CommandInterface;
 use Core\Support\Session\Session;
 
 class LoginCommand implements CommandInterface
 {
-
     public function __construct(
         private readonly UserRepositories $userRepositories,
         private readonly string           $email,
@@ -17,7 +17,7 @@ class LoginCommand implements CommandInterface
     {
     }
 
-    public function execute(): mixed
+    public function execute(): ?User
     {
         $user = $this->userRepositories->findByEmailAndPassword($this->email, $this->password);
 

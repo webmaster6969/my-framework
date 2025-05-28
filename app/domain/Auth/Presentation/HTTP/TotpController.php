@@ -3,14 +3,15 @@
 namespace App\domain\Auth\Presentation\HTTP;
 
 use App\domain\Auth\Application\Repositories\UserRepositories;
-use App\domain\Auth\Service\AuthService;
+use App\domain\Auth\Application\UseCases\Commands\DisableTwoFactoryCommand;
+use App\domain\Auth\Application\UseCases\Commands\EnableTwoFactoryCommand;
+use App\domain\Auth\Application\UseCases\Queries\FindUserQuery;
 use Core\Http\Request;
 use Core\Support\Csrf\Csrf;
 use Core\Support\Session\Session;
 use Core\Totp\TotpException;
 use Core\Totp\TotpFactory;
 use Core\View\View;
-use DateMalformedStringException;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
 use Endroid\QrCode\Builder\Builder;
@@ -32,8 +33,8 @@ class TotpController
         $totp = TotpFactory::create();
 
         $newSecretKey = false;
-        $authService = new AuthService(new UserRepositories());
-        $user = $authService->getUser();
+        $findUserQuery = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
+        $user = $findUserQuery->handle();
 
         if (empty($user->getGoogle2faSecret())) {
             $newSecretKey = true;
@@ -74,6 +75,10 @@ class TotpController
         ]);
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
     public function enableTwoFactor()
     {
         $newSecret = Request::input('secret');
@@ -84,9 +89,11 @@ class TotpController
             exit;
         }
 
-        $authService = new AuthService(new UserRepositories());
-        $authService->enableTwoFactor($newSecret);
-        Session::set('two_factor_auth', true);
+        $findUserQuery = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
+        $user = $findUserQuery->handle();
+        $enableTwoFactoryCommand = new EnableTwoFactoryCommand(new UserRepositories(), $user, $newSecret);
+        $enableTwoFactoryCommand->execute();
+
         header('Location: /two-factory');
         exit;
     }
@@ -95,14 +102,17 @@ class TotpController
     {
         $totp = TotpFactory::create();
         $csrfToken = Request::input('csrf_token');
+        $newSecret = Request::input('secret');
 
         if (!Csrf::check($csrfToken)) {
             header('Location: /register');
             exit;
         }
 
-        $authService = new AuthService(new UserRepositories());
-        $authService->enableTwoFactor($totp->generateSecret());
+        $findUserQuery = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
+        $user = $findUserQuery->handle();
+        $enableTwoFactoryCommand = new EnableTwoFactoryCommand(new UserRepositories(), $user, $totp->generateSecret());
+        $enableTwoFactoryCommand->execute();
         header('Location: /two-factory');
         exit;
     }
@@ -114,7 +124,6 @@ class TotpController
      */
     public function disableTwoFactor()
     {
-        $totp = TotpFactory::create();
         $csrfToken = Request::input('csrf_token');
 
         if (!Csrf::check($csrfToken)) {
@@ -122,8 +131,10 @@ class TotpController
             exit;
         }
 
-        $authService = new AuthService(new UserRepositories());
-        $authService->disableTwoFactor($totp->generateSecret());
+        $findUserQuery = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
+        $user = $findUserQuery->handle();
+        $disableTwoFactoryCommand = new DisableTwoFactoryCommand(new UserRepositories(), $user);
+        $disableTwoFactoryCommand->execute();
         header('Location: /two-factory');
         exit;
     }
@@ -145,8 +156,8 @@ class TotpController
 
         $secret = Request::input('secret');
 
-        $authService = new AuthService(new UserRepositories());
-        $user = $authService->getUser();
+        $findUserQuery = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
+        $user = $findUserQuery->handle();
         $totp = TotpFactory::create();
 
         if (!$totp->verifyCode($user->getGoogle2faSecret(), $secret)) {
