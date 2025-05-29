@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Core\Support\Auth;
 
 use App\domain\Auth\Domain\Model\Entities\User;

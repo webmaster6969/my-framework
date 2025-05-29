@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use App\domain\Auth\Presentation\HTTP\AuthController;
 use App\domain\Auth\Presentation\HTTP\ProfileController;
 use App\domain\Auth\Presentation\HTTP\TotpController;
@@ -21,7 +23,12 @@ $router->group([
     $router->post('/storage', [StorageController::class, 'uplode']);
     $router->get('/profile', [ProfileController::class, 'index']);
     $router->post('/profile/update', [ProfileController::class, 'update']);
+
     $router->get('/', [TaskController::class, 'index']);
+    $router->get('/tasks', [TaskController::class, 'index']);
+    $router->get('/tasks/create', [TaskController::class, 'create']);
+    $router->post('/tasks/store', [TaskController::class, 'store']);
+
     $router->get('/logout', [AuthController::class, 'logout']);
     $router->get('/two-factory', [TotpController::class, 'index']);
     $router->post('/two-factory-enable', [TotpController::class, 'enableTwoFactor']);

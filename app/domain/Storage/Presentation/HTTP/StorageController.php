@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\domain\Storage\Presentation\HTTP;
 
 use App\domain\Storage\Application\Repositories\StorageRepository;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\domain\Auth\Application\UseCases\Commands;
 
 use App\domain\Auth\Domain\Exceptions\LogoutException;

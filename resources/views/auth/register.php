@@ -1,4 +1,5 @@
 <?php
+
 $token = \Core\Support\Csrf\Csrf::token();
 ?>
 

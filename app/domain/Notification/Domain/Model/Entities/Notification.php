@@ -10,6 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
 #[ORM\Table(name: "notifications")]
+#[ORM\HasLifecycleCallbacks]
 class Notification
 {
     #[ORM\Id]
@@ -28,11 +29,11 @@ class Notification
     #[ORM\Column(type: "datetime")]
     private \DateTimeInterface $sentAt;
 
-    #[ORM\Column(type: "datetime")]
-    private \DateTime $created_at;
+    #[ORM\Column(type: "datetime_immutable")]
+    private \DateTimeImmutable $created_at;
 
-    #[ORM\Column(type: "datetime")]
-    private \DateTime $updated_at;
+    #[ORM\Column(type: "datetime_immutable")]
+    private \DateTimeImmutable $updated_at;
 
     public function __construct(User $user, Task $task)
     {
@@ -61,13 +62,27 @@ class Notification
         return $this->sentAt;
     }
 
-    public function getCreatedAt(): \DateTime
+    public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->created_at;
     }
 
-    public function getUpdatedAt(): \DateTime
+    public function getUpdatedAt(): \DateTimeImmutable
     {
         return $this->updated_at;
+    }
+
+    #[ORM\PrePersist]
+    public function onPrePersist(): void
+    {
+        $now = new \DateTimeImmutable();
+        $this->created_at = $now;
+        $this->updated_at = $now;
+    }
+
+    #[ORM\PreUpdate]
+    public function onPreUpdate(): void
+    {
+        $this->updated_at = new \DateTimeImmutable();
     }
 }

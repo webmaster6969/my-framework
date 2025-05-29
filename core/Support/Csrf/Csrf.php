@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Core\Support\Csrf;
 
 use Core\Support\Session\Session;

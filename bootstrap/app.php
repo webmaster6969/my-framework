@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Core\Database\DB;
 use Core\Support\App\App;
 use Core\Support\Crypt\Crypt;

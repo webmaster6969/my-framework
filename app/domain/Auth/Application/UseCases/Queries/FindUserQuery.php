@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\domain\Auth\Application\UseCases\Queries;
 
 use App\domain\Auth\Application\Repositories\UserRepositories;

@@ -1,12 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\domain\Task\Domain\Model\Entities;
+
 use App\domain\Auth\Domain\Model\Entities\User;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
 #[ORM\Table(name: "tasks")]
-#[ORM\Index(name: "idx_task_user_date", columns: ["user_id", "date"])]
+#[ORM\Index(name: "idx_task_user_date", columns: ["user_id", "start_task", "end_task"])]
+#[ORM\HasLifecycleCallbacks]
 class Task
 {
     public const STATUS_PENDING = 'pending';
@@ -28,11 +32,11 @@ class Task
     #[ORM\Column(type: "text", nullable: true)]
     private ?string $description;
 
-    #[ORM\Column(type: "date")]
-    private \DateTimeInterface $date;
+    #[ORM\Column(type: "datetime")]
+    private \DateTime $start_task;
 
-    #[ORM\Column(type: "time", nullable: true)]
-    private ?\DateTimeInterface $time;
+    #[ORM\Column(type: "datetime")]
+    private \DateTime $end_task;
 
     #[ORM\Column(type: "string", length: 20)]
     private string $status;
@@ -40,21 +44,27 @@ class Task
     #[ORM\Column(type: "boolean")]
     private bool $notified = false;
 
-    #[ORM\Column(type: "datetime")]
-    private \DateTime $created_at;
+    #[ORM\Column(type: "datetime_immutable")]
+    private \DateTimeImmutable $created_at;
 
-    #[ORM\Column(type: "datetime")]
-    private \DateTime $updated_at;
+    #[ORM\Column(type: "datetime_immutable")]
+    private \DateTimeImmutable $updated_at;
 
-    public function __construct(User $user, string $title, \DateTimeInterface $date)
+    public function __construct(
+        User      $user,
+        string    $title,
+        string    $description,
+        \DateTime $start_task,
+        \DateTime $end_task,
+    )
     {
         $this->user = $user;
         $this->title = $title;
-        $this->date = $date;
+        $this->description = $description;
+        $this->start_task = $start_task;
+        $this->end_task = $end_task;
         $this->status = self::STATUS_PENDING;
         $this->notified = false;
-        $this->description = null;
-        $this->time = null;
     }
 
     public function getId(): int
@@ -92,24 +102,24 @@ class Task
         $this->description = $desc;
     }
 
-    public function getDate(): \DateTimeInterface
+    public function getStartTask(): \DateTime
     {
-        return $this->date;
+        return $this->start_task;
     }
 
-    public function setDate(\DateTimeInterface $date): void
+    public function setStartTask(\DateTime $start_task): void
     {
-        $this->date = $date;
+        $this->start_task = $start_task;
     }
 
-    public function getTime(): ?\DateTimeInterface
+    public function getEndTask(): \DateTime
     {
-        return $this->time;
+        return $this->end_task;
     }
 
-    public function setTime(?\DateTimeInterface $time): void
+    public function setEndTask(\DateTime $end_task): void
     {
-        $this->time = $time;
+        $this->end_task = $end_task;
     }
 
     public function getStatus(): string
@@ -140,13 +150,27 @@ class Task
         $this->setStatus(self::STATUS_DONE);
     }
 
-    public function getCreatedAt(): \DateTime
+    public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->created_at;
     }
 
-    public function getUpdatedAt(): \DateTime
+    public function getUpdatedAt(): \DateTimeImmutable
     {
         return $this->updated_at;
+    }
+
+    #[ORM\PrePersist]
+    public function onPrePersist(): void
+    {
+        $now = new \DateTimeImmutable();
+        $this->created_at = $now;
+        $this->updated_at = $now;
+    }
+
+    #[ORM\PreUpdate]
+    public function onPreUpdate(): void
+    {
+        $this->updated_at = new \DateTimeImmutable();
     }
 }

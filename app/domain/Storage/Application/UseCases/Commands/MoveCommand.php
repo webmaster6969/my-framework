@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\domain\Storage\Application\UseCases\Commands;
 
 use App\domain\Common\Domain\CommandInterface;
