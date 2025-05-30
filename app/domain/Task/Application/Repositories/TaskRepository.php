@@ -8,9 +8,15 @@ use App\domain\Auth\Domain\Model\Entities\User;
 use App\domain\Task\Domain\Model\Entities\Task;
 use App\domain\Task\Domain\Repositories\TaskRepositoryInterface;
 use Core\Database\DB;
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
 
 class TaskRepository implements TaskRepositoryInterface
 {
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
     public function save(Task $task): bool
     {
         DB::getEntityManager()->persist($task);
@@ -19,19 +25,42 @@ class TaskRepository implements TaskRepositoryInterface
         return true;
     }
 
-    public function delete($task)
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
+    public function delete(Task $task): bool
     {
-        // TODO: Implement delete() method.
+        DB::getEntityManager()->remove($task);
+        DB::getEntityManager()->flush();
+
+        return true;
     }
 
-    public function update($task)
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
+    public function update(Task $task): bool
     {
-        // TODO: Implement update() method.
+        DB::getEntityManager()->persist($task);
+        DB::getEntityManager()->flush();
+
+        return true;
     }
 
-    public function find($id)
+    public function findByUser(User $user, int $task_id): ?Task
     {
-        // TODO: Implement find() method.
+        return DB::getEntityManager()
+            ->createQueryBuilder()
+            ->select('t')
+            ->from(Task::class, 't')
+            ->where('t.user = :userId')
+            ->andWhere('t.id = :taskId')
+            ->setParameter('taskId', $task_id)
+            ->setParameter('userId', $user->getId())
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 
     public function findAll()
@@ -39,7 +68,7 @@ class TaskRepository implements TaskRepositoryInterface
         // TODO: Implement findAll() method.
     }
 
-    public function findByUser(User $user, int $page = 1, int $limit = 10): array
+    public function findByUserAll(User $user, int $page = 1, int $limit = 10): array
     {
         $page = max(1, $page); // Защита от нуля и отрицательных значений
         $offset = ($page - 1) * $limit;
@@ -55,5 +84,10 @@ class TaskRepository implements TaskRepositoryInterface
             ->setMaxResults($limit)
             ->getQuery()
             ->getResult();
+    }
+
+    public function find($id)
+    {
+        // TODO: Implement find() method.
     }
 }

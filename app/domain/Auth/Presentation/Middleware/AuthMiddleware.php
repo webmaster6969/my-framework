@@ -7,6 +7,7 @@ namespace App\domain\Auth\Presentation\Middleware;
 use App\domain\Auth\Application\Repositories\UserRepositories;
 use App\domain\Auth\Application\UseCases\Queries\FindUserQuery;
 use Core\Http\Middleware\MiddlewareInterface;
+use Core\Routing\Redirect;
 use Core\Support\Session\Session;
 
 class AuthMiddleware implements MiddlewareInterface
@@ -17,8 +18,7 @@ class AuthMiddleware implements MiddlewareInterface
         $user = $findUserQuery->handle();
 
         if (empty($user)) {
-            header('Location: /login');
-            exit();
+            Redirect::to('/login')->send();
         }
 
         return $next();

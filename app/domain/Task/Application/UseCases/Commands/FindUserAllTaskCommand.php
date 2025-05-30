@@ -8,7 +8,7 @@ use App\domain\Auth\Domain\Model\Entities\User;
 use App\domain\Common\Domain\CommandInterface;
 use App\domain\Task\Application\Repositories\TaskRepository;
 
-class UserTaskCommand implements CommandInterface
+class FindUserAllTaskCommand implements CommandInterface
 {
     public function __construct(
         private readonly TaskRepository $taskRepository,

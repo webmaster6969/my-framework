@@ -7,6 +7,7 @@ namespace App\Http\Middleware;
 use App\domain\Auth\Application\Repositories\UserRepositories;
 use App\domain\Auth\Application\UseCases\Queries\FindUserQuery;
 use Core\Http\Middleware\MiddlewareInterface;
+use Core\Routing\Redirect;
 use Core\Support\Session\Session;
 
 class GuestMiddleware implements MiddlewareInterface
@@ -17,8 +18,7 @@ class GuestMiddleware implements MiddlewareInterface
         $user = $findUserQuery->handle();
 
         if (!empty($user)) {
-            header('Location: /profile');
-            exit();
+            Redirect::to('/profile')->send();
         }
 
         return $next();

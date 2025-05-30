@@ -28,6 +28,9 @@ $router->group([
     $router->get('/tasks', [TaskController::class, 'index']);
     $router->get('/tasks/create', [TaskController::class, 'create']);
     $router->post('/tasks/store', [TaskController::class, 'store']);
+    $router->get('/tasks/edit/', [TaskController::class, 'edit']);
+    $router->post('/tasks/update/', [TaskController::class, 'update']);
+    $router->get('/tasks/delete/', [TaskController::class, 'delete']);
 
     $router->get('/logout', [AuthController::class, 'logout']);
     $router->get('/two-factory', [TotpController::class, 'index']);

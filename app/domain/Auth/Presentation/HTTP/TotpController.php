@@ -9,6 +9,7 @@ use App\domain\Auth\Application\UseCases\Commands\DisableTwoFactoryCommand;
 use App\domain\Auth\Application\UseCases\Commands\EnableTwoFactoryCommand;
 use App\domain\Auth\Application\UseCases\Queries\FindUserQuery;
 use Core\Http\Request;
+use Core\Routing\Redirect;
 use Core\Support\Csrf\Csrf;
 use Core\Support\Session\Session;
 use Core\Totp\TotpException;
@@ -87,8 +88,7 @@ class TotpController
         $csrfToken = Request::input('csrf_token');
 
         if (!Csrf::check($csrfToken)) {
-            header('Location: /register');
-            exit;
+            Redirect::to('/register')->send();
         }
 
         $findUserQuery = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
@@ -96,8 +96,7 @@ class TotpController
         $enableTwoFactoryCommand = new EnableTwoFactoryCommand(new UserRepositories(), $user, $newSecret);
         $enableTwoFactoryCommand->execute();
 
-        header('Location: /two-factory');
-        exit;
+        Redirect::to('/two-factory')->send();
     }
 
     public function newAndEnableTwoFactor()
@@ -107,16 +106,14 @@ class TotpController
         $newSecret = Request::input('secret');
 
         if (!Csrf::check($csrfToken)) {
-            header('Location: /register');
-            exit;
+            Redirect::to('/register')->send();
         }
 
         $findUserQuery = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
         $user = $findUserQuery->handle();
         $enableTwoFactoryCommand = new EnableTwoFactoryCommand(new UserRepositories(), $user, $totp->generateSecret());
         $enableTwoFactoryCommand->execute();
-        header('Location: /two-factory');
-        exit;
+        Redirect::to('/two-factory')->send();
     }
 
     /**
@@ -129,16 +126,14 @@ class TotpController
         $csrfToken = Request::input('csrf_token');
 
         if (!Csrf::check($csrfToken)) {
-            header('Location: /register');
-            exit;
+            Redirect::to('/register')->send();
         }
 
         $findUserQuery = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
         $user = $findUserQuery->handle();
         $disableTwoFactoryCommand = new DisableTwoFactoryCommand(new UserRepositories(), $user);
         $disableTwoFactoryCommand->execute();
-        header('Location: /two-factory');
-        exit;
+        Redirect::to('/two-factory')->send();
     }
 
     public function twoFactoryAuth()
@@ -152,8 +147,7 @@ class TotpController
         $csrfToken = Request::input('csrf_token');
 
         if (!Csrf::check($csrfToken)) {
-            header('Location: /register');
-            exit;
+            Redirect::to('/register')->send();
         }
 
         $secret = Request::input('secret');
@@ -163,12 +157,10 @@ class TotpController
         $totp = TotpFactory::create();
 
         if (!$totp->verifyCode($user->getGoogle2faSecret(), $secret)) {
-            header('Location: /two-factory-auth');
-            exit;
+            Redirect::to('/two-factory-auth')->send();
         }
 
         Session::set('two_factor_auth', true);
-        header('Location: /profile');
-        exit;
+        Redirect::to('/profile')->send();
     }
 }

@@ -4,27 +4,23 @@ declare(strict_types=1);
 
 namespace App\domain\Task\Application\UseCases\Commands;
 
+use App\domain\Auth\Domain\Model\Entities\User;
 use App\domain\Common\Domain\CommandInterface;
 use App\domain\Task\Application\Repositories\TaskRepository;
 use App\domain\Task\Domain\Model\Entities\Task;
-use Doctrine\ORM\Exception\ORMException;
-use Doctrine\ORM\OptimisticLockException;
 
-class StoreTaskCommand implements CommandInterface
+class FindUserTaskCommand implements CommandInterface
 {
     public function __construct(
         private readonly TaskRepository $taskRepository,
-        private readonly Task           $task,
+        private readonly User $user,
+        private readonly int            $task_id
     )
     {
     }
 
-    /**
-     * @throws OptimisticLockException
-     * @throws ORMException
-     */
-    public function execute(): bool
+    public function execute(): ?Task
     {
-        return $this->taskRepository->save($this->task);
+        return $this->taskRepository->findByUser($this->user, $this->task_id);
     }
 }

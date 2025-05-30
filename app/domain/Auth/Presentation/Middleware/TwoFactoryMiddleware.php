@@ -7,6 +7,7 @@ namespace App\domain\Auth\Presentation\Middleware;
 use App\domain\Auth\Application\Repositories\UserRepositories;
 use App\domain\Auth\Application\UseCases\Queries\FindUserQuery;
 use Core\Http\Middleware\MiddlewareInterface;
+use Core\Routing\Redirect;
 use Core\Support\Session\Session;
 
 class TwoFactoryMiddleware implements MiddlewareInterface
@@ -18,8 +19,7 @@ class TwoFactoryMiddleware implements MiddlewareInterface
 
         if (!empty($user->getGoogle2faSecret())) {
             if (Session::get('two_factor_auth') !== true) {
-                header('Location: /two-factory-auth');
-                exit();
+                Redirect::to('/two-factory-auth')->send();
             }
         }
 

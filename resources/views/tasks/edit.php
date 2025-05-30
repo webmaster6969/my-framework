@@ -29,29 +29,29 @@
                             <h3 class="card-title">Create task</h3>
                         </div>
 
-                        <form method="post" action="/tasks/store">
+                        <form method="post" action="/tasks/update/?id={{ $task->getId() }}">
                             <div class="card-body">
                                 <div class="form-group">
                                     <label for="title">Title</label>
-                                    <input type="text" name="title" class="form-control" id="title" placeholder="Enter title">
+                                    <input type="text" name="title" value="{{ $task->getTitle() }}" class="form-control" id="title" placeholder="Enter title">
                                 </div>
                                 <div class="form-group">
                                     <label for="description">Description</label>
-                                    <input type="text" name="description" class="form-control" id="description" placeholder="Enter description">
+                                    <input type="text" name="description" value="{{ $task->getDescription() }}" class="form-control" id="description" placeholder="Enter description">
                                 </div>
                                 <div class="form-group">
                                     <label for="start_task">Start task</label>
-                                    <input type="datetime-local" step="1" name="start_task" class="form-control" id="start_task" placeholder="Enter start task">
+                                    <input type="datetime-local" step="1" name="start_task" value="{{ $task->getStartTask()->format('Y-m-d\TH:i:s') }}" class="form-control" id="start_task" placeholder="Enter start task">
                                 </div>
                                 <div class="form-group">
                                     <label for="end_task">End task</label>
-                                    <input type="datetime-local" step="1" name="end_task" class="form-control" id="end_task" placeholder="Enter end task">
+                                    <input type="datetime-local" step="1" name="end_task" value="{{ $task->getEndTask()->format('Y-m-d\TH:i:s') }}" class="form-control" id="end_task" placeholder="Enter end task">
                                 </div>
                             </div>
-                            <!-- /.card-body -->
 
                             <div class="card-footer">
-                                <button type="submit" class="btn btn-primary">Create</button>
+                                <button type="submit" class="btn btn-primary">Update</button>
+                                <a href="/tasks/delete/?id={{ $task->getId() }}" class="btn btn-danger">Delete</a>
                             </div>
                         </form>
                     </div>

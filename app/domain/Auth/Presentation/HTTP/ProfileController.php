@@ -8,6 +8,7 @@ use App\domain\Auth\Application\Repositories\UserRepositories;
 use App\domain\Auth\Application\UseCases\Commands\UpdateUserCommand;
 use App\domain\Auth\Application\UseCases\Queries\FindUserQuery;
 use Core\Http\Request;
+use Core\Routing\Redirect;
 use Core\Support\Csrf\Csrf;
 use Core\Support\Session\Session;
 use Core\View\View;
@@ -25,8 +26,7 @@ class ProfileController
         $user = new FindUserQuery(new UserRepositories(), Session::get('user_id'))->handle();
 
         if (empty($user)) {
-            header('Location: /login');
-            exit;
+            Redirect::to('/login')->send();
         }
 
         $view = new View();
@@ -43,8 +43,7 @@ class ProfileController
         $csrfToken = Request::input('csrf_token');
 
         if (!Csrf::check($csrfToken)) {
-            header('Location: /login');
-            exit;
+            Redirect::to('/login')->send();
         }
 
         $findUserQuery = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
@@ -53,7 +52,6 @@ class ProfileController
         $updateUserCommand = new UpdateUserCommand(new UserRepositories(), $user);
         $user = $updateUserCommand->execute();
 
-        header('Location: /profile');
-        exit;
+        Redirect::to('/profile')->send();
     }
 }

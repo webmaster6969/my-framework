@@ -9,6 +9,7 @@ use App\domain\Storage\Application\UseCases\Commands\MoveCommand;
 use App\domain\Storage\Application\UseCases\Commands\UplodeCommand;
 use App\domain\Storage\Domain\Exceptions\NotUplodeFileException;
 use Core\Http\Request;
+use Core\Routing\Redirect;
 use Core\Storage\File;
 use Core\Support\Csrf\Csrf;
 use Core\View\View;
@@ -30,8 +31,7 @@ class StorageController
         $csrfToken = Request::input('csrf_token');
 
         if (!Csrf::check($csrfToken)) {
-            header('Location: /login');
-            exit;
+            Redirect::to('/login')->send();
         }
 
         $uplodeCommand = new UplodeCommand(new StorageRepository(), File::fromGlobals('file'));
@@ -46,7 +46,6 @@ class StorageController
             throw new NotUplodeFileException('Not upload file');
         }
 
-        header('Location: /storage');
-        exit;
+        Redirect::to('/storage')->send();
     }
 }

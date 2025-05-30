@@ -10,6 +10,7 @@ use App\domain\Auth\Application\UseCases\Commands\LogoutCommand;
 use App\domain\Auth\Application\UseCases\Commands\RegisterCommand;
 use App\domain\Auth\Application\UseCases\Queries\FindUserQuery;
 use Core\Http\Request;
+use Core\Routing\Redirect;
 use Core\Support\Csrf\Csrf;
 use Core\Support\Session\Session;
 use Core\View\View;
@@ -29,8 +30,7 @@ class AuthController
         $user = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
 
         if (!empty($user->handle())) {
-            header('Location: /profile');
-            exit;
+            Redirect::to('/profile')->send();
         }
 
         $view = new View();
@@ -44,19 +44,16 @@ class AuthController
         $csrfToken = Request::input('csrf_token');
 
         if (!Csrf::check($csrfToken)) {
-            header('Location: /login');
-            exit;
+            Redirect::to('/login')->send();
         }
 
         $loginCommand = new LoginCommand(new UserRepositories(), $email, $password);
 
         if (!empty($loginCommand->execute())) {
-            header('Location: /profile');
-            exit;
+            Redirect::to('/profile')->send();
         }
 
-        header('Location: /login');
-        exit;
+        Redirect::to('/login')->send();
     }
 
     /**
@@ -64,7 +61,7 @@ class AuthController
      * @throws OptimisticLockException
      * @throws ORMException
      */
-    public function register(): bool
+    public function register()
     {
         $name = Request::input('name');
         $email = Request::input('email');
@@ -72,8 +69,7 @@ class AuthController
         $csrfToken = Request::input('csrf_token');
 
         if (!Csrf::check($csrfToken)) {
-            header('Location: /register');
-            exit;
+            Redirect::to('/register')->send();
         }
 
         $registerCommand = new RegisterCommand(new UserRepositories(), $name, $email, $password);
@@ -82,12 +78,10 @@ class AuthController
         $loginCommand = new LoginCommand(new UserRepositories(), $email, $password);
 
         if ($loginCommand->execute()) {
-            header('Location: /profile');
-            exit;
+            Redirect::to('/profile')->send();
         }
 
-        header('Location: /login');
-        exit;
+        Redirect::to('/login')->send();
     }
 
     public function registerForm()
@@ -101,8 +95,7 @@ class AuthController
         $logout = new LogoutCommand()->execute();
 
         if ($logout) {
-            header('Location: /login');
-            exit;
+            Redirect::to('/login')->send();
         }
     }
 }

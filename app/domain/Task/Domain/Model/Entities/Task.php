@@ -13,9 +13,10 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\HasLifecycleCallbacks]
 class Task
 {
-    public const STATUS_PENDING = 'pending';
-    public const STATUS_DONE = 'done';
-    public const STATUS_CANCELED = 'canceled';
+    public const string STATUS_PENDING = 'pending';
+    public const string STATUS_IN_PROGRESS = 'in_progress';
+    public const string STATUS_DONE = 'done';
+    public const string STATUS_CANCELED = 'canceled';
 
     #[ORM\Id]
     #[ORM\Column(type: "integer")]
@@ -129,7 +130,12 @@ class Task
 
     public function setStatus(string $status): void
     {
-        if (!in_array($status, [self::STATUS_PENDING, self::STATUS_DONE, self::STATUS_CANCELED])) {
+        if (!in_array($status, [
+            self::STATUS_PENDING,
+            self::STATUS_IN_PROGRESS,
+            self::STATUS_DONE,
+            self::STATUS_CANCELED
+        ])) {
             throw new \InvalidArgumentException("Invalid status");
         }
         $this->status = $status;

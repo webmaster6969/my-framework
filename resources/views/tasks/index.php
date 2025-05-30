@@ -42,9 +42,6 @@
                         <th style="width: 20%">
                             Task Name
                         </th>
-                        <th>
-                            Task Progress
-                        </th>
                         <th style="width: 8%" class="text-center">
                             Status
                         </th>
@@ -54,50 +51,35 @@
                     </thead>
                     <tbody>
                     <?php foreach ($tasks as $task) : ?>
-                    <tr>
-                        <td>
-                            #
-                        </td>
-                        <td>
-                            <a>
-                                <?php echo $task->getTitle(); ?>
-                            </a>
-                            <br/>
-                            <small>
-                                <?php echo $task->getCreatedAt()->format('Y-m-d H:i:s'); ?>
-                            </small>
-                        </td>
-                        <td class="task_progress">
-                            <div class="progress progress-sm">
-                                <div class="progress-bar bg-green" role="progressbar" aria-valuenow="57"
-                                     aria-valuemin="0" aria-valuemax="100" style="width: 57%">
-                                </div>
-                            </div>
-                            <small>
-                                57% Complete
-                            </small>
-                        </td>
-                        <td class="project-state">
-                            <span class="badge badge-success">Success</span>
-                        </td>
-                        <td class="project-actions text-right">
-                            <a class="btn btn-primary btn-sm" href="#">
-                                <i class="fas fa-folder">
-                                </i>
-                                View
-                            </a>
-                            <a class="btn btn-info btn-sm" href="#">
-                                <i class="fas fa-pencil-alt">
-                                </i>
-                                Edit
-                            </a>
-                            <a class="btn btn-danger btn-sm" href="#">
-                                <i class="fas fa-trash">
-                                </i>
-                                Delete
-                            </a>
-                        </td>
-                    </tr>
+                        <tr>
+                            <td>
+                                #
+                            </td>
+                            <td>
+                                <a>
+                                    <?php echo $task->getTitle(); ?>
+                                </a>
+                                <br/>
+                                <small>
+                                    <?php echo $task->getCreatedAt()->format('Y-m-d H:i:s'); ?>
+                                </small>
+                            </td>
+                            <td class="project-state">
+                                <span class="badge badge-success"><?php echo $task->getStatus(); ?></span>
+                            </td>
+                            <td class="project-actions text-right">
+                                <a class="btn btn-info btn-sm" href="/tasks/edit/?id=<?php echo $task->getId(); ?>">
+                                    <i class="fas fa-pencil-alt">
+                                    </i>
+                                    Edit
+                                </a>
+                                <a class="btn btn-danger btn-sm" href="/tasks/delete/?id=<?php echo $task->getId(); ?>">
+                                    <i class="fas fa-trash">
+                                    </i>
+                                    Delete
+                                </a>
+                            </td>
+                        </tr>
                     <?php endforeach; ?>
                     </tbody>
                 </table>
