@@ -19,6 +19,10 @@ $token = \Core\Support\Csrf\Csrf::token();
                             <span class="fas fa-user"></span>
                         </div>
                     </div>
+
+                    <?php if (!empty($errors['name'])): ?>
+                        <span class="text-danger"><?php echo implode(', ', $errors['name']); ?></span>
+                    <?php endif; ?>
                 </div>
                 <div class="input-group mb-3">
                     <input type="email" name="email" class="form-control" placeholder="Email">
@@ -27,6 +31,10 @@ $token = \Core\Support\Csrf\Csrf::token();
                             <span class="fas fa-envelope"></span>
                         </div>
                     </div>
+
+                    <?php if (!empty($errors['email'])): ?>
+                        <span class="text-danger"><?php echo implode(', ', $errors['email']); ?></span>
+                    <?php endif; ?>
                 </div>
                 <div class="input-group mb-3">
                     <input type="password" name="password" class="form-control" placeholder="Password">
@@ -35,6 +43,10 @@ $token = \Core\Support\Csrf\Csrf::token();
                             <span class="fas fa-lock"></span>
                         </div>
                     </div>
+
+                    <?php if (!empty($errors['password'])): ?>
+                        <span class="text-danger"><?php echo implode(', ', $errors['password']); ?></span>
+                    <?php endif; ?>
                 </div>
                 <div class="col-4">
                     <button type="submit" class="btn btn-primary btn-block">Register</button>

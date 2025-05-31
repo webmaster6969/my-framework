@@ -1,3 +1,10 @@
+<?php
+
+use Core\Support\Csrf\Csrf;
+
+$token = Csrf::token();
+?>
+
 @include('partials.header')
 @include('partials.navbar')
 @include('partials.sidebar')
@@ -31,21 +38,38 @@
 
                         <form method="post" action="/tasks/store">
                             <div class="card-body">
+                                <input type="hidden" name="csrf_token" value="<?php echo $token; ?>">
                                 <div class="form-group">
                                     <label for="title">Title</label>
-                                    <input type="text" name="title" class="form-control" id="title" placeholder="Enter title">
+                                    <input type="text" name="title" value="{{ $data['title'] }}" class="form-control" id="title" placeholder="Enter title">
+
+                                    <?php if (!empty($errors['title'])): ?>
+                                        <span class="text-danger"><?php echo implode(', ', $errors['title']); ?></span>
+                                    <?php endif; ?>
                                 </div>
                                 <div class="form-group">
                                     <label for="description">Description</label>
-                                    <input type="text" name="description" class="form-control" id="description" placeholder="Enter description">
+                                    <input type="text" name="description" value="{{ $data['description'] }}" class="form-control" id="description" placeholder="Enter description">
+
+                                    <?php if (!empty($errors['description'])): ?>
+                                        <span class="text-danger"><?php echo implode(', ', $errors['description']); ?></span>
+                                    <?php endif; ?>
                                 </div>
                                 <div class="form-group">
                                     <label for="start_task">Start task</label>
-                                    <input type="datetime-local" step="1" name="start_task" class="form-control" id="start_task" placeholder="Enter start task">
+                                    <input type="datetime-local" step="1" name="start_task" value="{{ $data['start_task'] }}" class="form-control" id="start_task" placeholder="Enter start task">
+
+                                    <?php if (!empty($errors['start_task'])): ?>
+                                        <span class="text-danger"><?php echo implode(', ', $errors['start_task']); ?></span>
+                                    <?php endif; ?>
                                 </div>
                                 <div class="form-group">
                                     <label for="end_task">End task</label>
-                                    <input type="datetime-local" step="1" name="end_task" class="form-control" id="end_task" placeholder="Enter end task">
+                                    <input type="datetime-local" step="1" name="end_task" value="{{ $data['end_task'] }}" class="form-control" id="end_task" placeholder="Enter end task">
+
+                                    <?php if (!empty($errors['end_task'])): ?>
+                                        <span class="text-danger"><?php echo implode(', ', $errors['end_task']); ?></span>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                             <!-- /.card-body -->

@@ -69,6 +69,10 @@ $token = Csrf::token();
                                                 <input type="text" name="name" class="form-control" id="inputName"
                                                        placeholder="Name">
                                             </div>
+
+                                            <?php if (!empty($errors['name'])): ?>
+                                                <span class="text-danger"><?php echo implode(', ', $errors['name']); ?></span>
+                                            <?php endif; ?>
                                         </div>
                                         <div class="form-group row">
                                             <div class="offset-sm-2 col-sm-10">

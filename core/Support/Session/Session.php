@@ -6,10 +6,24 @@ namespace Core\Support\Session;
 
 class Session
 {
+    private static array $errors;
+    private static array $flash;
+
     public static function start(): void
     {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
+        }
+
+        static::$errors = $_SESSION['_errors'] ?? [];
+        static::$flash = $_SESSION['_flash'] ?? [];
+
+        if (isset($_SESSION['_flash'])) {
+            $_SESSION['_flash'] = [];
+        }
+
+        if (isset($_SESSION['_errors'])) {
+            $_SESSION['_errors'] = [];
         }
     }
 
@@ -36,5 +50,33 @@ class Session
     public static function destroy(): void
     {
         session_destroy();
+    }
+
+    public static function all(): array
+    {
+        return $_SESSION;
+    }
+
+    public static function clear(): void
+    {
+        $_SESSION = [];
+    }
+
+    public static function error(): mixed
+    {
+        if (isset(static::$errors)) {
+            return static::$errors;
+        }
+
+        return null;
+    }
+
+    public static function flash(string $key): mixed
+    {
+        if (isset(static::$flash[$key])) {
+            return static::$flash[$key];
+        }
+
+        return null;
     }
 }

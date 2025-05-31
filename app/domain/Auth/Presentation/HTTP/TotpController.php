@@ -8,6 +8,7 @@ use App\domain\Auth\Application\Repositories\UserRepositories;
 use App\domain\Auth\Application\UseCases\Commands\DisableTwoFactoryCommand;
 use App\domain\Auth\Application\UseCases\Commands\EnableTwoFactoryCommand;
 use App\domain\Auth\Application\UseCases\Queries\FindUserQuery;
+use App\domain\Common\Domain\Exceptions\CsrfException;
 use Core\Http\Request;
 use Core\Routing\Redirect;
 use Core\Support\Csrf\Csrf;
@@ -88,7 +89,7 @@ class TotpController
         $csrfToken = Request::input('csrf_token');
 
         if (!Csrf::check($csrfToken)) {
-            Redirect::to('/register')->send();
+            throw new CsrfException('Csrf error');
         }
 
         $findUserQuery = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
@@ -103,10 +104,9 @@ class TotpController
     {
         $totp = TotpFactory::create();
         $csrfToken = Request::input('csrf_token');
-        $newSecret = Request::input('secret');
 
         if (!Csrf::check($csrfToken)) {
-            Redirect::to('/register')->send();
+            throw new CsrfException('Csrf error');
         }
 
         $findUserQuery = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
@@ -118,7 +118,6 @@ class TotpController
 
     /**
      * @throws OptimisticLockException
-     * @throws TotpException
      * @throws ORMException
      */
     public function disableTwoFactor()
@@ -126,7 +125,7 @@ class TotpController
         $csrfToken = Request::input('csrf_token');
 
         if (!Csrf::check($csrfToken)) {
-            Redirect::to('/register')->send();
+            throw new CsrfException('Csrf error');
         }
 
         $findUserQuery = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
@@ -142,12 +141,15 @@ class TotpController
         echo $view->render('two-factory.input');
     }
 
+    /**
+     * @throws TotpException
+     */
     public function twoFactoryAuthCheck()
     {
         $csrfToken = Request::input('csrf_token');
 
         if (!Csrf::check($csrfToken)) {
-            Redirect::to('/register')->send();
+            throw new CsrfException('Csrf error');
         }
 
         $secret = Request::input('secret');

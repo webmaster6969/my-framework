@@ -34,6 +34,10 @@ $token = Csrf::token();
                         <form action="/storage" method="post" enctype="multipart/form-data">
                             <input type="hidden" name="csrf_token" value="<?php echo $token; ?>">
                             <input type="file" name="file">
+
+                            <?php if (!empty($errors['file'])): ?>
+                                <span class="text-danger"><?php echo implode(', ', $errors['file']); ?></span>
+                            <?php endif; ?>
                             <button type="submit">Upload</button>
                         </form>
                     </div>

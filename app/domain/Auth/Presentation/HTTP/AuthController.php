@@ -9,10 +9,12 @@ use App\domain\Auth\Application\UseCases\Commands\LoginCommand;
 use App\domain\Auth\Application\UseCases\Commands\LogoutCommand;
 use App\domain\Auth\Application\UseCases\Commands\RegisterCommand;
 use App\domain\Auth\Application\UseCases\Queries\FindUserQuery;
+use App\domain\Common\Domain\Exceptions\CsrfException;
 use Core\Http\Request;
 use Core\Routing\Redirect;
 use Core\Support\Csrf\Csrf;
 use Core\Support\Session\Session;
+use Core\Validator\Validator;
 use Core\View\View;
 use DateMalformedStringException;
 use Doctrine\ORM\Exception\ORMException;
@@ -44,7 +46,7 @@ class AuthController
         $csrfToken = Request::input('csrf_token');
 
         if (!Csrf::check($csrfToken)) {
-            Redirect::to('/login')->send();
+            throw new CsrfException('Csrf error');
         }
 
         $loginCommand = new LoginCommand(new UserRepositories(), $email, $password);
@@ -69,7 +71,27 @@ class AuthController
         $csrfToken = Request::input('csrf_token');
 
         if (!Csrf::check($csrfToken)) {
-            Redirect::to('/register')->send();
+            throw new CsrfException('Csrf error');
+        }
+
+        $data = [
+            'name' => $name,
+            'email' => $email,
+            'password' => $password,
+        ];
+
+        $rules = [
+            'name' => 'required|min:3|max:150',
+            'email' => 'required|min:4|max:150',
+            'password' => 'required|min:4|max:255',
+        ];
+
+        $validator = new Validator($data, $rules);
+        if ($validator->fails()) {
+            Redirect::to('/register')
+                ->with('data', $data)
+                ->withErrors($validator->errors())
+                ->send();
         }
 
         $registerCommand = new RegisterCommand(new UserRepositories(), $name, $email, $password);
@@ -87,7 +109,7 @@ class AuthController
     public function registerForm()
     {
         $view = new View();
-        echo $view->render('auth.register');
+        echo $view->render('auth.register', ['errors' => Session::error()]);
     }
 
     public function logout()
