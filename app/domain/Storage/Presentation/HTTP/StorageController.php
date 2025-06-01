@@ -8,10 +8,9 @@ use App\domain\Storage\Application\Repositories\StorageRepository;
 use App\domain\Storage\Application\UseCases\Commands\MoveCommand;
 use App\domain\Storage\Application\UseCases\Commands\UplodeCommand;
 use App\domain\Storage\Domain\Exceptions\NotUplodeFileException;
-use Core\Http\Request;
+use Core\Response\Response;
 use Core\Routing\Redirect;
 use Core\Storage\File;
-use Core\Support\Csrf\Csrf;
 use Core\Support\Session\Session;
 use Core\Validator\Validator;
 use Core\View\View;
@@ -22,20 +21,17 @@ class StorageController
     /**
      * @throws Exception
      */
-    public function index()
+    public function index(): Response
     {
-        $view = new View();
-        echo $view->render('storage.index', ['errors' => Session::error()]);
+        $view = new View('storage.index', ['errors' => Session::error()]);
+
+        return Response::make($view)->withHeaders([
+            'Content-Type' => 'text/html',
+        ])->withStatus(200);
     }
 
     public function uplode()
     {
-        $csrfToken = Request::input('csrf_token');
-
-        if (!Csrf::check($csrfToken)) {
-            Redirect::to('/login')->send();
-        }
-
         $data = [
             'file' => $_FILES['file'] ?? null,
         ];

@@ -6,7 +6,6 @@ namespace App\domain\Task\Presentation\HTTP;
 
 use App\domain\Auth\Application\Repositories\UserRepositories;
 use App\domain\Auth\Application\UseCases\Queries\FindUserQuery;
-use App\domain\Common\Domain\Exceptions\CsrfException;
 use App\domain\Task\Application\Repositories\TaskRepository;
 use App\domain\Task\Application\UseCases\Commands\DeleteTaskCommand;
 use App\domain\Task\Application\UseCases\Commands\FindUserTaskCommand;
@@ -17,8 +16,8 @@ use App\domain\Task\Domain\Exceptions\NotCreateTaskException;
 use App\domain\Task\Domain\Exceptions\NotDeleteTaskException;
 use App\domain\Task\Domain\Model\Entities\Task;
 use Core\Http\Request;
+use Core\Response\Response;
 use Core\Routing\Redirect;
-use Core\Support\Csrf\Csrf;
 use Core\Support\Session\Session;
 use Core\Validator\Validator;
 use Core\View\View;
@@ -32,7 +31,7 @@ class TaskController
     /**
      * @throws Exception
      */
-    public function index()
+    public function index(): Response
     {
         $findUserQuery = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
         $user = $findUserQuery->handle();
@@ -40,15 +39,17 @@ class TaskController
         $userTaskCommand = new UserTaskCommand(new TaskRepository(), $user, 1);
         $tasks = $userTaskCommand->execute();
 
-        $view = new View();
+        $view = new View('tasks.index', ['tasks' => $tasks]);
 
-        echo $view->render('tasks.index', ['tasks' => $tasks]);
+        return Response::make($view)->withHeaders([
+            'Content-Type' => 'text/html',
+        ])->withStatus(200);
     }
 
     /**
      * @throws Exception
      */
-    public function create()
+    public function create(): Response
     {
         $dataFlash = Session::flash('data');
         $data = [
@@ -58,8 +59,10 @@ class TaskController
             'end_task' => $dataFlash['end_task'] ?? '',
         ];
 
-        $view = new View();
-        echo $view->render('tasks.create', ['data' => $data, 'errors' => Session::error()]);
+        $view = new View('tasks.create', ['data' => $data, 'errors' => Session::error()]);
+        return Response::make($view)->withHeaders([
+            'Content-Type' => 'text/html',
+        ])->withStatus(200);
     }
 
     /**
@@ -75,11 +78,6 @@ class TaskController
         $description = Request::input('description');
         $start_task = Request::input('start_task');
         $end_task = Request::input('end_task');
-        $csrfToken = Request::input('csrf_token');
-
-        if (!Csrf::check($csrfToken)) {
-            throw new CsrfException('Csrf error');
-        }
 
         $data = [
             'title' => $title,
@@ -120,7 +118,7 @@ class TaskController
     /**
      * @throws Exception
      */
-    public function edit()
+    public function edit(): Response
     {
         $task_id = (int)Request::input('id');
 
@@ -135,8 +133,10 @@ class TaskController
             exit;
         }
 
-        $view = new View();
-        echo $view->render('tasks.edit', ['task' => $task, 'errors' => Session::error()]);
+        $view = new View('tasks.edit', ['task' => $task, 'errors' => Session::error()]);
+        return Response::make($view)->withHeaders([
+            'Content-Type' => 'text/html',
+        ])->withStatus(200);
     }
 
     /**
@@ -153,11 +153,6 @@ class TaskController
         $start_task = Request::input('start_task');
         $end_task = Request::input('end_task');
         $task_id = (int)Request::input('id');
-        $csrfToken = Request::input('csrf_token');
-
-        if (!Csrf::check($csrfToken)) {
-            throw new CsrfException('Csrf error');
-        }
 
         $data = [
             'title' => $title,

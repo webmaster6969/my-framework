@@ -9,10 +9,9 @@ use App\domain\Auth\Application\UseCases\Commands\LoginCommand;
 use App\domain\Auth\Application\UseCases\Commands\LogoutCommand;
 use App\domain\Auth\Application\UseCases\Commands\RegisterCommand;
 use App\domain\Auth\Application\UseCases\Queries\FindUserQuery;
-use App\domain\Common\Domain\Exceptions\CsrfException;
 use Core\Http\Request;
+use Core\Response\Response;
 use Core\Routing\Redirect;
-use Core\Support\Csrf\Csrf;
 use Core\Support\Session\Session;
 use Core\Validator\Validator;
 use Core\View\View;
@@ -26,7 +25,7 @@ class AuthController
     /**
      * @throws Exception
      */
-    public function index()
+    public function index(): Response
     {
 
         $user = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
@@ -35,19 +34,17 @@ class AuthController
             Redirect::to('/profile')->send();
         }
 
-        $view = new View();
-        echo $view->render('auth.login');
+        $view = new View('auth.login');
+
+        return Response::make($view)->withHeaders([
+            'Content-Type' => 'text/html',
+        ])->withStatus(200);
     }
 
     public function login()
     {
         $email = Request::input('email');
         $password = Request::input('password');
-        $csrfToken = Request::input('csrf_token');
-
-        if (!Csrf::check($csrfToken)) {
-            throw new CsrfException('Csrf error');
-        }
 
         $loginCommand = new LoginCommand(new UserRepositories(), $email, $password);
 
@@ -68,11 +65,6 @@ class AuthController
         $name = Request::input('name');
         $email = Request::input('email');
         $password = Request::input('password');
-        $csrfToken = Request::input('csrf_token');
-
-        if (!Csrf::check($csrfToken)) {
-            throw new CsrfException('Csrf error');
-        }
 
         $data = [
             'name' => $name,
@@ -106,10 +98,16 @@ class AuthController
         Redirect::to('/login')->send();
     }
 
-    public function registerForm()
+    /**
+     * @throws Exception
+     */
+    public function registerForm(): Response
     {
-        $view = new View();
-        echo $view->render('auth.register', ['errors' => Session::error()]);
+        $view = new View('auth.register', ['errors' => Session::error()]);
+
+        return Response::make($view)->withHeaders([
+            'Content-Type' => 'text/html',
+        ])->withStatus(200);
     }
 
     public function logout()

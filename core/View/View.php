@@ -8,27 +8,32 @@ use Exception;
 class View
 {
     protected string $viewsPath;
+    protected string $view;
+    protected array $data = [];
 
-    public function __construct(string $viewsPath = __DIR__ . '/../../resources/views')
+
+    public function __construct(string $view = '', array $data = [], string $viewsPath = __DIR__ . '/../../resources/views')
     {
         $this->viewsPath = rtrim($viewsPath, '/');
+        $this->view = $view;
+        $this->data = $data;
     }
 
     /**
      * @throws Exception
      */
-    public function render(string $view, array $data = []): string
+    public function render(): string
     {
-        $templatePath = $this->viewsPath . '/' . str_replace('.', '/', $view) . '.php';
+        $templatePath = $this->viewsPath . '/' . str_replace('.', '/', $this->view) . '.php';
 
         if (!file_exists($templatePath)) {
-            throw new Exception("View [$view] not found at $templatePath");
+            throw new Exception("View [$this->view] not found at $templatePath");
         }
 
         $template = file_get_contents($templatePath);
 
         $compiled = $this->compileTemplate($template);
-        extract($data);
+        extract($this->data);
         ob_start();
         eval('?>' . $compiled);
         return ob_get_clean();

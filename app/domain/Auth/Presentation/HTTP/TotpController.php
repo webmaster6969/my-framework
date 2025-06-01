@@ -8,10 +8,9 @@ use App\domain\Auth\Application\Repositories\UserRepositories;
 use App\domain\Auth\Application\UseCases\Commands\DisableTwoFactoryCommand;
 use App\domain\Auth\Application\UseCases\Commands\EnableTwoFactoryCommand;
 use App\domain\Auth\Application\UseCases\Queries\FindUserQuery;
-use App\domain\Common\Domain\Exceptions\CsrfException;
 use Core\Http\Request;
+use Core\Response\Response;
 use Core\Routing\Redirect;
-use Core\Support\Csrf\Csrf;
 use Core\Support\Session\Session;
 use Core\Totp\TotpException;
 use Core\Totp\TotpFactory;
@@ -32,7 +31,7 @@ class TotpController
     /**
      * @throws Exception
      */
-    public function index()
+    public function index(): Response
     {
         $totp = TotpFactory::create();
 
@@ -71,12 +70,15 @@ class TotpController
             $imageString = $result->getString();
         }
 
-        $view = new View();
-        echo $view->render('two-factory.index', [
+        $view = new View('two-factory.index', [
             'image' => $imageString,
             'secret' => $secretKey,
             'newSecretKey' => $newSecretKey,
         ]);
+
+        return Response::make($view)->withHeaders([
+            'Content-Type' => 'text/html',
+        ])->withStatus(200);
     }
 
     /**
@@ -86,11 +88,6 @@ class TotpController
     public function enableTwoFactor()
     {
         $newSecret = Request::input('secret');
-        $csrfToken = Request::input('csrf_token');
-
-        if (!Csrf::check($csrfToken)) {
-            throw new CsrfException('Csrf error');
-        }
 
         $findUserQuery = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
         $user = $findUserQuery->handle();
@@ -103,11 +100,6 @@ class TotpController
     public function newAndEnableTwoFactor()
     {
         $totp = TotpFactory::create();
-        $csrfToken = Request::input('csrf_token');
-
-        if (!Csrf::check($csrfToken)) {
-            throw new CsrfException('Csrf error');
-        }
 
         $findUserQuery = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
         $user = $findUserQuery->handle();
@@ -122,12 +114,6 @@ class TotpController
      */
     public function disableTwoFactor()
     {
-        $csrfToken = Request::input('csrf_token');
-
-        if (!Csrf::check($csrfToken)) {
-            throw new CsrfException('Csrf error');
-        }
-
         $findUserQuery = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
         $user = $findUserQuery->handle();
         $disableTwoFactoryCommand = new DisableTwoFactoryCommand(new UserRepositories(), $user);
@@ -135,10 +121,13 @@ class TotpController
         Redirect::to('/two-factory')->send();
     }
 
-    public function twoFactoryAuth()
+    public function twoFactoryAuth(): Response
     {
-        $view = new View();
-        echo $view->render('two-factory.input');
+        $view = new View('two-factory.input');
+
+        return Response::make($view)->withHeaders([
+            'Content-Type' => 'text/html',
+        ])->withStatus(200);
     }
 
     /**
@@ -146,12 +135,6 @@ class TotpController
      */
     public function twoFactoryAuthCheck()
     {
-        $csrfToken = Request::input('csrf_token');
-
-        if (!Csrf::check($csrfToken)) {
-            throw new CsrfException('Csrf error');
-        }
-
         $secret = Request::input('secret');
 
         $findUserQuery = new FindUserQuery(new UserRepositories(), Session::get('user_id'));

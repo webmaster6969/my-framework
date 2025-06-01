@@ -7,10 +7,9 @@ namespace App\domain\Auth\Presentation\HTTP;
 use App\domain\Auth\Application\Repositories\UserRepositories;
 use App\domain\Auth\Application\UseCases\Commands\UpdateUserCommand;
 use App\domain\Auth\Application\UseCases\Queries\FindUserQuery;
-use App\domain\Common\Domain\Exceptions\CsrfException;
 use Core\Http\Request;
+use Core\Response\Response;
 use Core\Routing\Redirect;
-use Core\Support\Csrf\Csrf;
 use Core\Support\Session\Session;
 use Core\Validator\Validator;
 use Core\View\View;
@@ -23,7 +22,7 @@ class ProfileController
     /**
      * @throws Exception
      */
-    public function index()
+    public function index(): Response
     {
         $user = new FindUserQuery(new UserRepositories(), Session::get('user_id'))->handle();
 
@@ -31,8 +30,11 @@ class ProfileController
             Redirect::to('/login')->send();
         }
 
-        $view = new View();
-        echo $view->render('auth.profile', ['user' => $user, 'errors' => Session::error()]);
+        $view = new View('auth.profile', ['user' => $user, 'errors' => Session::error()]);
+
+        return Response::make($view)->withHeaders([
+            'Content-Type' => 'text/html',
+        ])->withStatus(200);
     }
 
     /**
@@ -42,11 +44,6 @@ class ProfileController
     public function update()
     {
         $name = Request::input('name');
-        $csrfToken = Request::input('csrf_token');
-
-        if (!Csrf::check($csrfToken)) {
-            throw new CsrfException('Csrf error');
-        }
 
         $data = [
             'name' => $name,

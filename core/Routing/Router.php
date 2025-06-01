@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Core\Routing;
 
 use Core\Http\Kernel;
@@ -88,7 +90,11 @@ class Router
 
                     };
                     $kernel = new Kernel($route->middleware);
-                    return $kernel->handle($handler);
+                    $response = $kernel->handle($handler);
+
+                    $response->send();
+
+                    return;
                 }
             }
         }
