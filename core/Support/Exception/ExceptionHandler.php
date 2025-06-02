@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Core\Support\Exception;
 
+use Core\Logger\Logger;
+use ErrorException;
+
 class ExceptionHandler
 {
     public static function register(): void
@@ -18,6 +21,8 @@ class ExceptionHandler
 
         $isDev = getenv('APP_ENV') !== 'production';
 
+        Logger::error($e->getMessage());
+
         if ($isDev) {
             echo "<h1>Exception: " . get_class($e) . "</h1>";
             echo "<p><strong>Message:</strong> " . $e->getMessage() . "</p>";
@@ -28,8 +33,11 @@ class ExceptionHandler
         }
     }
 
+    /**
+     * @throws ErrorException
+     */
     public static function handleError(int $errno, string $errstr, string $errfile, int $errline): void
     {
-        throw new \ErrorException($errstr, 0, $errno, $errfile, $errline);
+        throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
     }
 }

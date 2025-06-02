@@ -9,6 +9,7 @@ use App\domain\Auth\Application\UseCases\Commands\LoginCommand;
 use App\domain\Auth\Application\UseCases\Commands\LogoutCommand;
 use App\domain\Auth\Application\UseCases\Commands\RegisterCommand;
 use App\domain\Auth\Application\UseCases\Queries\FindUserQuery;
+use App\domain\Auth\Domain\Exceptions\LogoutException;
 use Core\Http\Request;
 use Core\Response\Response;
 use Core\Routing\Redirect;
@@ -31,7 +32,7 @@ class AuthController
         $user = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
 
         if (!empty($user->handle())) {
-            Redirect::to('/profile')->send();
+            return Response::make(Redirect::to('/profile'));
         }
 
         $view = new View('auth.login');
@@ -41,7 +42,7 @@ class AuthController
         ])->withStatus(200);
     }
 
-    public function login()
+    public function login(): Response
     {
         $email = Request::input('email');
         $password = Request::input('password');
@@ -49,10 +50,10 @@ class AuthController
         $loginCommand = new LoginCommand(new UserRepositories(), $email, $password);
 
         if (!empty($loginCommand->execute())) {
-            Redirect::to('/profile')->send();
+            return Response::make(Redirect::to('/profile'));
         }
 
-        Redirect::to('/login')->send();
+        return Response::make(Redirect::to('/login'));
     }
 
     /**
@@ -60,7 +61,7 @@ class AuthController
      * @throws OptimisticLockException
      * @throws ORMException
      */
-    public function register()
+    public function register(): Response
     {
         $name = Request::input('name');
         $email = Request::input('email');
@@ -80,10 +81,9 @@ class AuthController
 
         $validator = new Validator($data, $rules);
         if ($validator->fails()) {
-            Redirect::to('/register')
+            return Response::make(Redirect::to('/register')
                 ->with('data', $data)
-                ->withErrors($validator->errors())
-                ->send();
+                ->withErrors($validator->errors()));
         }
 
         $registerCommand = new RegisterCommand(new UserRepositories(), $name, $email, $password);
@@ -92,10 +92,10 @@ class AuthController
         $loginCommand = new LoginCommand(new UserRepositories(), $email, $password);
 
         if ($loginCommand->execute()) {
-            Redirect::to('/profile')->send();
+            return Response::make(Redirect::to('/profile'));
         }
 
-        Redirect::to('/login')->send();
+        return Response::make(Redirect::to('/login'));
     }
 
     /**
@@ -110,12 +110,14 @@ class AuthController
         ])->withStatus(200);
     }
 
-    public function logout()
+    public function logout(): Response
     {
         $logout = new LogoutCommand()->execute();
 
-        if ($logout) {
-            Redirect::to('/login')->send();
+        if (!$logout) {
+            throw new LogoutException('Logout failed');
         }
+
+        return Response::make(Redirect::to('/login'));
     }
 }

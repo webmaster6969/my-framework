@@ -69,7 +69,7 @@ class TaskController
      * @throws OptimisticLockException
      * @throws ORMException
      */
-    public function store()
+    public function store(): Response
     {
         $findUserQuery = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
         $user = $findUserQuery->handle();
@@ -96,10 +96,9 @@ class TaskController
         $validator = new Validator($data, $rules);
 
         if ($validator->fails()) {
-            Redirect::to('/tasks/create')
+            return Response::make(Redirect::to('/tasks/create')
                 ->with('data', $data)
-                ->withErrors($validator->errors())
-                ->send();
+                ->withErrors($validator->errors()));
         }
 
         $start_task_format_datetime = DateTime::createFromFormat('Y-m-d\TH:i:s', $start_task);
@@ -111,8 +110,7 @@ class TaskController
             throw new NotCreateTaskException('Task not created');
         }
 
-        Redirect::to('/tasks')->send();
-        exit;
+        return Response::make(Redirect::to('/tasks'));
     }
 
     /**
@@ -129,8 +127,7 @@ class TaskController
         $task = $findUserQuery->execute();
 
         if (empty($task)) {
-            Redirect::to('/tasks')->send();
-            exit;
+            return Response::make(Redirect::to('/tasks'));
         }
 
         $view = new View('tasks.edit', ['task' => $task, 'errors' => Session::error()]);
@@ -143,7 +140,7 @@ class TaskController
      * @throws OptimisticLockException
      * @throws ORMException
      */
-    public function update()
+    public function update(): Response
     {
         $findUserQuery = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
         $user = $findUserQuery->handle();
@@ -171,10 +168,9 @@ class TaskController
         $validator = new Validator($data, $rules);
 
         if ($validator->fails()) {
-            Redirect::to('/tasks/edit/' . '?id=' . $task_id)
+            return Response::make(Redirect::to('/tasks/edit/' . '?id=' . $task_id)
                 ->with('data', $data)
-                ->withErrors($validator->errors())
-                ->send();
+                ->withErrors($validator->errors()));
         }
 
         $start_task_format_datetime = DateTime::createFromFormat('Y-m-d\TH:i:s', $start_task);
@@ -184,8 +180,7 @@ class TaskController
         $task = $findUserQuery->execute();
 
         if (empty($task)) {
-            Redirect::to('/tasks')->send();
-            exit;
+            return Response::make(Redirect::to('/tasks'));
         }
 
         $task->setTitle($title);
@@ -197,14 +192,14 @@ class TaskController
             throw new NotCreateTaskException('Task not created');
         }
 
-        Redirect::to('/tasks')->send();
+        return Response::make(Redirect::to('/tasks'));
     }
 
     /**
      * @throws OptimisticLockException
      * @throws ORMException
      */
-    public function delete()
+    public function delete(): Response
     {
         $findUserQuery = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
         $user = $findUserQuery->handle();
@@ -215,7 +210,7 @@ class TaskController
         $task = $findUserQuery->execute();
 
         if (empty($task)) {
-            Redirect::to('/tasks')->send();
+            return Response::make(Redirect::to('/tasks'));
         }
 
         $findUserQuery = new DeleteTaskCommand(new TaskRepository(), $user, $task);
@@ -223,6 +218,6 @@ class TaskController
             throw new NotDeleteTaskException('Task not deleted');
         }
 
-        Redirect::to('/tasks')->send();
+        return Response::make(Redirect::to('/tasks'));
     }
 }

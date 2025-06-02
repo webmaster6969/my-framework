@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Core\Database\DB;
+use Core\Logger\Logger;
 use Core\Support\App\App;
 use Core\Support\Crypt\Crypt;
 use Core\Support\Env\Env;
@@ -13,6 +14,8 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMSetup;
 
 require_once __DIR__ . '/../vendor/autoload.php';
+
+Logger::setLogFile(__DIR__ . '/../logs/logs.log');
 
 Session::start();
 
@@ -30,11 +33,6 @@ $config = ORMSetup::createAttributeMetadataConfiguration(
     ],
     isDevMode: true,
 );
-// or if you prefer XML
-// $config = ORMSetup::createXMLMetadataConfiguration(
-//    paths: [__DIR__ . '/config/xml'],
-//    isDevMode: true,
-//);
 
 // configuring the database connection
 $connection = DriverManager::getConnection([

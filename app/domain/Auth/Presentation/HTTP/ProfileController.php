@@ -27,7 +27,7 @@ class ProfileController
         $user = new FindUserQuery(new UserRepositories(), Session::get('user_id'))->handle();
 
         if (empty($user)) {
-            Redirect::to('/login')->send();
+            return Response::make(Redirect::to('/login'));
         }
 
         $view = new View('auth.profile', ['user' => $user, 'errors' => Session::error()]);
@@ -41,7 +41,7 @@ class ProfileController
      * @throws OptimisticLockException
      * @throws ORMException
      */
-    public function update()
+    public function update(): Response
     {
         $name = Request::input('name');
 
@@ -67,6 +67,6 @@ class ProfileController
         $updateUserCommand = new UpdateUserCommand(new UserRepositories(), $user);
         $user = $updateUserCommand->execute();
 
-        Redirect::to('/profile')->send();
+        return Response::make(Redirect::to('/profile'));
     }
 }

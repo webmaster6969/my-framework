@@ -85,7 +85,7 @@ class TotpController
      * @throws OptimisticLockException
      * @throws ORMException
      */
-    public function enableTwoFactor()
+    public function enableTwoFactor(): Response
     {
         $newSecret = Request::input('secret');
 
@@ -94,10 +94,15 @@ class TotpController
         $enableTwoFactoryCommand = new EnableTwoFactoryCommand(new UserRepositories(), $user, $newSecret);
         $enableTwoFactoryCommand->execute();
 
-        Redirect::to('/two-factory')->send();
+        return Response::make(Redirect::to('/two-factory'));
     }
 
-    public function newAndEnableTwoFactor()
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     * @throws TotpException
+     */
+    public function newAndEnableTwoFactor(): Response
     {
         $totp = TotpFactory::create();
 
@@ -105,20 +110,22 @@ class TotpController
         $user = $findUserQuery->handle();
         $enableTwoFactoryCommand = new EnableTwoFactoryCommand(new UserRepositories(), $user, $totp->generateSecret());
         $enableTwoFactoryCommand->execute();
-        Redirect::to('/two-factory')->send();
+
+        return Response::make(Redirect::to('/two-factory'));
     }
 
     /**
      * @throws OptimisticLockException
      * @throws ORMException
      */
-    public function disableTwoFactor()
+    public function disableTwoFactor(): Response
     {
         $findUserQuery = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
         $user = $findUserQuery->handle();
         $disableTwoFactoryCommand = new DisableTwoFactoryCommand(new UserRepositories(), $user);
         $disableTwoFactoryCommand->execute();
-        Redirect::to('/two-factory')->send();
+
+        return Response::make(Redirect::to('/two-factory'));
     }
 
     public function twoFactoryAuth(): Response
@@ -133,7 +140,7 @@ class TotpController
     /**
      * @throws TotpException
      */
-    public function twoFactoryAuthCheck()
+    public function twoFactoryAuthCheck(): Response
     {
         $secret = Request::input('secret');
 
@@ -142,10 +149,10 @@ class TotpController
         $totp = TotpFactory::create();
 
         if (!$totp->verifyCode($user->getGoogle2faSecret(), $secret)) {
-            Redirect::to('/two-factory-auth')->send();
+            return Response::make(Redirect::to('/two-factory-auth'));
         }
 
         Session::set('two_factor_auth', true);
-        Redirect::to('/profile')->send();
+        return Response::make(Redirect::to('/profile'));
     }
 }

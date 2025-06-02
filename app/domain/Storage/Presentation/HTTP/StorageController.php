@@ -30,7 +30,7 @@ class StorageController
         ])->withStatus(200);
     }
 
-    public function uplode()
+    public function uplode(): Response
     {
         $data = [
             'file' => $_FILES['file'] ?? null,
@@ -43,10 +43,9 @@ class StorageController
         $validator = new Validator($data, $rules);
 
         if ($validator->fails()) {
-            Redirect::to('/storage')
+            return Response::make(Redirect::to('/storage')
                 ->with('data', $data)
-                ->withErrors($validator->errors())
-                ->send();
+                ->withErrors($validator->errors()));
         }
 
         $uplodeCommand = new UplodeCommand(new StorageRepository(), File::fromGlobals('file'));
@@ -61,6 +60,6 @@ class StorageController
             throw new NotUplodeFileException('Not upload file');
         }
 
-        Redirect::to('/storage')->send();
+        return Response::make(Redirect::to('/storage'));
     }
 }

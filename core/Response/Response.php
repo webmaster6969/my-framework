@@ -2,7 +2,9 @@
 
 namespace Core\Response;
 
+use Core\Routing\Redirect;
 use Core\View\View;
+use Exception;
 
 class Response
 {
@@ -36,16 +38,22 @@ class Response
         return $this;
     }
 
+    /**
+     * @throws Exception
+     */
     public function send(): void
     {
         foreach ($this->headers as $key => $value) {
             header("$key: $value");
         }
 
-        http_response_code($this->status);
-
         if ($this->content instanceof View) {
+            http_response_code($this->status);
             echo $this->content->render();
+        }
+
+        if ($this->content instanceof Redirect) {
+            $this->content->send();
         }
     }
 }

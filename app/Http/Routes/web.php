@@ -6,11 +6,11 @@ use App\domain\Auth\Presentation\HTTP\AuthController;
 use App\domain\Auth\Presentation\HTTP\ProfileController;
 use App\domain\Auth\Presentation\HTTP\TotpController;
 use App\domain\Auth\Presentation\Middleware\AuthMiddleware;
+use App\domain\Auth\Presentation\Middleware\GuestMiddleware;
 use App\domain\Auth\Presentation\Middleware\TwoFactoryMiddleware;
 use App\domain\Common\Presentation\HTTP\CsrfMiddleware;
 use App\domain\Storage\Presentation\HTTP\StorageController;
 use App\domain\Task\Presentation\HTTP\TaskController;
-use App\Http\Middleware\GuestMiddleware;
 use Core\Http\Request;
 use Core\Routing\Router;
 
