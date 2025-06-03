@@ -18,6 +18,11 @@ class Env
         }
 
         $lines = file($path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+
+        if ($lines === false) {
+            throw new Exception("Unable to read .env file at: {$path}");
+        }
+
         foreach ($lines as $line) {
             if (str_starts_with(trim($line), '#')) {
                 continue;
@@ -37,7 +42,12 @@ class Env
         }
     }
 
-    public static function get(string $key, $default = null): mixed
+    /**
+     * @param string $key
+     * @param mixed|null $default
+     * @return mixed
+     */
+    public static function get(string $key, mixed $default = null)
     {
         return $_ENV[$key] ?? $default;
     }

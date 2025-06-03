@@ -82,7 +82,7 @@ final class Base32
         for ($i = 0; $i < $binaryLength; $i += 8) {
             $byte = substr($binary, $i, 8);
             if (strlen($byte) === 8) {
-                $output .= chr(bindec($byte));
+                $output .= chr((int)bindec($byte));
             }
         }
 

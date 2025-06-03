@@ -9,13 +9,23 @@ use Doctrine\ORM\EntityManager;
 
 class DB
 {
+    /**
+     * @var EntityManager|null
+     */
     private static ?EntityManager $em = null;
 
+    /**
+     * @param EntityManager $entityManager
+     * @return void
+     */
     public static function setEntityManager(EntityManager $entityManager): void
     {
         self::$em = $entityManager;
     }
 
+    /**
+     * @return EntityManager|null
+     */
     public static function getEntityManager(): ?EntityManager
     {
         return self::$em;
@@ -34,6 +44,9 @@ class DB
     }
 
     /**
+     * @param string $sql
+     * @param array<string, mixed> $params
+     * @return list<array<string,mixed>>
      * @throws Exception
      * @throws \Exception
      */
@@ -44,10 +57,13 @@ class DB
     }
 
     /**
+     * @param string $sql
+     * @param array<string, mixed> $params
+     * @return int|string
      * @throws Exception
      * @throws \Exception
      */
-    public static function execute(string $sql, array $params = []): int
+    public static function execute(string $sql, array $params = []): int|string
     {
         $conn = self::em()->getConnection();
         return $conn->executeStatement($sql, $params);

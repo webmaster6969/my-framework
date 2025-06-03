@@ -11,6 +11,11 @@ use App\domain\Task\Domain\Model\Entities\Task;
 
 class FindUserTaskCommand implements CommandInterface
 {
+    /**
+     * @param TaskRepository $taskRepository
+     * @param User $user
+     * @param int $task_id
+     */
     public function __construct(
         private readonly TaskRepository $taskRepository,
         private readonly User $user,
@@ -19,7 +24,10 @@ class FindUserTaskCommand implements CommandInterface
     {
     }
 
-    public function execute(): ?Task
+    /**
+     * @return Task|null
+     */
+    public function execute(): Task|null
     {
         return $this->taskRepository->findByUser($this->user, $this->task_id);
     }

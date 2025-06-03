@@ -14,6 +14,12 @@ use Doctrine\ORM\OptimisticLockException;
 
 class RegisterCommand implements CommandInterface
 {
+    /**
+     * @param UserRepositories $userRepositories
+     * @param string $name
+     * @param string $email
+     * @param string $password
+     */
     public function __construct(
         private readonly UserRepositories $userRepositories,
         private readonly string           $name,
@@ -30,12 +36,6 @@ class RegisterCommand implements CommandInterface
      */
     public function execute(): ?User
     {
-        $user = $this->userRepositories->create($this->name, $this->email, $this->password);
-
-        if (empty($user)) {
-            throw new RegisterException('User not created');
-        }
-
-        return $user;
+        return $this->userRepositories->create($this->name, $this->email, $this->password);
     }
 }

@@ -30,6 +30,9 @@ class StorageController
         ])->withStatus(200);
     }
 
+    /**
+     * @return Response
+     */
     public function uplode(): Response
     {
         $data = [
@@ -48,13 +51,19 @@ class StorageController
                 ->withErrors($validator->errors()));
         }
 
-        $uplodeCommand = new UplodeCommand(new StorageRepository(), File::fromGlobals('file'));
+        $file = File::fromGlobals('file');
+
+        if ($file === null) {
+            throw new NotUplodeFileException('File not uploaded or invalid');
+        }
+
+        $uplodeCommand = new UplodeCommand(new StorageRepository(), $file);
 
         if (empty($uplodeCommand->execute())) {
             throw new NotUplodeFileException('Not upload file');
         }
 
-        $moveCommand = new MoveCommand(new StorageRepository(), File::fromGlobals('file'), 'app');
+        $moveCommand = new MoveCommand(new StorageRepository(), $file, 'app');
 
         if (empty($moveCommand->execute())) {
             throw new NotUplodeFileException('Not upload file');

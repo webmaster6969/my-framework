@@ -33,21 +33,25 @@ class TotpController
      */
     public function index(): Response
     {
+        $userId = Session::get('user_id');
+        $userId = is_int($userId) ? $userId : null;
+
         $totp = TotpFactory::create();
 
         $newSecretKey = false;
-        $findUserQuery = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
+        $findUserQuery = new FindUserQuery(new UserRepositories(), $userId);
         $user = $findUserQuery->handle();
 
-        if (empty($user->getGoogle2faSecret())) {
+        $secretKey = '';
+        if ($user !== null && !empty($user->getGoogle2faSecret())) {
+            $secretKey = $user->getGoogle2faSecret();
+        } else {
             $newSecretKey = true;
             $secretKey = $totp->generateSecret();
-        } else {
-            $secretKey = $user->getGoogle2faSecret();
         }
 
         $imageString = '';
-        if (!empty($secretKey)) {
+        if ($secretKey !== '') {
             $builder = new Builder(
                 writer: new SvgWriter(),
                 writerOptions: [],
@@ -87,10 +91,23 @@ class TotpController
      */
     public function enableTwoFactor(): Response
     {
-        $newSecret = Request::input('secret');
+        $userId = Session::get('user_id');
+        $userId = is_int($userId) ? $userId : null;
 
-        $findUserQuery = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
+        $newSecret = Request::input('secret');
+        if (!is_string($newSecret) || $newSecret === '') {
+            // Ошибка или редирект, например
+            return Response::make(Redirect::to('/two-factory'));
+        }
+
+        $findUserQuery = new FindUserQuery(new UserRepositories(), $userId);
         $user = $findUserQuery->handle();
+
+        if ($user === null) {
+            // Пользователь не найден — обработка ошибки
+            return Response::make(Redirect::to('/login'));
+        }
+
         $enableTwoFactoryCommand = new EnableTwoFactoryCommand(new UserRepositories(), $user, $newSecret);
         $enableTwoFactoryCommand->execute();
 
@@ -104,11 +121,20 @@ class TotpController
      */
     public function newAndEnableTwoFactor(): Response
     {
+        $userId = Session::get('user_id');
+        $userId = is_int($userId) ? $userId : null;
+
         $totp = TotpFactory::create();
 
-        $findUserQuery = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
+        $findUserQuery = new FindUserQuery(new UserRepositories(), $userId);
         $user = $findUserQuery->handle();
-        $enableTwoFactoryCommand = new EnableTwoFactoryCommand(new UserRepositories(), $user, $totp->generateSecret());
+
+        if ($user === null) {
+            return Response::make(Redirect::to('/login'));
+        }
+
+        $newSecret = $totp->generateSecret();
+        $enableTwoFactoryCommand = new EnableTwoFactoryCommand(new UserRepositories(), $user, $newSecret);
         $enableTwoFactoryCommand->execute();
 
         return Response::make(Redirect::to('/two-factory'));
@@ -120,14 +146,25 @@ class TotpController
      */
     public function disableTwoFactor(): Response
     {
-        $findUserQuery = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
+        $userId = Session::get('user_id');
+        $userId = is_int($userId) ? $userId : null;
+
+        $findUserQuery = new FindUserQuery(new UserRepositories(), $userId);
         $user = $findUserQuery->handle();
+
+        if ($user === null) {
+            return Response::make(Redirect::to('/login'));
+        }
+
         $disableTwoFactoryCommand = new DisableTwoFactoryCommand(new UserRepositories(), $user);
         $disableTwoFactoryCommand->execute();
 
         return Response::make(Redirect::to('/two-factory'));
     }
 
+    /**
+     * @return Response
+     */
     public function twoFactoryAuth(): Response
     {
         $view = new View('two-factory.input');
@@ -142,13 +179,29 @@ class TotpController
      */
     public function twoFactoryAuthCheck(): Response
     {
-        $secret = Request::input('secret');
+        $userId = Session::get('user_id');
+        $userId = is_int($userId) ? $userId : null;
 
-        $findUserQuery = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
+        $secret = Request::input('secret');
+        if (!is_string($secret) || $secret === '') {
+            return Response::make(Redirect::to('/two-factory-auth'));
+        }
+
+        $findUserQuery = new FindUserQuery(new UserRepositories(), $userId);
         $user = $findUserQuery->handle();
+
+        if ($user === null) {
+            return Response::make(Redirect::to('/login'));
+        }
+
         $totp = TotpFactory::create();
 
-        if (!$totp->verifyCode($user->getGoogle2faSecret(), $secret)) {
+        $userSecret = $user->getGoogle2faSecret();
+        if ($userSecret === null || $userSecret === '') {
+            return Response::make(Redirect::to('/two-factory-auth'));
+        }
+
+        if (!$totp->verifyCode($userSecret, $secret)) {
             return Response::make(Redirect::to('/two-factory-auth'));
         }
 

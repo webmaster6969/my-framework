@@ -20,8 +20,19 @@ Logger::setLogFile(__DIR__ . '/../logs/logs.log');
 Session::start();
 
 Env::load();
-App::init(Env::get('APP_PATH'));
-new Crypt(Env::get('ENCRYPTION_KEY'));
+
+$appPath = Env::get('APP_PATH');
+if (!is_string($appPath)) {
+    throw new \RuntimeException('APP_PATH environment variable is not set or not a string');
+}
+App::init($appPath);
+
+$encryptionKey = Env::get('ENCRYPTION_KEY');
+if (!is_string($encryptionKey)) {
+    throw new \RuntimeException('ENCRYPTION_KEY environment variable is not set or not a string');
+}
+new Crypt($encryptionKey);
+
 ExceptionHandler::register();
 
 // Create a simple "default" Doctrine ORM configuration for Attributes
@@ -34,18 +45,52 @@ $config = ORMSetup::createAttributeMetadataConfiguration(
     isDevMode: true,
 );
 
+// Получаем переменные окружения с проверками и преобразованием типов
+$dbHost = Env::get('DB_HOST');
+if (!is_string($dbHost)) {
+    throw new \RuntimeException('DB_HOST environment variable is not set or not a string');
+}
+
+$dbUser = Env::get('DB_USERNAME');
+if (!is_string($dbUser)) {
+    throw new \RuntimeException('DB_USERNAME environment variable is not set or not a string');
+}
+
+$dbPassword = Env::get('DB_PASSWORD');
+if (!is_string($dbPassword)) {
+    throw new \RuntimeException('DB_PASSWORD environment variable is not set or not a string');
+}
+
+$dbName = Env::get('DB_DATABASE');
+if (!is_string($dbName)) {
+    throw new \RuntimeException('DB_DATABASE environment variable is not set or not a string');
+}
+
+$dbCharset = Env::get('DB_CHARSET');
+if (!is_string($dbCharset)) {
+    throw new \RuntimeException('DB_CHARSET environment variable is not set or not a string');
+}
+
+$dbPort = Env::get('DB_PORT');
+if (!is_string($dbPort) && !is_int($dbPort)) {
+    throw new \RuntimeException('DB_PORT environment variable is not set or not a string/int');
+}
+// Приводим порт к int, если строка
+$dbPort = is_string($dbPort) ? (int)$dbPort : $dbPort;
+
 // configuring the database connection
 $connection = DriverManager::getConnection([
     'driver' => 'pdo_mysql',
-    'host' => Env::get('DB_HOST'),
-    'user' => Env::get('DB_USERNAME'),
-    'password' => Env::get('DB_PASSWORD'),
-    'dbname' => Env::get('DB_DATABASE'),
-    'charset' => Env::get('DB_CHARSET'),
-    'port' => Env::get('DB_PORT'),
+    'host' => $dbHost,
+    'user' => $dbUser,
+    'password' => $dbPassword,
+    'dbname' => $dbName,
+    'charset' => $dbCharset,
+    'port' => $dbPort,
 ], $config);
 
 // obtaining the entity manager
 $entityManager = new EntityManager($connection, $config);
 DB::setEntityManager($entityManager);
+
 require __DIR__ . '/../app/Http/Routes/web.php';

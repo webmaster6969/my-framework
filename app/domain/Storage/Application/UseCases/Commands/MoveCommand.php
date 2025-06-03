@@ -10,6 +10,11 @@ use Core\Storage\File;
 
 class MoveCommand implements CommandInterface
 {
+    /**
+     * @param StorageRepository $storageRepository
+     * @param File $file
+     * @param string $path
+     */
     public function __construct(
         private readonly StorageRepository $storageRepository,
         private readonly File              $file,
@@ -18,6 +23,9 @@ class MoveCommand implements CommandInterface
     {
     }
 
+    /**
+     * @return bool
+     */
     public function execute(): bool
     {
         return $this->storageRepository->move($this->file, $this->path);

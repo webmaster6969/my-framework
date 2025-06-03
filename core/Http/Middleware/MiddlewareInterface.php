@@ -6,5 +6,9 @@ namespace Core\Http\Middleware;
 
 interface MiddlewareInterface
 {
-    public function handle(callable $next);
+    /**
+     * @param callable $next
+     * @return mixed
+     */
+    public function handle(callable $next): mixed;
 }

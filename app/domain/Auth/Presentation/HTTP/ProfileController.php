@@ -24,9 +24,15 @@ class ProfileController
      */
     public function index(): Response
     {
-        $user = new FindUserQuery(new UserRepositories(), Session::get('user_id'))->handle();
+        $userId = Session::get('user_id');
+        if (!is_int($userId)) {
+            // если в сессии нет корректного id — редирект на логин
+            return Response::make(Redirect::to('/login'));
+        }
 
-        if (empty($user)) {
+        $user = new FindUserQuery(new UserRepositories(), $userId)->handle();
+
+        if ($user === null) {
             return Response::make(Redirect::to('/login'));
         }
 
@@ -43,15 +49,15 @@ class ProfileController
      */
     public function update(): Response
     {
+        $userId = Session::get('user_id');
+        if (!is_int($userId)) {
+            return Response::make(Redirect::to('/login'));
+        }
+
         $name = Request::input('name');
 
-        $data = [
-            'name' => $name,
-        ];
-
-        $rules = [
-            'name' => 'required|min:3|max:255',
-        ];
+        $data = ['name' => $name];
+        $rules = ['name' => 'required|min:3|max:255'];
 
         $validator = new Validator($data, $rules);
         if ($validator->fails()) {
@@ -61,11 +67,18 @@ class ProfileController
                 ->send();
         }
 
-        $findUserQuery = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
-        $user = $findUserQuery->handle();
+        $user = new FindUserQuery(new UserRepositories(), $userId)->handle();
+
+        if ($user === null) {
+            return Response::make(Redirect::to('/login'));
+        }
+
+        if (!is_string($name)) {
+            return Response::make(Redirect::to('/profile'));
+        }
+
         $user->setName($name);
-        $updateUserCommand = new UpdateUserCommand(new UserRepositories(), $user);
-        $user = $updateUserCommand->execute();
+        $user = new UpdateUserCommand(new UserRepositories(), $user)->execute();
 
         return Response::make(Redirect::to('/profile'));
     }

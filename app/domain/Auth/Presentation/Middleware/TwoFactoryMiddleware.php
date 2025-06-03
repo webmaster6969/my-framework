@@ -12,13 +12,23 @@ use Core\Support\Session\Session;
 
 class TwoFactoryMiddleware implements MiddlewareInterface
 {
+    /**
+     * @param callable $next
+     * @return mixed
+     */
     public function handle(callable $next): mixed
     {
-        $findUserQuery = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
+        $userId = Session::get('user_id');
+        if (empty($userId) || !is_int($userId)) {
+            return $next();
+        }
+
+        $findUserQuery = new FindUserQuery(new UserRepositories(), $userId);
         $user = $findUserQuery->handle();
 
-        if (!empty($user->getGoogle2faSecret())) {
-            if (Session::get('two_factor_auth') !== true) {
+        if (!empty($user) && !empty($user->getGoogle2faSecret())) {
+            $twoFactorAuth = Session::get('two_factor_auth');
+            if ($twoFactorAuth !== true) {
                 Redirect::to('/two-factory-auth')->send();
             }
         }

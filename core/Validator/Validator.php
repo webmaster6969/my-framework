@@ -1,31 +1,51 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Core\Validator;
 
 class Validator
 {
+    /**
+     * @var array<string, mixed>
+     */
     protected array $data;
+
+    /**
+     * @var array<string, string|string[]> $rules
+     */
     protected array $rules;
+
+    /**
+     * @var array<string, string[]>
+     */
     protected array $errors = [];
 
+    /**
+     * @param array<string, mixed> $data
+     * @param array<string, string|string[]> $rules
+     */
     public function __construct(array $data, array $rules)
     {
         $this->data = $data;
         $this->rules = $rules;
     }
 
+    /**
+     * @return bool
+     */
     public function fails(): bool
     {
-        $this->errors = []; // reset errors
+        $this->errors = [];
 
         foreach ($this->rules as $field => $rules) {
-            $rules = is_array($rules) ? $rules : explode('|', $rules);
+            $rules = is_array($rules) ? $rules : explode('|', (string) $rules);
             $value = $this->data[$field] ?? null;
 
             foreach ($rules as $rule) {
                 $params = [];
                 if (str_contains($rule, ':')) {
-                    [$ruleName, $paramStr] = explode(':', $rule);
+                    [$ruleName, $paramStr] = explode(':', $rule, 2);
                     $params = explode(',', $paramStr);
                 } else {
                     $ruleName = $rule;
@@ -44,21 +64,26 @@ class Validator
         return !empty($this->errors);
     }
 
+    /**
+     * @param string $field
+     * @param string $rule
+     * @param array<int, string> $params
+     */
     protected function addError(string $field, string $rule, array $params = []): void
     {
         $messages = [
-            'required'     => 'Поле :field обязательно для заполнения.',
-            'email'        => 'Поле :field должно быть валидным email адресом.',
-            'min'          => 'Поле :field должно содержать минимум :param символов.',
-            'max'          => 'Поле :field должно содержать максимум :param символов.',
-            'date_format'  => 'Поле :field должно быть в формате :param.',
-            'mimes'        => 'Файл в поле :field должен быть одного из следующих типов: :param.',
-            'mimetypes'    => 'Файл в поле :field должен иметь MIME-тип: :param.',
+            'required'    => 'Поле :field обязательно для заполнения.',
+            'email'       => 'Поле :field должно быть валидным email адресом.',
+            'min'         => 'Поле :field должно содержать минимум :param символов.',
+            'max'         => 'Поле :field должно содержать максимум :param символов.',
+            'date_format' => 'Поле :field должно быть в формате :param.',
+            'mimes'       => 'Файл в поле :field должен быть одного из следующих типов: :param.',
+            'mimetypes'   => 'Файл в поле :field должен иметь MIME-тип: :param.',
         ];
 
         $message = $messages[$rule] ?? "Ошибка в поле :field.";
-
         $message = str_replace(':field', $field, $message);
+
         if (!empty($params)) {
             $message = str_replace(':param', $params[0], $message);
         }
@@ -66,36 +91,62 @@ class Validator
         $this->errors[$field][] = $message;
     }
 
+    /**
+     * @return array<string, string[]>
+     */
     public function errors(): array
     {
         return $this->errors;
     }
 
-    // === Правила ===
+    // === Валидации ===
 
-    protected function validateRequired($value): bool
+    /**
+     * @param mixed $value
+     * @return bool
+     */
+    protected function validateRequired(mixed $value): bool
     {
         return !is_null($value) && $value !== '';
     }
 
-    protected function validateEmail($value): bool
+    /**
+     * @param mixed $value
+     * @return bool
+     */
+    protected function validateEmail(mixed $value): bool
     {
-        return filter_var($value, FILTER_VALIDATE_EMAIL) !== false;
+        return is_string($value) && filter_var($value, FILTER_VALIDATE_EMAIL) !== false;
     }
 
-    protected function validateMin($value, $min): bool
+    /**
+     * @param mixed $value
+     * @param string $min
+     * @return bool
+     */
+    protected function validateMin(mixed $value, string $min): bool
     {
-        return mb_strlen((string)$value) >= (int)$min;
+        return is_string($value) && mb_strlen($value) >= (int) $min;
     }
 
-    protected function validateMax($value, $max): bool
+    /**
+     * @param mixed $value
+     * @param string $max
+     * @return bool
+     */
+    protected function validateMax(mixed $value, string $max): bool
     {
-        return mb_strlen((string)$value) <= (int)$max;
+        return is_string($value) && mb_strlen($value) <= (int) $max;
     }
 
-    protected function validateDateFormat($value, $format): bool
+    /**
+     * @param mixed $value
+     * @param string $format
+     * @return bool
+     */
+    protected function validateDateFormat(mixed $value, string $format): bool
     {
-        if (empty($value)) {
+        if (!is_string($value)) {
             return false;
         }
 
@@ -103,24 +154,40 @@ class Validator
         return $dt && $dt->format($format) === $value;
     }
 
-    protected function validateMimes($value, ...$extensions): bool
+    /**
+     * @param mixed $value
+     * @param string ...$extensions
+     * @return bool
+     */
+    protected function validateMimes(mixed $value, string ...$extensions): bool
     {
-        if (!isset($value['name'])) return false;
+        if (!is_array($value) || !isset($value['name']) || !is_string($value['name'])) {
+            return false;
+        }
 
         $fileExtension = strtolower(pathinfo($value['name'], PATHINFO_EXTENSION));
-        return in_array($fileExtension, $extensions);
+        return in_array($fileExtension, $extensions, true);
     }
 
-    protected function validateMimetypes($value, ...$mimetypes): bool
+    /**
+     * @param mixed $value
+     * @param string ...$mimetypes
+     * @return bool
+     */
+    protected function validateMimetypes(mixed $value, string ...$mimetypes): bool
     {
-        if (!isset($value['tmp_name']) || !is_file($value['tmp_name'])) {
+        if (!is_array($value) || !isset($value['tmp_name']) || !is_string($value['tmp_name']) || !is_file($value['tmp_name'])) {
             return false;
         }
 
         $fInfo = finfo_open(FILEINFO_MIME_TYPE);
+        if (!$fInfo) {
+            return false;
+        }
+
         $mime = finfo_file($fInfo, $value['tmp_name']);
         finfo_close($fInfo);
 
-        return in_array($mime, $mimetypes);
+        return $mime !== false && in_array($mime, $mimetypes, true);
     }
 }

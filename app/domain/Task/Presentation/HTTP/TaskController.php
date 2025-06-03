@@ -15,6 +15,7 @@ use App\domain\Task\Application\UseCases\Commands\UserTaskCommand;
 use App\domain\Task\Domain\Exceptions\NotCreateTaskException;
 use App\domain\Task\Domain\Exceptions\NotDeleteTaskException;
 use App\domain\Task\Domain\Model\Entities\Task;
+use App\domain\Auth\Domain\Model\Entities\User;
 use Core\Http\Request;
 use Core\Response\Response;
 use Core\Routing\Redirect;
@@ -26,6 +27,7 @@ use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
 use Exception;
 
+
 class TaskController
 {
     /**
@@ -33,80 +35,87 @@ class TaskController
      */
     public function index(): Response
     {
-        $findUserQuery = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
-        $user = $findUserQuery->handle();
+        $userId = Session::get('user_id');
+        if (!is_int($userId)) {
+            return Response::make(Redirect::to('/login'));
+        }
 
-        $userTaskCommand = new UserTaskCommand(new TaskRepository(), $user, 1);
-        $tasks = $userTaskCommand->execute();
+        $user = new FindUserQuery(new UserRepositories(), $userId)->handle();
+        if (!$user instanceof User) {
+            return Response::make(Redirect::to('/login'));
+        }
 
-        $view = new View('tasks.index', ['tasks' => $tasks]);
+        $tasks = new UserTaskCommand(new TaskRepository(), $user, 1)->execute();
 
-        return Response::make($view)->withHeaders([
-            'Content-Type' => 'text/html',
-        ])->withStatus(200);
+        return Response::make(new View('tasks.index', ['tasks' => $tasks]))
+            ->withHeaders(['Content-Type' => 'text/html'])
+            ->withStatus(200);
     }
 
     /**
-     * @throws Exception
+     * @return Response
      */
     public function create(): Response
     {
         $dataFlash = Session::flash('data');
-        $data = [
+        $data = is_array($dataFlash) ? [
             'title' => $dataFlash['title'] ?? '',
             'description' => $dataFlash['description'] ?? '',
             'start_task' => $dataFlash['start_task'] ?? '',
             'end_task' => $dataFlash['end_task'] ?? '',
-        ];
+        ] : ['title' => '', 'description' => '', 'start_task' => '', 'end_task' => ''];
 
-        $view = new View('tasks.create', ['data' => $data, 'errors' => Session::error()]);
-        return Response::make($view)->withHeaders([
-            'Content-Type' => 'text/html',
-        ])->withStatus(200);
+        return Response::make(new View('tasks.create', ['data' => $data, 'errors' => Session::error()]))
+            ->withHeaders(['Content-Type' => 'text/html'])
+            ->withStatus(200);
     }
 
     /**
      * @throws OptimisticLockException
      * @throws ORMException
+     * @throws NotCreateTaskException
      */
     public function store(): Response
     {
-        $findUserQuery = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
-        $user = $findUserQuery->handle();
+        $userId = Session::get('user_id');
+        if (!is_int($userId)) return Response::make(Redirect::to('/login'));
 
-        $title = Request::input('title');
-        $description = Request::input('description');
+        $user = new FindUserQuery(new UserRepositories(), $userId)->handle();
+        if (!$user instanceof User) return Response::make(Redirect::to('/login'));
+
+        $titleInput = Request::input('title');
+        $descriptionInput = Request::input('description');
         $start_task = Request::input('start_task');
         $end_task = Request::input('end_task');
 
-        $data = [
-            'title' => $title,
-            'description' => $description,
-            'start_task' => $start_task,
-            'end_task' => $end_task
-        ];
+        $title = is_string($titleInput) ? $titleInput : '';
+        $description = is_string($descriptionInput) ? $descriptionInput : '';
 
-        $rules = [
+        $start_task = is_string($start_task) ? $start_task : '';
+        $end_task = is_string($end_task) ? $end_task : '';
+
+        $data = compact('title', 'description', 'start_task', 'end_task');
+
+        $validator = new Validator($data, [
             'title' => 'required|min:3|max:255',
             'description' => 'required|min:3|max:255',
             'start_task' => 'required|date_format:Y-m-d\TH:i:s',
             'end_task' => 'required|date_format:Y-m-d\TH:i:s',
-        ];
-
-        $validator = new Validator($data, $rules);
+        ]);
 
         if ($validator->fails()) {
-            return Response::make(Redirect::to('/tasks/create')
-                ->with('data', $data)
-                ->withErrors($validator->errors()));
+            return Response::make(Redirect::to('/tasks/create')->with('data', $data)->withErrors($validator->errors()));
         }
 
-        $start_task_format_datetime = DateTime::createFromFormat('Y-m-d\TH:i:s', $start_task);
-        $end_task_format_datetime = DateTime::createFromFormat('Y-m-d\TH:i:s', $end_task);
+        $startDate = DateTime::createFromFormat('Y-m-d\TH:i:s', (string) $start_task);
+        $endDate = DateTime::createFromFormat('Y-m-d\TH:i:s', (string) $end_task);
 
-        $task = new Task($user, $title, $description, $start_task_format_datetime, $end_task_format_datetime);
-        $findUserQuery = new StoreTaskCommand(new TaskRepository(), $task);
-        if (!$findUserQuery->execute()) {
+        if (!$startDate || !$endDate) {
+            throw new NotCreateTaskException('Invalid datetime format.');
+        }
+
+        $task = new Task($user, $title, $description, $startDate, $endDate);
+        if (!new StoreTaskCommand(new TaskRepository(), $task)->execute()) {
             throw new NotCreateTaskException('Task not created');
         }
 
@@ -118,103 +127,113 @@ class TaskController
      */
     public function edit(): Response
     {
-        $task_id = (int)Request::input('id');
+        $task_id = Request::input('id');
+        if (!is_numeric($task_id)) return Response::make(Redirect::to('/tasks'));
 
-        $findUserQuery = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
-        $user = $findUserQuery->handle();
+        $userId = Session::get('user_id');
+        if (!is_int($userId)) return Response::make(Redirect::to('/login'));
 
-        $findUserQuery = new FindUserTaskCommand(new TaskRepository(), $user, $task_id);
-        $task = $findUserQuery->execute();
+        $user = new FindUserQuery(new UserRepositories(), $userId)->handle();
+        if (!$user instanceof User) return Response::make(Redirect::to('/login'));
 
-        if (empty($task)) {
-            return Response::make(Redirect::to('/tasks'));
-        }
+        $task = new FindUserTaskCommand(new TaskRepository(), $user, (int)$task_id)->execute();
 
-        $view = new View('tasks.edit', ['task' => $task, 'errors' => Session::error()]);
-        return Response::make($view)->withHeaders([
-            'Content-Type' => 'text/html',
-        ])->withStatus(200);
+        if (!$task) return Response::make(Redirect::to('/tasks'));
+
+        return Response::make(new View('tasks.edit', ['task' => $task, 'errors' => Session::error()]))
+            ->withHeaders(['Content-Type' => 'text/html'])
+            ->withStatus(200);
     }
 
     /**
-     * @throws OptimisticLockException
      * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws NotCreateTaskException
      */
     public function update(): Response
     {
-        $findUserQuery = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
-        $user = $findUserQuery->handle();
+        $userId = Session::get('user_id');
+        if (!is_int($userId)) return Response::make(Redirect::to('/login'));
 
-        $title = Request::input('title');
-        $description = Request::input('description');
+        $user = new FindUserQuery(new UserRepositories(), $userId)->handle();
+        if (!$user instanceof User) return Response::make(Redirect::to('/login'));
+
+        $task_id = Request::input('id');
+        if (!is_numeric($task_id)) return Response::make(Redirect::to('/tasks'));
+
+        $titleInput = Request::input('title');
+        $descriptionInput = Request::input('description');
         $start_task = Request::input('start_task');
         $end_task = Request::input('end_task');
-        $task_id = (int)Request::input('id');
+
+        $title = is_string($titleInput) ? $titleInput : '';
+        $description = is_string($descriptionInput) ? $descriptionInput : '';
+
+        $start_task = is_string($start_task) ? $start_task : '';
+        $end_task = is_string($end_task) ? $end_task : '';
 
         $data = [
             'title' => $title,
             'description' => $description,
             'start_task' => $start_task,
-            'end_task' => $end_task
+            'end_task' => $end_task,
         ];
 
-        $rules = [
+        $validator = new Validator($data, [
             'title' => 'required|min:3|max:255',
             'description' => 'required|min:3|max:255',
             'start_task' => 'required|date_format:Y-m-d\TH:i:s',
             'end_task' => 'required|date_format:Y-m-d\TH:i:s',
-        ];
-
-        $validator = new Validator($data, $rules);
+        ]);
 
         if ($validator->fails()) {
-            return Response::make(Redirect::to('/tasks/edit/' . '?id=' . $task_id)
+            return Response::make(Redirect::to('/tasks/edit/?id=' . (int)$task_id)
                 ->with('data', $data)
                 ->withErrors($validator->errors()));
         }
 
-        $start_task_format_datetime = DateTime::createFromFormat('Y-m-d\TH:i:s', $start_task);
-        $end_task_format_datetime = DateTime::createFromFormat('Y-m-d\TH:i:s', $end_task);
+        $startDate = DateTime::createFromFormat('Y-m-d\TH:i:s', (string) $data['start_task']);
+        $endDate = DateTime::createFromFormat('Y-m-d\TH:i:s', (string) $data['end_task']);
 
-        $findUserQuery = new FindUserTaskCommand(new TaskRepository(), $user, $task_id);
-        $task = $findUserQuery->execute();
-
-        if (empty($task)) {
-            return Response::make(Redirect::to('/tasks'));
+        if (!$startDate || !$endDate) {
+            throw new NotCreateTaskException('Invalid datetime.');
         }
 
-        $task->setTitle($title);
-        $task->setDescription($description);
-        $task->setStartTask($start_task_format_datetime);
-        $task->setEndTask($end_task_format_datetime);
-        $findUserQuery = new UpdateTaskCommand(new TaskRepository(), $user, $task);
-        if (!$findUserQuery->execute()) {
-            throw new NotCreateTaskException('Task not created');
+        $task = new FindUserTaskCommand(new TaskRepository(), $user, (int)$task_id)->execute();
+        if (!$task) return Response::make(Redirect::to('/tasks'));
+
+        $task->setTitle($data['title']);
+        $task->setDescription($data['description']);
+        $task->setStartTask($startDate);
+        $task->setEndTask($endDate);
+
+        if (!new UpdateTaskCommand(new TaskRepository(), $user, $task)->execute()) {
+            throw new NotCreateTaskException('Task not updated');
         }
 
         return Response::make(Redirect::to('/tasks'));
     }
 
     /**
-     * @throws OptimisticLockException
      * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws NotDeleteTaskException
      */
     public function delete(): Response
     {
-        $findUserQuery = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
-        $user = $findUserQuery->handle();
+        $userId = Session::get('user_id');
+        if (!is_int($userId)) return Response::make(Redirect::to('/login'));
 
-        $task_id = (int)Request::input('id');
+        $user = new FindUserQuery(new UserRepositories(), $userId)->handle();
+        if (!$user instanceof User) return Response::make(Redirect::to('/login'));
 
-        $findUserQuery = new FindUserTaskCommand(new TaskRepository(), $user, $task_id);
-        $task = $findUserQuery->execute();
+        $task_id = Request::input('id');
+        if (!is_numeric($task_id)) return Response::make(Redirect::to('/tasks'));
 
-        if (empty($task)) {
-            return Response::make(Redirect::to('/tasks'));
-        }
+        $task = new FindUserTaskCommand(new TaskRepository(), $user, (int)$task_id)->execute();
+        if (!$task) return Response::make(Redirect::to('/tasks'));
 
-        $findUserQuery = new DeleteTaskCommand(new TaskRepository(), $user, $task);
-        if (!$findUserQuery->execute()) {
+        if (!new DeleteTaskCommand(new TaskRepository(), $user, $task)->execute()) {
             throw new NotDeleteTaskException('Task not deleted');
         }
 

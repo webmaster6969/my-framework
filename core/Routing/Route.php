@@ -6,15 +6,25 @@ namespace Core\Routing;
 
 class Route
 {
+    /**
+     * @var string
+     */
     public readonly string $method;
-    public readonly string $uri;
-    public readonly array $action;
-    public array $middleware {
-        get {
-            return $this->middleware;
-        }
-    }
 
+    /**
+     * @var string
+     */
+    public readonly string $uri;
+
+    /** @var array{0: class-string, 1: string} */
+    public readonly array $action;
+
+    /** @var array<int, string> */
+    public array $middleware;
+
+    /**
+     * @param array{0: class-string, 1: string} $action
+     */
     public function __construct(string $method, string $uri, array $action)
     {
         $this->method = $method;
@@ -23,12 +33,20 @@ class Route
         $this->middleware = [];
     }
 
+    /**
+     * @param array<int, string> $middleware
+     * @return $this
+     */
     public function middleware(array $middleware): self
     {
         $this->middleware = $middleware;
         return $this;
     }
 
+    /**
+     * @param string $requestUri
+     * @return array<string, string>|false
+     */
     public function match(string $requestUri): array|false
     {
         $pattern = preg_replace('#\{([\w]+)\}#', '(?P<$1>[^/]+)', $this->uri);

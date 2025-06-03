@@ -6,5 +6,8 @@ namespace App\domain\Common\Domain;
 
 interface CommandInterface
 {
+    /**
+     * @return mixed
+     */
     public function execute(): mixed;
 }

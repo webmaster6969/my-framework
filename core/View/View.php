@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Core\View;
@@ -7,11 +8,26 @@ use Exception;
 
 class View
 {
+    /**
+     * @var string
+     */
     protected string $viewsPath;
+
+    /**
+     * @var string
+     */
     protected string $view;
+
+    /**
+     * @var array<string, mixed>
+     */
     protected array $data = [];
 
-
+    /**
+     * @param string $view
+     * @param array<string, mixed> $data
+     * @param string $viewsPath
+     */
     public function __construct(string $view = '', array $data = [], string $viewsPath = __DIR__ . '/../../resources/views')
     {
         $this->viewsPath = rtrim($viewsPath, '/');
@@ -31,36 +47,59 @@ class View
         }
 
         $template = file_get_contents($templatePath);
+        if ($template === false) {
+            throw new Exception("Failed to read view file at $templatePath");
+        }
 
         $compiled = $this->compileTemplate($template);
-        extract($this->data);
+
+        extract($this->data, EXTR_SKIP);
+
         ob_start();
         eval('?>' . $compiled);
-        return ob_get_clean();
+        $output = ob_get_clean();
+
+        return $output !== false ? $output : '';
     }
 
+    /**
+     * @param string $template
+     * @return string
+     */
     protected function compileTemplate(string $template): string
     {
         // Поддержка выражений вида {{ $user->name }}
         $template = preg_replace_callback('/{{\s*(.+?)\s*}}/', function ($matches) {
-            return '<?= htmlspecialchars(' . $matches[1] . ') ?>';
+            return '<?= htmlspecialchars(' . $matches[1] . ', ENT_QUOTES, \'UTF-8\') ?>';
         }, $template);
+
+        // Если preg_replace_callback вернёт null (что маловероятно), приводим к пустой строке
+        if ($template === null) {
+            $template = '';
+        }
 
         // Управляющие конструкции
-        $template = preg_replace('/@if\s*\((.*?)\)/', '<?php if ($1): ?>', $template);
-        $template = preg_replace('/@elseif\s*\((.*?)\)/', '<?php elseif ($1): ?>', $template);
-        $template = preg_replace('/@else/', '<?php else: ?>', $template);
-        $template = preg_replace('/@endif/', '<?php endif; ?>', $template);
+        $template = preg_replace('/@if\s*\((.*?)\)/', '<?php if ($1): ?>', $template) ?? '';
+        $template = preg_replace('/@elseif\s*\((.*?)\)/', '<?php elseif ($1): ?>', $template) ?? '';
+        $template = preg_replace('/@else/', '<?php else: ?>', $template) ?? '';
+        $template = preg_replace('/@endif/', '<?php endif; ?>', $template) ?? '';
 
-        $template = preg_replace('/@foreach\s*\((.*?)\)/', '<?php foreach ($1): ?>', $template);
-        $template = preg_replace('/@endforeach/', '<?php endforeach; ?>', $template);
+        $template = preg_replace('/@foreach\s*\((.*?)\)/', '<?php foreach ($1): ?>', $template) ?? '';
+        $template = preg_replace('/@endforeach/', '<?php endforeach; ?>', $template) ?? '';
 
+        // @include поддержка
         $template = preg_replace_callback('/@include\s*\(\s*[\'"](.*?)[\'"]\s*\)/', function ($matches) {
-            $included = file_get_contents($this->viewsPath . '/' . str_replace('.', '/', $matches[1]) . '.php');
+            $includedPath = $this->viewsPath . '/' . str_replace('.', '/', $matches[1]) . '.php';
+            if (!file_exists($includedPath)) {
+                return ''; // Или можно выбросить исключение
+            }
+            $included = file_get_contents($includedPath);
+            if ($included === false) {
+                return '';
+            }
             return $this->compileTemplate($included);
-        }, $template);
+        }, $template) ?? '';
 
         return $template;
     }
-
 }

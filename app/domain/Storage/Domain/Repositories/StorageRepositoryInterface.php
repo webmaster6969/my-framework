@@ -8,7 +8,7 @@ use Core\Storage\File;
 
 interface StorageRepositoryInterface
 {
-    public function uplode(File $file): mixed;
+    public function uplode(File $file): bool;
 
-    public function move(File $file, string $path): mixed;
+    public function move(File $file, string $path): bool;
 }

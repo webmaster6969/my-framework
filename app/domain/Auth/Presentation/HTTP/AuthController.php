@@ -28,8 +28,13 @@ class AuthController
      */
     public function index(): Response
     {
+        $userId = Session::get('user_id');
+        if (!is_int($userId) && !is_null($userId)) {
+            // Попытка привести к int, если возможно
+            $userId = is_numeric($userId) ? (int)$userId : null;
+        }
 
-        $user = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
+        $user = new FindUserQuery(new UserRepositories(), $userId);
 
         if (!empty($user->handle())) {
             return Response::make(Redirect::to('/profile'));
@@ -42,10 +47,17 @@ class AuthController
         ])->withStatus(200);
     }
 
+    /**
+     * @return Response
+     */
     public function login(): Response
     {
         $email = Request::input('email');
         $password = Request::input('password');
+
+        // Приведение к строкам или установка пустой строки, если null
+        $email = is_string($email) ? $email : '';
+        $password = is_string($password) ? $password : '';
 
         $loginCommand = new LoginCommand(new UserRepositories(), $email, $password);
 
@@ -66,6 +78,11 @@ class AuthController
         $name = Request::input('name');
         $email = Request::input('email');
         $password = Request::input('password');
+
+        // Приведение к строкам или установка пустой строки, если null
+        $name = is_string($name) ? $name : '';
+        $email = is_string($email) ? $email : '';
+        $password = is_string($password) ? $password : '';
 
         $data = [
             'name' => $name,
@@ -110,6 +127,9 @@ class AuthController
         ])->withStatus(200);
     }
 
+    /**
+     * @return Response
+     */
     public function logout(): Response
     {
         $logout = new LogoutCommand()->execute();

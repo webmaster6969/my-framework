@@ -4,95 +4,150 @@ declare(strict_types=1);
 
 namespace Core\Routing;
 
+use Closure;
 use Core\Http\Kernel;
 use Core\Http\Request;
+use Core\Http\Middleware\MiddlewareInterface;
+use Core\Response\Response;
+use Exception;
 
 class Router
 {
+    /** @var array<int, Route> */
     protected array $routes = [];
 
+    /** @var array{prefix?: string, middleware?: array<int, class-string<MiddlewareInterface>>} */
     protected array $groupAttributes = [];
 
-    public function get(string $uri, $action): Route
+    /**
+     * @param string $uri
+     * @param array{0: class-string, 1: string} $action
+     * @return Route
+     */
+    public function get(string $uri, array $action): Route
     {
         return $this->addRoute('GET', $uri, $action);
     }
 
-    public function post(string $uri, $action): Route
+    /**
+     * @param string $uri
+     * @param array{0: class-string, 1: string} $action
+     * @return Route
+     */
+    public function post(string $uri, array $action): Route
     {
         return $this->addRoute('POST', $uri, $action);
     }
 
-    public function put(string $uri, $action): Route
+    /**
+     * @param string $uri
+     * @param array{0: class-string, 1: string} $action
+     * @return Route
+     */
+    public function put(string $uri, array $action): Route
     {
         return $this->addRoute('PUT', $uri, $action);
     }
 
-    public function delete(string $uri, $action): Route
+    /**
+     * @param string $uri
+     * @param array{0: class-string, 1: string} $action
+     * @return Route
+     */
+    public function delete(string $uri, array $action): Route
     {
         return $this->addRoute('DELETE', $uri, $action);
     }
 
-    public function addRoute(string $method, string $uri, $action): Route
+    /**
+     * @param string $method
+     * @param string $uri
+     * @param array{0: class-string, 1: string} $action
+     * @return Route
+     */
+    public function addRoute(string $method, string $uri, array $action): Route
     {
-        // Применение префикса из группы, если есть
-        if (!empty($this->groupAttributes['prefix'])) {
-            $uri = rtrim($this->groupAttributes['prefix'], '/') . '/' . ltrim($uri, '/');
-        }
-
+        $prefix = $this->groupAttributes['prefix'] ?? '';
+        $uri = rtrim($prefix, '/') . '/' . ltrim($uri, '/');
         $route = new Route($method, $uri, $action);
 
-        // Применение middleware из группы, если есть
         if (!empty($this->groupAttributes['middleware'])) {
-            $route->middleware($this->groupAttributes['middleware']);
+            /** @var array<int, class-string<MiddlewareInterface>> $middleware */
+            $middleware = $this->groupAttributes['middleware'];
+            $route->middleware($middleware);
         }
 
         $this->routes[] = $route;
         return $route;
     }
 
-    public function group(array $attributes, \Closure $callback)
+    /**
+     * @param array{prefix?: string, middleware?: array<int, class-string<MiddlewareInterface>>} $attributes
+     * @param Closure $callback
+     */
+    public function group(array $attributes, Closure $callback): void
     {
         $previousGroup = $this->groupAttributes;
 
-        // Слияние middleware и префикса
         if (!empty($previousGroup)) {
             if (isset($previousGroup['prefix']) && isset($attributes['prefix'])) {
-                $attributes['prefix'] = rtrim($previousGroup['prefix'], '/') . '/' . ltrim($attributes['prefix'], '/');
+                $previousPrefix = $previousGroup['prefix'];
+                $attributesPrefix = $attributes['prefix'];
+                $attributes['prefix'] = rtrim($previousPrefix, '/') . '/' . ltrim($attributesPrefix, '/');
             } elseif (isset($previousGroup['prefix'])) {
                 $attributes['prefix'] = $previousGroup['prefix'];
             }
 
             if (isset($previousGroup['middleware']) && isset($attributes['middleware'])) {
-                $attributes['middleware'] = array_merge($previousGroup['middleware'], $attributes['middleware']);
+                /** @var array<int, class-string<MiddlewareInterface>> $mergedMiddleware */
+                $mergedMiddleware = array_merge(
+                    (array)$previousGroup['middleware'],
+                    (array)$attributes['middleware']
+                );
+                $attributes['middleware'] = $mergedMiddleware;
             } elseif (isset($previousGroup['middleware'])) {
                 $attributes['middleware'] = $previousGroup['middleware'];
             }
         }
 
         $this->groupAttributes = $attributes;
-
         $callback($this);
-
         $this->groupAttributes = $previousGroup;
     }
 
-    public function dispatch(Request $request)
+    /**
+     * @throws Exception
+     */
+    public function dispatch(Request $request): void
     {
         foreach ($this->routes as $route) {
             if ($route->method === $request->method() && $route->uri === $request->path()) {
                 $params = $route->match($request->path());
 
                 if ($params !== false) {
-                    $handler = function () use ($route, $params) {
+                    $handler = function () use ($route, $params): mixed {
                         [$class, $method] = $route->action;
-                        return (new $class)->$method(...array_values($params));
-
+                        return new $class()->$method(...array_values($params));
                     };
-                    $kernel = new Kernel($route->middleware);
+
+                    $middlewares = array_map(function (string $middlewareClass): MiddlewareInterface {
+                        $middleware = new $middlewareClass();
+                        if (!$middleware instanceof MiddlewareInterface) {
+                            throw new \RuntimeException("Middleware must implement MiddlewareInterface");
+                        }
+                        return $middleware;
+                    }, $route->middleware);
+
+
+                    $kernel = new Kernel($middlewares);
                     $response = $kernel->handle($handler);
 
-                    $response->send();
+                    if ($response instanceof Response) {
+                        $response->send();
+                    } else {
+                        http_response_code(500);
+                        echo "Invalid response from handler.";
+                    }
 
                     return;
                 }

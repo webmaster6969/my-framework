@@ -10,6 +10,10 @@ use Core\Storage\File;
 
 class UplodeCommand implements CommandInterface
 {
+    /**
+     * @param StorageRepository $storageRepository
+     * @param File $file
+     */
     public function __construct(
         private readonly StorageRepository $storageRepository,
         private readonly File              $file,
@@ -17,6 +21,9 @@ class UplodeCommand implements CommandInterface
     {
     }
 
+    /**
+     * @return bool
+     */
     public function execute(): bool
     {
         return $this->storageRepository->uplode($this->file);

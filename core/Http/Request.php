@@ -6,61 +6,111 @@ namespace Core\Http;
 
 class Request
 {
+    /** @var array<string, mixed> */
     protected array $get;
+
+    /** @var array<string, mixed> */
     protected array $post;
+
+    /** @var array<string, mixed> */
     protected array $server;
+
+    /** @var array<string, mixed> */
     protected array $cookies;
+
+    /** @var array<string, mixed> */
     protected array $files;
+    /** @var array<string, string> */
     protected array $headers;
-    protected string $body;
+
+    /** @var string|false */
+    protected string|false $body;
+
+    /** @var Request|null */
     protected static ?Request $request = null;
 
     public function __construct()
     {
-        $this->get     = $_GET;
-        $this->post    = $_POST;
-        $this->server  = $_SERVER;
+        $this->get = $_GET;
+        $this->post = $_POST;
+        $this->server = $_SERVER;
         $this->cookies = $_COOKIE;
-        $this->files   = $_FILES;
+        $this->files = $_FILES;
         $this->headers = function_exists('getallheaders') ? getallheaders() : [];
-        $this->body    = file_get_contents('php://input');
+        $this->body = file_get_contents('php://input');
 
         static::$request = $this;
     }
 
+    /**
+     * @return Request
+     */
+    protected static function instance(): Request
+    {
+        if (!static::$request) {
+            throw new \RuntimeException('Request is not initialized.');
+        }
+        return static::$request;
+    }
+
+    /**
+     * @return string
+     */
     public static function method(): string
     {
-        return strtoupper(static::$request->server['REQUEST_METHOD'] ?? 'GET');
+        $method = static::instance()->server['REQUEST_METHOD'] ?? null;
+        return strtoupper(is_string($method) ? $method : 'GET');
     }
 
+    /**
+     * @return string
+     */
     public static function path(): string
     {
-        $uri = static::$request->server['REQUEST_URI'] ?? '/';
-        return strtok($uri, '?');
+        $uri = static::instance()->server['REQUEST_URI'] ?? null;
+        $uri = is_string($uri) ? $uri : '/';
+        return strtok($uri, '?') ?: '/';
     }
 
+    /**
+     * @param string $key
+     * @return mixed
+     */
     public static function file(string $key): mixed
     {
-        return static::$request->files[$key] ?? null;
+        return static::instance()->files[$key] ?? null;
     }
 
-    public static function input(string $key, $default = null): mixed
+    /**
+     * @param string $key
+     * @param mixed|null $default
+     * @return mixed
+     */
+    public static function input(string $key, mixed $default = null): mixed
     {
-        return static::$request->post[$key] ?? static::$request->get[$key] ?? $default;
+        return static::instance()->post[$key] ?? static::instance()->get[$key] ?? $default;
     }
 
+    /** @return array<string, mixed> */
     public static function all(): array
     {
-        return array_merge(static::$request->get, static::$request->post);
+        return array_merge(static::instance()->get, static::instance()->post);
     }
 
+    /**
+     * @param string $key
+     * @return string|null
+     */
     public static function header(string $key): ?string
     {
-        return static::$request->headers[$key] ?? null;
+        return static::instance()->headers[$key] ?? null;
     }
 
-    public static function body(): string
+    /**
+     * @return string|false
+     */
+    public static function body(): string|false
     {
-        return static::$request->body;
+        return static::instance()->body;
     }
 }

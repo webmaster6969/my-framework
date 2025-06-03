@@ -11,11 +11,15 @@ use Core\Support\Csrf\Csrf;
 
 class CsrfMiddleware implements MiddlewareInterface
 {
+    /**
+     * @param callable $next
+     * @return mixed
+     */
     public function handle(callable $next): mixed
     {
         $csrfToken = Request::input('csrf_token');
 
-        if (!Csrf::check($csrfToken)) {
+        if (empty($csrfToken) || (is_string($csrfToken) && !Csrf::check($csrfToken))) {
             throw new CsrfException('Csrf error');
         }
 

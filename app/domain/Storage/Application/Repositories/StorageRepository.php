@@ -11,12 +11,12 @@ use Core\Support\App\App;
 
 class StorageRepository implements StorageRepositoryInterface
 {
-    public function uplode(File $file): mixed
+    public function uplode(File $file): bool
     {
         return $this->move($file, 'temporary');
     }
 
-    public function move(File $file, string $path): mixed
+    public function move(File $file, string $path): bool
     {
         $storage = new Storage(App::getBasePath() . '/storage/');
         return $storage->move($file, $path);

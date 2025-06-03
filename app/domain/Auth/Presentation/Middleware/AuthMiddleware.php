@@ -12,9 +12,18 @@ use Core\Support\Session\Session;
 
 class AuthMiddleware implements MiddlewareInterface
 {
+    /**
+     * @param callable $next
+     * @return mixed
+     */
     public function handle(callable $next): mixed
     {
-        $findUserQuery = new FindUserQuery(new UserRepositories(), Session::get('user_id'));
+        $userId = Session::get('user_id');
+        if (empty($userId) || !is_int($userId)) {
+            return $next();
+        }
+
+        $findUserQuery = new FindUserQuery(new UserRepositories(), $userId);
         $user = $findUserQuery->handle();
 
         if (empty($user)) {

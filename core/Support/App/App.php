@@ -6,15 +6,29 @@ namespace Core\Support\App;
 
 class App
 {
-    protected static $app;
+    /**
+     * @var App
+     */
+    protected static App $app;
+    /**
+     * @var string
+     */
     protected string $basePath;
-    public static function init($basePath): void
+
+    /**
+     * @param string $basePath
+     * @return void
+     */
+    public static function init(string $basePath): void
     {
         self::$app = new App();
         self::$app->basePath = $basePath;
     }
 
-    public static function getBasePath()
+    /**
+     * @return string
+     */
+    public static function getBasePath(): string
     {
         return self::$app->basePath;
     }

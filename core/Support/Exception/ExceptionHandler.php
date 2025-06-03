@@ -9,12 +9,19 @@ use ErrorException;
 
 class ExceptionHandler
 {
+    /**
+     * @return void
+     */
     public static function register(): void
     {
         set_exception_handler([self::class, 'handleException']);
         set_error_handler([self::class, 'handleError']);
     }
 
+    /**
+     * @param \Throwable $e
+     * @return void
+     */
     public static function handleException(\Throwable $e): void
     {
         http_response_code(500);
@@ -36,7 +43,7 @@ class ExceptionHandler
     /**
      * @throws ErrorException
      */
-    public static function handleError(int $errno, string $errstr, string $errfile, int $errline): void
+    public static function handleError(int $errno, string $errstr, string $errfile, int $errline): bool
     {
         throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
     }

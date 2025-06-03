@@ -8,9 +8,14 @@ use Exception;
 
 class Response
 {
+    /** @var array<string, string> */
     private array $headers = [];
     private int $status = 200;
     private mixed $content;
+
+    /**
+     * @param array<string, string> $headers
+     */
     public static function make(mixed $data, int $status = 200, array $headers = []): Response
     {
         $response = new Response();
@@ -20,6 +25,9 @@ class Response
         return $response;
     }
 
+    /**
+     * @param array<string, string> $headers
+     */
     public function withHeaders(array $headers): Response
     {
         $this->headers = $headers;

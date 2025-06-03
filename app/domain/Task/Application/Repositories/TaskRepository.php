@@ -8,19 +8,37 @@ use App\domain\Auth\Domain\Model\Entities\User;
 use App\domain\Task\Domain\Model\Entities\Task;
 use App\domain\Task\Domain\Repositories\TaskRepositoryInterface;
 use Core\Database\DB;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
 
 class TaskRepository implements TaskRepositoryInterface
 {
     /**
+     * @var EntityManagerInterface|\Doctrine\ORM\EntityManager|null
+     */
+    private ?EntityManagerInterface $em;
+
+    /**
+     *
+     */
+    public function __construct()
+    {
+        $this->em = DB::getEntityManager();
+    }
+
+    /**
      * @throws OptimisticLockException
      * @throws ORMException
      */
     public function save(Task $task): bool
     {
-        DB::getEntityManager()->persist($task);
-        DB::getEntityManager()->flush();
+        if ($this->em === null) {
+            return false;
+        }
+
+        $this->em->persist($task);
+        $this->em->flush();
 
         return true;
     }
@@ -31,8 +49,12 @@ class TaskRepository implements TaskRepositoryInterface
      */
     public function delete(Task $task): bool
     {
-        DB::getEntityManager()->remove($task);
-        DB::getEntityManager()->flush();
+        if ($this->em === null) {
+            return false;
+        }
+
+        $this->em->remove($task);
+        $this->em->flush();
 
         return true;
     }
@@ -43,15 +65,30 @@ class TaskRepository implements TaskRepositoryInterface
      */
     public function update(Task $task): bool
     {
-        DB::getEntityManager()->persist($task);
-        DB::getEntityManager()->flush();
+        if ($this->em === null) {
+            return false;
+        }
+
+        $this->em->persist($task);
+        $this->em->flush();
 
         return true;
     }
 
+    /**
+     * @param User $user
+     * @param int $task_id
+     * @return Task|null
+     * @phpstan-return Task|null
+     */
     public function findByUser(User $user, int $task_id): ?Task
     {
-        return DB::getEntityManager()
+        if ($this->em === null) {
+            return null;
+        }
+
+        /** @var Task|null $task */
+        $task = $this->em
             ->createQueryBuilder()
             ->select('t')
             ->from(Task::class, 't')
@@ -61,19 +98,40 @@ class TaskRepository implements TaskRepositoryInterface
             ->setParameter('userId', $user->getId())
             ->getQuery()
             ->getOneOrNullResult();
+
+        return $task;
     }
 
-    public function findAll()
+    /**
+     * @return Task[]
+     */
+    public function findAll(): array
     {
-        // TODO: Implement findAll() method.
+        if ($this->em === null) {
+            return [];
+        }
+
+        return $this->em->getRepository(Task::class)->findAll();
     }
 
+    /**
+     * @param User $user
+     * @param int $page
+     * @param int $limit
+     * @return Task[]
+     * @phpstan-return array<Task>
+     */
     public function findByUserAll(User $user, int $page = 1, int $limit = 10): array
     {
-        $page = max(1, $page); // Защита от нуля и отрицательных значений
+        if ($this->em === null) {
+            return [];
+        }
+
+        $page = max(1, $page);
         $offset = ($page - 1) * $limit;
 
-        return DB::getEntityManager()
+        /** @var Task[] $tasks */
+        $tasks = $this->em
             ->createQueryBuilder()
             ->select('t')
             ->from(Task::class, 't')
@@ -84,10 +142,20 @@ class TaskRepository implements TaskRepositoryInterface
             ->setMaxResults($limit)
             ->getQuery()
             ->getResult();
+
+        return $tasks;
     }
 
-    public function find($id)
+    /**
+     * @param int $id
+     * @return Task|null
+     */
+    public function find(int $id): ?Task
     {
-        // TODO: Implement find() method.
+        if ($this->em === null) {
+            return null;
+        }
+
+        return $this->em->getRepository(Task::class)->find($id);
     }
 }

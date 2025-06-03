@@ -4,16 +4,26 @@ declare(strict_types=1);
 
 namespace Core\Http;
 
+use Core\Http\Middleware\MiddlewareInterface;
+
 class Kernel
 {
+    /** @var array<MiddlewareInterface> */
     protected array $middleware = [];
 
+    /**
+     * @param array<MiddlewareInterface> $middleware
+     */
     public function __construct(array $middleware = [])
     {
         $this->middleware = $middleware;
     }
 
-    public function handle(callable $controller)
+    /**
+     * @param callable $controller
+     * @return mixed
+     */
+    public function handle(callable $controller): mixed
     {
         $pipeline = array_reduce(
             array_reverse($this->middleware),

@@ -8,44 +8,117 @@ use Core\Support\App\App;
 
 class File implements IFile
 {
+    /**
+     * @param string $originalName
+     * @param string $tmpPath
+     * @param string $mimeType
+     * @param int $size
+     */
     public function __construct(
         protected string $originalName,
         protected string $tmpPath,
-        protected string $mimeType {
-            get {
-                return $this->mimeType;
-            }
-        },
-        protected int    $size {
-            get {
-                return $this->size;
-            }
-        })
+        protected string $mimeType,
+        protected int    $size,
+    )
     {
     }
 
+    /**
+     * @param string $key
+     * @return self|null
+     */
     public static function fromGlobals(string $key): ?self
     {
-        if (!isset($_FILES[$key])) {
+        if (!isset($_FILES[$key]) || !is_array($_FILES[$key])) {
             return null;
         }
 
-        $newPath = App::getBasePath() . '/storage/temporary/' . $_FILES[$key]['name'];
-        move_uploaded_file($_FILES[$key]['tmp_name'], $newPath);
+        $file = $_FILES[$key];
+
+        // Валидация ключей и типов
+        if (
+            !isset($file['name'], $file['tmp_name'], $file['type'], $file['size']) ||
+            !is_string($file['name']) ||
+            !is_string($file['tmp_name']) ||
+            !is_string($file['type']) ||
+            !is_int($file['size']) // Важно: иногда приходит string, проверка может быть строже
+        ) {
+            return null;
+        }
+
+        $newPath = App::getBasePath() . '/storage/temporary/' . $file['name'];
+        if (!move_uploaded_file($file['tmp_name'], $newPath)) {
+            return null;
+        }
 
         return new self(
-            $_FILES[$key]['name'],
+            $file['name'],
             $newPath,
-            $_FILES[$key]['type'],
-            $_FILES[$key]['size']
+            $file['type'],
+            $file['size']
         );
     }
 
+    /**
+     * @param string $name Имя поля формы (например, 'images')
+     * @return File[]|null
+     */
+    public static function fromMultipleGlobals(string $name): ?array
+    {
+        if (
+            !isset($_FILES[$name]) ||
+            !is_array($_FILES[$name]) ||
+            !isset($_FILES[$name]['name']) ||
+            !is_array($_FILES[$name]['name'])
+        ) {
+            return null;
+        }
+
+        $files = $_FILES[$name];
+        $count = count($files['name']);
+        $result = [];
+
+        for ($i = 0; $i < $count; $i++) {
+            $originalName = $files['name'][$i];
+            $tmpName      = $files['tmp_name'][$i];
+            $mimeType     = $files['type'][$i];
+            $size         = $files['size'][$i];
+            $error        = $files['error'][$i];
+
+            if (
+                $error !== UPLOAD_ERR_OK ||
+                !is_uploaded_file($tmpName) ||
+                !is_string($originalName) ||
+                !is_string($tmpName) ||
+                !is_string($mimeType) ||
+                !is_int($size)
+            ) {
+                continue;
+            }
+
+            $newPath = App::getBasePath() . '/storage/temporary/' . basename($originalName);
+            if (!move_uploaded_file($tmpName, $newPath)) {
+                continue;
+            }
+
+            $result[] = new self($originalName, $newPath, $mimeType, $size);
+        }
+
+        return $result ?: null;
+    }
+
+    /**
+     * @return string
+     */
     public function getClientOriginalName(): string
     {
         return $this->originalName;
     }
 
+    /**
+     * @param string $destinationPath
+     * @return bool
+     */
     public function move(string $destinationPath): bool
     {
         if (rename($this->tmpPath, $destinationPath)) {
@@ -55,31 +128,49 @@ class File implements IFile
         return false;
     }
 
+    /**
+     * @return string
+     */
     public function getExtension(): string
     {
         return pathinfo($this->originalName, PATHINFO_EXTENSION);
     }
 
+    /**
+     * @return string
+     */
     public function getFilenameWithoutExtension(): string
     {
         return pathinfo($this->originalName, PATHINFO_FILENAME);
     }
 
+    /**
+     * @return bool
+     */
     public function delete(): bool
     {
         return file_exists($this->tmpPath) && unlink($this->tmpPath);
     }
 
+    /**
+     * @return string
+     */
     public function getMimeType(): string
     {
         return $this->mimeType;
     }
 
+    /**
+     * @return int
+     */
     public function getSize(): int
     {
         return $this->size;
     }
 
+    /**
+     * @return string
+     */
     public function path(): string
     {
         return $this->tmpPath;
