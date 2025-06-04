@@ -4,7 +4,6 @@ use Core\Support\Csrf\Csrf;
 
 $token = Csrf::token();
 
-// Гарантируем, что $data и $errors — массивы с ключами строкового типа
 $data = (isset($data) && is_array($data)) ? array_filter($data, fn($k) => is_string($k), ARRAY_FILTER_USE_KEY) : [];
 $errors = (isset($errors) && is_array($errors)) ? array_filter($errors, fn($k) => is_string($k), ARRAY_FILTER_USE_KEY) : [];
 
