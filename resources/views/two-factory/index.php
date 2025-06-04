@@ -42,7 +42,7 @@ $newSecretKey = $newSecretKey ?? false;
 
                 <?php if (!empty($image) && is_string($image)): ?>
                     <svg class="mt-4" width="300" height="300" xmlns="http://www.w3.org/2000/svg"
-                         viewBox="<?= htmlspecialchars($image, ENT_QUOTES, 'UTF-8') ?>"></svg>
+                         viewBox="<?= $image ?>"></svg>
                 <?php else: ?>
                     <p class="text-danger">QR-код недоступен.</p>
                 <?php endif; ?>
