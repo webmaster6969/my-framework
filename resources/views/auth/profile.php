@@ -3,6 +3,11 @@
 use Core\Support\Csrf\Csrf;
 
 $token = Csrf::token();
+
+// Гарантируем, что $errors — массив
+$errors = isset($errors) && is_array($errors) ? $errors : [];
+$nameErrors = isset($errors['name']) ? (array) $errors['name'] : [];
+
 ?>
 
 @include('partials.header')
@@ -23,7 +28,7 @@ $token = Csrf::token();
                     </ol>
                 </div>
             </div>
-        </div><!-- /.container-fluid -->
+        </div>
     </section>
 
     <section class="content">
@@ -46,23 +51,25 @@ $token = Csrf::token();
 
                             <a href="#" class="btn btn-primary btn-block"><b>Follow</b></a>
                         </div>
-                        <!-- /.card-body -->
                     </div>
-                    <!-- /.card -->
                 </div>
+
                 <div class="col-md-8">
                     <div class="card">
                         <div class="card-header p-2">
                             <ul class="nav nav-pills">
-                                <li class="nav-item"><a class="nav-link active" href="#settings" data-toggle="tab">Settings</a>
+                                <li class="nav-item">
+                                    <a class="nav-link active" href="#settings" data-toggle="tab">Settings</a>
                                 </li>
                             </ul>
                         </div>
+
                         <div class="card-body">
                             <div class="tab-content">
                                 <div class="active tab-pane" id="settings">
                                     <form method="post" action="/profile/update" class="form-horizontal">
                                         <input type="hidden" name="csrf_token" value="<?php echo $token; ?>">
+
                                         <div class="form-group row">
                                             <label for="inputName" class="col-sm-2 col-form-label">Name</label>
                                             <div class="col-sm-10">
@@ -70,10 +77,13 @@ $token = Csrf::token();
                                                        placeholder="Name">
                                             </div>
 
-                                            <?php if (!empty($errors['name'])): ?>
-                                                <span class="text-danger"><?php echo implode(', ', $errors['name']); ?></span>
+                                            <?php if (!empty($nameErrors)): ?>
+                                                <div class="offset-sm-2 col-sm-10">
+                                                    <span class="text-danger"><?php echo implode(', ', $nameErrors); ?></span>
+                                                </div>
                                             <?php endif; ?>
                                         </div>
+
                                         <div class="form-group row">
                                             <div class="offset-sm-2 col-sm-10">
                                                 <button type="submit" class="btn btn-danger">Submit</button>
@@ -84,11 +94,9 @@ $token = Csrf::token();
                             </div>
                         </div>
                     </div>
-                </div>
-                <!-- /.col -->
-            </div>
-            <!-- /.row -->
-        </div><!-- /.container-fluid -->
+                </div> <!-- /.col -->
+            </div> <!-- /.row -->
+        </div>
     </section>
 </div>
 

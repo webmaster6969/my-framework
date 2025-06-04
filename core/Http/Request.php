@@ -6,21 +6,21 @@ namespace Core\Http;
 
 class Request
 {
-    /** @var array<string, mixed> */
+    /** @var array<mixed, mixed> */
     protected array $get;
 
-    /** @var array<string, mixed> */
+    /** @var array<mixed, mixed> */
     protected array $post;
 
-    /** @var array<string, mixed> */
+    /** @var array<mixed, mixed> */
     protected array $server;
 
-    /** @var array<string, mixed> */
+    /** @var array<mixed, mixed> */
     protected array $cookies;
 
-    /** @var array<string, mixed> */
+    /** @var array<mixed, mixed> */
     protected array $files;
-    /** @var array<string, string> */
+    /** @var array<mixed, mixed> */
     protected array $headers;
 
     /** @var string|false */
@@ -91,7 +91,7 @@ class Request
         return static::instance()->post[$key] ?? static::instance()->get[$key] ?? $default;
     }
 
-    /** @return array<string, mixed> */
+    /** @return array<mixed, mixed> */
     public static function all(): array
     {
         return array_merge(static::instance()->get, static::instance()->post);
@@ -99,9 +99,9 @@ class Request
 
     /**
      * @param string $key
-     * @return string|null
+     * @return mixed|null
      */
-    public static function header(string $key): ?string
+    public static function header(string $key): mixed
     {
         return static::instance()->headers[$key] ?? null;
     }

@@ -3,6 +3,64 @@
 use Core\Support\Csrf\Csrf;
 
 $token = Csrf::token();
+
+// Гарантируем, что $data и $errors — массивы с ключами строкового типа
+$data = (isset($data) && is_array($data)) ? array_filter($data, fn($k) => is_string($k), ARRAY_FILTER_USE_KEY) : [];
+$errors = (isset($errors) && is_array($errors)) ? array_filter($errors, fn($k) => is_string($k), ARRAY_FILTER_USE_KEY) : [];
+
+/**
+ * @param string $key
+ * @param array<string, mixed> $data
+ * @return string
+ */
+function old(string $key, array $data): string
+{
+    if (!array_key_exists($key, $data)) {
+        return '';
+    }
+
+    $value = $data[$key];
+
+    if (is_string($value)) {
+        return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+    }
+
+    if (is_scalar($value)) {
+        return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+    }
+
+    if (is_object($value) && method_exists($value, '__toString')) {
+        return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+    }
+
+    return '';
+}
+
+/**
+ * @param string $key
+ * @param array<string, mixed> $errors
+ * @return void
+ */
+function showErrors(string $key, array $errors): void
+{
+    if (!empty($errors[$key]) && is_array($errors[$key])) {
+        $escapedErrors = array_map(function($e) {
+            if (is_string($e)) {
+                return htmlspecialchars($e, ENT_QUOTES, 'UTF-8');
+            }
+            if (is_scalar($e)) {
+                return htmlspecialchars((string)$e, ENT_QUOTES, 'UTF-8');
+            }
+            if (is_object($e) && method_exists($e, '__toString')) {
+                return htmlspecialchars((string)$e, ENT_QUOTES, 'UTF-8');
+            }
+            return '';
+        }, $errors[$key]);
+
+        echo '<span class="text-danger">' . implode(', ', $escapedErrors) . '</span>';
+    }
+}
+
 ?>
 
 @include('partials.header')
@@ -39,37 +97,29 @@ $token = Csrf::token();
                         <form method="post" action="/tasks/store">
                             <div class="card-body">
                                 <input type="hidden" name="csrf_token" value="<?php echo $token; ?>">
+
                                 <div class="form-group">
                                     <label for="title">Title</label>
-                                    <input type="text" name="title" value="{{ $data['title'] }}" class="form-control" id="title" placeholder="Enter title">
-
-                                    <?php if (!empty($errors['title'])): ?>
-                                        <span class="text-danger"><?php echo implode(', ', $errors['title']); ?></span>
-                                    <?php endif; ?>
+                                    <input type="text" name="title" value="<?php echo old('title', $data); ?>" class="form-control" id="title" placeholder="Enter title">
+                                    <?php showErrors('title', $errors); ?>
                                 </div>
+
                                 <div class="form-group">
                                     <label for="description">Description</label>
-                                    <input type="text" name="description" value="{{ $data['description'] }}" class="form-control" id="description" placeholder="Enter description">
-
-                                    <?php if (!empty($errors['description'])): ?>
-                                        <span class="text-danger"><?php echo implode(', ', $errors['description']); ?></span>
-                                    <?php endif; ?>
+                                    <input type="text" name="description" value="<?php echo old('description', $data); ?>" class="form-control" id="description" placeholder="Enter description">
+                                    <?php showErrors('description', $errors); ?>
                                 </div>
+
                                 <div class="form-group">
                                     <label for="start_task">Start task</label>
-                                    <input type="datetime-local" step="1" name="start_task" value="{{ $data['start_task'] }}" class="form-control" id="start_task" placeholder="Enter start task">
-
-                                    <?php if (!empty($errors['start_task'])): ?>
-                                        <span class="text-danger"><?php echo implode(', ', $errors['start_task']); ?></span>
-                                    <?php endif; ?>
+                                    <input type="datetime-local" step="1" name="start_task" value="<?php echo old('start_task', $data); ?>" class="form-control" id="start_task" placeholder="Enter start task">
+                                    <?php showErrors('start_task', $errors); ?>
                                 </div>
+
                                 <div class="form-group">
                                     <label for="end_task">End task</label>
-                                    <input type="datetime-local" step="1" name="end_task" value="{{ $data['end_task'] }}" class="form-control" id="end_task" placeholder="Enter end task">
-
-                                    <?php if (!empty($errors['end_task'])): ?>
-                                        <span class="text-danger"><?php echo implode(', ', $errors['end_task']); ?></span>
-                                    <?php endif; ?>
+                                    <input type="datetime-local" step="1" name="end_task" value="<?php echo old('end_task', $data); ?>" class="form-control" id="end_task" placeholder="Enter end task">
+                                    <?php showErrors('end_task', $errors); ?>
                                 </div>
                             </div>
                             <!-- /.card-body -->
@@ -82,6 +132,7 @@ $token = Csrf::token();
                 </div>
             </div>
         </section>
+    </section>
 </div>
 
 @include('partials.footer')

@@ -3,6 +3,11 @@
 use Core\Support\Csrf\Csrf;
 
 $token = Csrf::token();
+
+// Гарантируем, что $errors — массив и $errors['file'] — массив или пустой
+$errors = isset($errors) && is_array($errors) ? $errors : [];
+$fileErrors = isset($errors['file']) ? (array) $errors['file'] : [];
+
 ?>
 
 @include('partials.header')
@@ -14,7 +19,7 @@ $token = Csrf::token();
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1>Uplode file</h1>
+                    <h1>Upload file</h1>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
@@ -35,8 +40,8 @@ $token = Csrf::token();
                             <input type="hidden" name="csrf_token" value="<?php echo $token; ?>">
                             <input type="file" name="file">
 
-                            <?php if (!empty($errors['file'])): ?>
-                                <span class="text-danger"><?php echo implode(', ', $errors['file']); ?></span>
+                            <?php if (!empty($fileErrors)): ?>
+                                <span class="text-danger"><?php echo implode(', ', $fileErrors); ?></span>
                             <?php endif; ?>
                             <button type="submit">Upload</button>
                         </form>

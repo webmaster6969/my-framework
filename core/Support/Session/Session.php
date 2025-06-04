@@ -7,12 +7,12 @@ namespace Core\Support\Session;
 class Session
 {
     /**
-     * @var array<string, mixed>|null
+     * @var array<string, mixed>
      */
     private static ?array $errors = null;
 
     /**
-     * @var array<string, mixed>|null
+     * @var array<string, mixed>
      */
     private static ?array $flash = null;
 
@@ -25,11 +25,24 @@ class Session
             session_start();
         }
 
-        self::$errors = is_array($_SESSION['_errors'] ?? null) ? $_SESSION['_errors'] : [];
-        self::$flash = is_array($_SESSION['_flash'] ?? null) ? $_SESSION['_flash'] : [];
+        self::$errors = is_array($_SESSION['_errors'] ?? null)
+            ? self::stringifyKeys($_SESSION['_errors'])
+            : [];
+
+        self::$flash = is_array($_SESSION['_flash'] ?? null)
+            ? self::stringifyKeys($_SESSION['_flash'])
+            : [];
 
         $_SESSION['_errors'] = [];
         $_SESSION['_flash'] = [];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function all(): array
+    {
+        return self::stringifyKeys($_SESSION);
     }
 
     /**
@@ -79,14 +92,6 @@ class Session
     }
 
     /**
-     * @return array<string, mixed>
-     */
-    public static function all(): array
-    {
-        return $_SESSION;
-    }
-
-    /**
      * @return void
      */
     public static function clear(): void
@@ -109,5 +114,18 @@ class Session
     public static function flash(string $key): mixed
     {
         return self::$flash[$key] ?? null;
+    }
+
+    /**
+     * @param array<array-key, mixed> $array
+     * @return array<string, mixed>
+     */
+    private static function stringifyKeys(array $array): array
+    {
+        $result = [];
+        foreach ($array as $key => $value) {
+            $result[(string)$key] = $value;
+        }
+        return $result;
     }
 }

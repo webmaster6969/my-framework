@@ -74,24 +74,32 @@ class File implements IFile
             return null;
         }
 
+        /** @var array{name: string[], tmp_name: string[], type: string[], size: int[], error: int[]} $files */
         $files = $_FILES[$name];
         $count = count($files['name']);
         $result = [];
 
         for ($i = 0; $i < $count; $i++) {
-            $originalName = $files['name'][$i];
-            $tmpName      = $files['tmp_name'][$i];
-            $mimeType     = $files['type'][$i];
-            $size         = $files['size'][$i];
-            $error        = $files['error'][$i];
+            $originalName = $files['name'][$i] ?? null;
+            $tmpName      = $files['tmp_name'][$i] ?? null;
+            $mimeType     = $files['type'][$i] ?? null;
+            $size         = $files['size'][$i] ?? null;
+            $error        = $files['error'][$i] ?? null;
 
+            // Проверка типов
             if (
-                $error !== UPLOAD_ERR_OK ||
-                !is_uploaded_file($tmpName) ||
                 !is_string($originalName) ||
                 !is_string($tmpName) ||
                 !is_string($mimeType) ||
-                !is_int($size)
+                !is_int($size) ||
+                !is_int($error)
+            ) {
+                continue;
+            }
+
+            if (
+                $error !== UPLOAD_ERR_OK ||
+                !is_uploaded_file($tmpName)
             ) {
                 continue;
             }

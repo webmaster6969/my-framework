@@ -34,7 +34,10 @@ class Storage
     public static function init(): void
     {
         $disk = new Storage(__DIR__ . '/../../storage');
+
+        /** @var array{disks: array<string, array<string, mixed>>, default: string} $config */
         $config = require __DIR__ . '/../../config/filesystems.php';
+
         $disk->disks = $config['disks'];
         $disk->defaultDisk = $config['default'];
         static::$disk = $disk;
@@ -74,7 +77,7 @@ class Storage
 
     /**
      * @param File $file
-     * @return string
+     * @return string|false
      * @throws Exception
      */
     public function getContents(File $file): string|false
