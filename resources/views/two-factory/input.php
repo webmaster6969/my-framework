@@ -12,7 +12,7 @@ $token = Csrf::token();
         <input type="hidden" name="csrf_token" value="<?php echo $token; ?>">
         <label>
             <strong>Ключ:</strong>
-            <input type="text" name="secret">
+            <input type="text" name="secret" autofocus>
         </label>
         <button type="submit">Login</button>
     </form>
