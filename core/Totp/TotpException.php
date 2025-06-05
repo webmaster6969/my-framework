@@ -8,5 +8,5 @@ use Exception;
 
 class TotpException extends Exception
 {
-    // Exception class for TOTP
+
 }

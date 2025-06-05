@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\domain\Task\Domain\Model\Entities;
 
 use App\domain\Auth\Domain\Model\Entities\User;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
@@ -14,19 +15,22 @@ use Doctrine\ORM\Mapping as ORM;
 class Task
 {
     /**
-     *
+     * @var string
      */
     public const string STATUS_PENDING = 'pending';
+
     /**
-     *
+     * @var string
      */
     public const string STATUS_IN_PROGRESS = 'in_progress';
+
     /**
-     *
+     * @var string
      */
     public const string STATUS_DONE = 'done';
+
     /**
-     *
+     * @var string
      */
     public const string STATUS_CANCELED = 'canceled';
 
@@ -58,16 +62,16 @@ class Task
     private ?string $description;
 
     /**
-     * @var \DateTime
+     * @var DateTime
      */
     #[ORM\Column(type: "datetime")]
-    private \DateTime $start_task;
+    private DateTime $start_task;
 
     /**
-     * @var \DateTime
+     * @var DateTime
      */
     #[ORM\Column(type: "datetime")]
-    private \DateTime $end_task;
+    private DateTime $end_task;
 
     /**
      * @var string
@@ -97,15 +101,15 @@ class Task
      * @param User $user
      * @param string $title
      * @param string $description
-     * @param \DateTime $start_task
-     * @param \DateTime $end_task
+     * @param DateTime $start_task
+     * @param DateTime $end_task
      */
     public function __construct(
         User      $user,
         string    $title,
         string    $description,
-        \DateTime $start_task,
-        \DateTime $end_task,
+        DateTime $start_task,
+        DateTime $end_task,
     )
     {
         $this->user = $user;
@@ -186,35 +190,35 @@ class Task
     }
 
     /**
-     * @return \DateTime
+     * @return DateTime
      */
-    public function getStartTask(): \DateTime
+    public function getStartTask(): DateTime
     {
         return $this->start_task;
     }
 
     /**
-     * @param \DateTime $start_task
+     * @param DateTime $start_task
      * @return void
      */
-    public function setStartTask(\DateTime $start_task): void
+    public function setStartTask(DateTime $start_task): void
     {
         $this->start_task = $start_task;
     }
 
     /**
-     * @return \DateTime
+     * @return DateTime
      */
-    public function getEndTask(): \DateTime
+    public function getEndTask(): DateTime
     {
         return $this->end_task;
     }
 
     /**
-     * @param \DateTime $end_task
+     * @param DateTime $end_task
      * @return void
      */
-    public function setEndTask(\DateTime $end_task): void
+    public function setEndTask(DateTime $end_task): void
     {
         $this->end_task = $end_task;
     }

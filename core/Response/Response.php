@@ -10,7 +10,13 @@ class Response
 {
     /** @var array<string, string> */
     private array $headers = [];
+    /**
+     * @var int
+     */
     private int $status = 200;
+    /**
+     * @var mixed
+     */
     private mixed $content;
 
     /**
@@ -34,12 +40,20 @@ class Response
         return $this;
     }
 
+    /**
+     * @param int $status
+     * @return $this
+     */
     public function withStatus(int $status): Response
     {
         $this->status = $status;
         return $this;
     }
 
+    /**
+     * @param mixed $content
+     * @return $this
+     */
     public function setContent(mixed $content): Response
     {
         $this->content = $content;

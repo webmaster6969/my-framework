@@ -8,11 +8,24 @@ use RuntimeException;
 
 class Crypt
 {
+    /**
+     * @var string
+     */
     protected static string $ENCRYPTION_KEY = 'your-32-byte-secret-key-goes-here-123!'; // длина должна быть 32 байта
+    /**
+     * @var string
+     */
     protected static string $ENCRYPTION_METHOD = 'AES-256-CBC';
 
+    /**
+     * @var Crypt
+     */
     protected static Crypt $instance;
 
+    /**
+     * @param string $ENCRYPTION_KEY
+     * @param string $ENCRYPTION_METHOD
+     */
     public function __construct(string $ENCRYPTION_KEY, string $ENCRYPTION_METHOD = 'AES-256-CBC')
     {
         static::$ENCRYPTION_KEY = $ENCRYPTION_KEY;
@@ -21,6 +34,10 @@ class Crypt
         static::$instance = $this;
     }
 
+    /**
+     * @param string $data
+     * @return string
+     */
     public static function encrypt(string $data): string
     {
         $key = hash('sha256', static::$ENCRYPTION_KEY, true); // 32 байта
@@ -36,6 +53,10 @@ class Crypt
         return base64_encode($iv . $cipherText);
     }
 
+    /**
+     * @param string $encryptedData
+     * @return string
+     */
     public static function decrypt(string $encryptedData): string
     {
         $data = base64_decode($encryptedData, true);

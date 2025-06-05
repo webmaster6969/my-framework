@@ -19,6 +19,10 @@ class Csrf
         return $token;
     }
 
+    /**
+     * @param string $token
+     * @return bool
+     */
     public static function check(string $token): bool
     {
         return Session::get('csrf_token') === $token;
