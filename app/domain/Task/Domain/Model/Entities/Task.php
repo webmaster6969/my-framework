@@ -6,6 +6,7 @@ namespace App\domain\Task\Domain\Model\Entities;
 
 use App\domain\Auth\Domain\Model\Entities\User;
 use DateTime;
+use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
@@ -86,16 +87,16 @@ class Task
     private bool $notified = false;
 
     /**
-     * @var \DateTimeImmutable
+     * @var DateTimeImmutable
      */
     #[ORM\Column(type: "datetime_immutable")]
-    private \DateTimeImmutable $created_at;
+    private DateTimeImmutable $created_at;
 
     /**
-     * @var \DateTimeImmutable
+     * @var DateTimeImmutable
      */
     #[ORM\Column(type: "datetime_immutable")]
-    private \DateTimeImmutable $updated_at;
+    private DateTimeImmutable $updated_at;
 
     /**
      * @param User $user
@@ -273,17 +274,17 @@ class Task
     }
 
     /**
-     * @return \DateTimeImmutable
+     * @return DateTimeImmutable
      */
-    public function getCreatedAt(): \DateTimeImmutable
+    public function getCreatedAt(): DateTimeImmutable
     {
         return $this->created_at;
     }
 
     /**
-     * @return \DateTimeImmutable
+     * @return DateTimeImmutable
      */
-    public function getUpdatedAt(): \DateTimeImmutable
+    public function getUpdatedAt(): DateTimeImmutable
     {
         return $this->updated_at;
     }
@@ -294,7 +295,7 @@ class Task
     #[ORM\PrePersist]
     public function onPrePersist(): void
     {
-        $now = new \DateTimeImmutable();
+        $now = new DateTimeImmutable();
         $this->created_at = $now;
         $this->updated_at = $now;
     }
@@ -305,6 +306,6 @@ class Task
     #[ORM\PreUpdate]
     public function onPreUpdate(): void
     {
-        $this->updated_at = new \DateTimeImmutable();
+        $this->updated_at = new DateTimeImmutable();
     }
 }

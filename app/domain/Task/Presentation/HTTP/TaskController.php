@@ -6,6 +6,7 @@ namespace App\domain\Task\Presentation\HTTP;
 
 use App\domain\Auth\Application\Repositories\UserRepositories;
 use App\domain\Auth\Application\UseCases\Queries\FindUserQuery;
+use App\domain\Common\Domain\Exceptions\ClearCacheException;
 use App\domain\Task\Application\Repositories\TaskRepository;
 use App\domain\Task\Application\UseCases\Commands\DeleteTaskCommand;
 use App\domain\Task\Application\UseCases\Commands\FindUserTaskCommand;
@@ -16,6 +17,7 @@ use App\domain\Task\Domain\Exceptions\NotCreateTaskException;
 use App\domain\Task\Domain\Exceptions\NotDeleteTaskException;
 use App\domain\Task\Domain\Model\Entities\Task;
 use App\domain\Auth\Domain\Model\Entities\User;
+use Core\Cache\Cache;
 use Core\Http\Request;
 use Core\Response\Response;
 use Core\Routing\Redirect;
@@ -45,7 +47,15 @@ class TaskController
             return Response::make(Redirect::to('/login'));
         }
 
-        $tasks = new UserTaskCommand(new TaskRepository(), $user, 1)->execute();
+        $cache = new Cache();
+        if ($cache->has('tasks_' . $user->getId())) {
+            $tasks = $cache->get('tasks_' . $user->getId());
+        }
+
+        if (empty($tasks)){
+            $tasks = new UserTaskCommand(new TaskRepository(), $user, 1)->execute();
+            $cache->set('tasks_' . $user->getId(), $tasks, 10);
+        }
 
         return Response::make(new View('tasks.index', ['tasks' => $tasks]))
             ->withHeaders(['Content-Type' => 'text/html'])
@@ -68,6 +78,25 @@ class TaskController
         return Response::make(new View('tasks.create', ['data' => $data, 'errors' => Session::error()]))
             ->withHeaders(['Content-Type' => 'text/html'])
             ->withStatus(200);
+    }
+
+    public function clearCache(): void
+    {
+        $userId = Session::get('user_id');
+        if (!is_int($userId) && !is_null($userId)) {
+            $userId = is_numeric($userId) ? (int)$userId : null;
+        }
+
+        $findUserQuery = new FindUserQuery(new UserRepositories(), $userId);
+
+        $user = $findUserQuery->handle();
+
+        if (!$user instanceof User) {
+            throw new ClearCacheException('Clear cache: User not found');
+        }
+
+        $cache = new Cache();
+        $cache->delete('tasks_' . $user->getId());
     }
 
     /**
@@ -107,8 +136,15 @@ class TaskController
             return Response::make(Redirect::to('/tasks/create')->with('data', $data)->withErrors($validator->errors()));
         }
 
-        $startDate = DateTime::createFromFormat('Y-m-d\TH:i:s', (string) $start_task);
-        $endDate = DateTime::createFromFormat('Y-m-d\TH:i:s', (string) $end_task);
+        $startDate = DateTime::createFromFormat('Y-m-d\TH:i:s', $start_task);
+        if (!$startDate) {
+            $startDate = DateTime::createFromFormat('Y-m-d\TH:i', $start_task);
+        }
+
+        $endDate = DateTime::createFromFormat('Y-m-d\TH:i:s', $end_task);
+        if (!$endDate) {
+            $endDate = DateTime::createFromFormat('Y-m-d\TH:i', $end_task);
+        }
 
         if (!$startDate || !$endDate) {
             throw new NotCreateTaskException('Invalid datetime format.');
@@ -118,6 +154,8 @@ class TaskController
         if (!new StoreTaskCommand(new TaskRepository(), $task)->execute()) {
             throw new NotCreateTaskException('Task not created');
         }
+
+        $this->clearCache();
 
         return Response::make(Redirect::to('/tasks'));
     }
@@ -192,11 +230,18 @@ class TaskController
                 ->withErrors($validator->errors()));
         }
 
-        $startDate = DateTime::createFromFormat('Y-m-d\TH:i:s', (string) $data['start_task']);
-        $endDate = DateTime::createFromFormat('Y-m-d\TH:i:s', (string) $data['end_task']);
+        $startDate = DateTime::createFromFormat('Y-m-d\TH:i:s', $start_task);
+        if (!$startDate) {
+            $startDate = DateTime::createFromFormat('Y-m-d\TH:i', $start_task);
+        }
+
+        $endDate = DateTime::createFromFormat('Y-m-d\TH:i:s', $end_task);
+        if (!$endDate) {
+            $endDate = DateTime::createFromFormat('Y-m-d\TH:i', $end_task);
+        }
 
         if (!$startDate || !$endDate) {
-            throw new NotCreateTaskException('Invalid datetime.');
+            throw new NotCreateTaskException('Invalid datetime format.');
         }
 
         $task = new FindUserTaskCommand(new TaskRepository(), $user, (int)$task_id)->execute();
@@ -210,6 +255,8 @@ class TaskController
         if (!new UpdateTaskCommand(new TaskRepository(), $user, $task)->execute()) {
             throw new NotCreateTaskException('Task not updated');
         }
+
+        $this->clearCache();
 
         return Response::make(Redirect::to('/tasks'));
     }
@@ -236,6 +283,8 @@ class TaskController
         if (!new DeleteTaskCommand(new TaskRepository(), $user, $task)->execute()) {
             throw new NotDeleteTaskException('Task not deleted');
         }
+
+        $this->clearCache();
 
         return Response::make(Redirect::to('/tasks'));
     }

@@ -68,26 +68,6 @@ class View
      */
     protected function compileTemplate(string $template): string
     {
-        // Поддержка выражений вида {{ $user->name }}
-        $template = preg_replace_callback('/{{\s*(.+?)\s*}}/', function ($matches) {
-            return '<?= htmlspecialchars(' . $matches[1] . ', ENT_QUOTES, \'UTF-8\') ?>';
-        }, $template);
-
-        // Если preg_replace_callback вернёт null (что маловероятно), приводим к пустой строке
-        if ($template === null) {
-            $template = '';
-        }
-
-        // Управляющие конструкции
-        $template = preg_replace('/@if\s*\((.*?)\)/', '<?php if ($1): ?>', $template) ?? '';
-        $template = preg_replace('/@elseif\s*\((.*?)\)/', '<?php elseif ($1): ?>', $template) ?? '';
-        $template = preg_replace('/@else/', '<?php else: ?>', $template) ?? '';
-        $template = preg_replace('/@endif/', '<?php endif; ?>', $template) ?? '';
-
-        $template = preg_replace('/@foreach\s*\((.*?)\)/', '<?php foreach ($1): ?>', $template) ?? '';
-        $template = preg_replace('/@endforeach/', '<?php endforeach; ?>', $template) ?? '';
-
-        // @include поддержка
         $template = preg_replace_callback('/@include\s*\(\s*[\'"](.*?)[\'"]\s*\)/', function ($matches) {
             $includedPath = $this->viewsPath . '/' . str_replace('.', '/', $matches[1]) . '.php';
             if (!file_exists($includedPath)) {
@@ -100,6 +80,20 @@ class View
             return $this->compileTemplate($included);
         }, $template) ?? '';
 
-        return $template;
+        $template = preg_replace_callback('/{{\s*(.+?)\s*}}/', function ($matches) {
+            return '<?= htmlspecialchars(' . $matches[1] . ', ENT_QUOTES, \'UTF-8\') ?>';
+        }, $template);
+
+        if ($template === null) {
+            $template = '';
+        }
+
+        $template = preg_replace('/@if\s*\((.*?)\)/', '<?php if ($1): ?>', $template) ?? '';
+        $template = preg_replace('/@elseif\s*\((.*?)\)/', '<?php elseif ($1): ?>', $template) ?? '';
+        $template = preg_replace('/@else/', '<?php else: ?>', $template) ?? '';
+        $template = preg_replace('/@endif/', '<?php endif; ?>', $template) ?? '';
+
+        $template = preg_replace('/@foreach\s*\((.*?)\)/', '<?php foreach ($1): ?>', $template) ?? '';
+        return preg_replace('/@endforeach/', '<?php endforeach; ?>', $template) ?? '';
     }
 }

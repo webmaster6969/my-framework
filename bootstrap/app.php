@@ -13,6 +13,8 @@ use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMSetup;
 
+date_default_timezone_set('Europe/Moscow');
+
 require_once __DIR__ . '/../vendor/autoload.php';
 
 Logger::setLogFile(__DIR__ . '/../logs/logs.log');

@@ -93,7 +93,7 @@ function showErrors(string $key, array $errors): void
                             <h3 class="card-title">Create task</h3>
                         </div>
 
-                        <form method="post" action="/tasks/store">
+                        <form method="post" action="/tasks/store" id="createTaskForm">
                             <div class="card-body">
                                 <input type="hidden" name="csrf_token" value="<?php echo $token; ?>">
 
