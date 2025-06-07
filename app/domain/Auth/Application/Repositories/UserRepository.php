@@ -7,26 +7,25 @@ namespace App\domain\Auth\Application\Repositories;
 use App\domain\Auth\Domain\Model\Entities\User;
 use App\domain\Auth\Domain\Repositories\UserRepositoryInterface;
 use DateMalformedStringException;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Exception\ORMException;
-use Doctrine\ORM\OptimisticLockException;
 
-class UserRepositorie implements UserRepositoryInterface
+class UserRepository implements UserRepositoryInterface
 {
     /**
-     * @var EntityManager
+     * @var EntityManagerInterface
      */
     private EntityManagerInterface $em;
 
+    /**
+     * @param EntityManagerInterface $em
+     */
     public function __construct(EntityManagerInterface $em)
     {
         $this->em = $em;
     }
 
     /**
-     * @throws OptimisticLockException
-     * @throws ORMException|DateMalformedStringException
+     * @throws DateMalformedStringException
      */
     public function create(string $name, string $email, string $password): User
     {
@@ -82,10 +81,9 @@ class UserRepositorie implements UserRepositoryInterface
             ->findOneBy(['email' => $email]);
     }
 
-
     /**
-     * @throws OptimisticLockException
-     * @throws ORMException
+     * @param User $user
+     * @return void
      */
     public function update(User $user): void
     {
@@ -94,8 +92,8 @@ class UserRepositorie implements UserRepositoryInterface
     }
 
     /**
-     * @throws OptimisticLockException
-     * @throws ORMException
+     * @param User $user
+     * @return void
      */
     public function delete(User $user): void
     {
@@ -104,8 +102,9 @@ class UserRepositorie implements UserRepositoryInterface
     }
 
     /**
-     * @throws OptimisticLockException
-     * @throws ORMException
+     * @param User $user
+     * @param string $google2faSecret
+     * @return bool
      */
     public function enableTwoFactor(User $user, string $google2faSecret): bool
     {
@@ -117,8 +116,8 @@ class UserRepositorie implements UserRepositoryInterface
     }
 
     /**
-     * @throws OptimisticLockException
-     * @throws ORMException
+     * @param User $user
+     * @return bool
      */
     public function disableTwoFactor(User $user): bool
     {

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\domain\Auth\Application\UseCases\Commands;
 
-use App\domain\Auth\Application\Repositories\UserRepositorie;
+use App\domain\Auth\Application\Repositories\UserRepository;
 use App\domain\Auth\Domain\Model\Entities\User;
 use App\domain\Common\Domain\CommandInterface;
 use Doctrine\ORM\Exception\ORMException;
@@ -13,8 +13,8 @@ use Doctrine\ORM\OptimisticLockException;
 class DisableTwoFactoryCommand implements CommandInterface
 {
     public function __construct(
-        private readonly UserRepositorie $userRepositories,
-        private readonly User            $user
+        private readonly UserRepository $userRepositories,
+        private readonly User           $user
     )
     {
     }

@@ -7,33 +7,29 @@ namespace App\domain\Task\Application\Repositories;
 use App\domain\Auth\Domain\Model\Entities\User;
 use App\domain\Task\Domain\Model\Entities\Task;
 use App\domain\Task\Domain\Repositories\TaskRepositoryInterface;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Exception\ORMException;
-use Doctrine\ORM\OptimisticLockException;
 
 class TaskRepository implements TaskRepositoryInterface
 {
     /**
-     * @var EntityManager|EntityManagerInterface|null
+     * @var EntityManagerInterface
      */
-    private EntityManagerInterface|EntityManager|null $em;
+    private EntityManagerInterface $em;
 
+    /**
+     * @param EntityManagerInterface $em
+     */
     public function __construct(EntityManagerInterface $em)
     {
         $this->em = $em;
     }
 
     /**
-     * @throws OptimisticLockException
-     * @throws ORMException
+     * @param Task $task
+     * @return bool
      */
     public function save(Task $task): bool
     {
-        if ($this->em === null) {
-            return false;
-        }
-
         $this->em->persist($task);
         $this->em->flush();
 
@@ -41,15 +37,11 @@ class TaskRepository implements TaskRepositoryInterface
     }
 
     /**
-     * @throws OptimisticLockException
-     * @throws ORMException
+     * @param Task $task
+     * @return bool
      */
     public function delete(Task $task): bool
     {
-        if ($this->em === null) {
-            return false;
-        }
-
         $this->em->remove($task);
         $this->em->flush();
 
@@ -57,15 +49,11 @@ class TaskRepository implements TaskRepositoryInterface
     }
 
     /**
-     * @throws OptimisticLockException
-     * @throws ORMException
+     * @param Task $task
+     * @return bool
      */
     public function update(Task $task): bool
     {
-        if ($this->em === null) {
-            return false;
-        }
-
         $this->em->persist($task);
         $this->em->flush();
 
@@ -80,10 +68,6 @@ class TaskRepository implements TaskRepositoryInterface
      */
     public function findByUser(User $user, int $task_id): ?Task
     {
-        if ($this->em === null) {
-            return null;
-        }
-
         /** @var Task|null $task */
         $task = $this->em
             ->createQueryBuilder()
@@ -104,10 +88,6 @@ class TaskRepository implements TaskRepositoryInterface
      */
     public function findAll(): array
     {
-        if ($this->em === null) {
-            return [];
-        }
-
         return $this->em->getRepository(Task::class)->findAll();
     }
 
@@ -120,10 +100,6 @@ class TaskRepository implements TaskRepositoryInterface
      */
     public function findByUserAll(User $user, int $page = 1, int $limit = 10): array
     {
-        if ($this->em === null) {
-            return [];
-        }
-
         $page = max(1, $page);
         $offset = ($page - 1) * $limit;
 
@@ -149,10 +125,6 @@ class TaskRepository implements TaskRepositoryInterface
      */
     public function find(int $id): ?Task
     {
-        if ($this->em === null) {
-            return null;
-        }
-
         return $this->em->getRepository(Task::class)->find($id);
     }
 }

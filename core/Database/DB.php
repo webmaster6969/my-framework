@@ -10,9 +10,9 @@ use Doctrine\ORM\EntityManager;
 class DB
 {
     /**
-     * @var EntityManager|null
+     * @var EntityManager
      */
-    private static ?EntityManager $em = null;
+    private static EntityManager $em;
 
     /**
      * @param EntityManager $entityManager
@@ -24,22 +24,18 @@ class DB
     }
 
     /**
-     * @return EntityManager|null
+     * @return EntityManager
      */
-    public static function getEntityManager(): ?EntityManager
+    public static function getEntityManager(): EntityManager
     {
         return self::$em;
     }
 
     /**
-     * @throws \Exception
+     * @return EntityManager
      */
     public static function em(): EntityManager
     {
-        if (!self::$em) {
-            throw new \Exception("EntityManager not initialized in DB");
-        }
-
         return self::$em;
     }
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\domain\Auth\Presentation\Middleware;
 
-use App\domain\Auth\Application\Repositories\UserRepositorie;
+use App\domain\Auth\Application\Repositories\UserRepository;
 use App\domain\Auth\Application\UseCases\Queries\FindUserQuery;
 use Core\Database\DB;
 use Core\Http\Middleware\MiddlewareInterface;
@@ -24,7 +24,7 @@ class AuthMiddleware implements MiddlewareInterface
             return $next();
         }
 
-        $findUserQuery = new FindUserQuery(new UserRepositorie(DB::getEntityManager()), $userId);
+        $findUserQuery = new FindUserQuery(new UserRepository(DB::getEntityManager()), $userId);
         $user = $findUserQuery->handle();
 
         if (empty($user)) {

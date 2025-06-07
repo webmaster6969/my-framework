@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\domain\Auth\Presentation\HTTP;
 
-use App\domain\Auth\Application\Repositories\UserRepositorie;
+use App\domain\Auth\Application\Repositories\UserRepository;
 use App\domain\Auth\Application\UseCases\Commands\DisableTwoFactoryCommand;
 use App\domain\Auth\Application\UseCases\Commands\EnableTwoFactoryCommand;
 use App\domain\Auth\Application\UseCases\Queries\FindUserQuery;
@@ -41,7 +41,7 @@ class TotpController
         $totp = TotpFactory::create();
 
         $newSecretKey = false;
-        $findUserQuery = new FindUserQuery(new UserRepositorie(DB::getEntityManager()), $userId);
+        $findUserQuery = new FindUserQuery(new UserRepository(DB::getEntityManager()), $userId);
         $user = $findUserQuery->handle();
 
         if ($user !== null && !empty($user->getGoogle2faSecret())) {
@@ -100,14 +100,14 @@ class TotpController
             return Response::make(Redirect::to('/two-factory'));
         }
 
-        $findUserQuery = new FindUserQuery(new UserRepositorie(DB::getEntityManager()), $userId);
+        $findUserQuery = new FindUserQuery(new UserRepository(DB::getEntityManager()), $userId);
         $user = $findUserQuery->handle();
 
         if ($user === null) {
             return Response::make(Redirect::to('/login'));
         }
 
-        $enableTwoFactoryCommand = new EnableTwoFactoryCommand(new UserRepositorie(DB::getEntityManager()), $user, $newSecret);
+        $enableTwoFactoryCommand = new EnableTwoFactoryCommand(new UserRepository(DB::getEntityManager()), $user, $newSecret);
         $enableTwoFactoryCommand->execute();
 
         return Response::make(Redirect::to('/two-factory'));
@@ -125,7 +125,7 @@ class TotpController
 
         $totp = TotpFactory::create();
 
-        $findUserQuery = new FindUserQuery(new UserRepositorie(DB::getEntityManager()), $userId);
+        $findUserQuery = new FindUserQuery(new UserRepository(DB::getEntityManager()), $userId);
         $user = $findUserQuery->handle();
 
         if ($user === null) {
@@ -133,7 +133,7 @@ class TotpController
         }
 
         $newSecret = $totp->generateSecret();
-        $enableTwoFactoryCommand = new EnableTwoFactoryCommand(new UserRepositorie(DB::getEntityManager()), $user, $newSecret);
+        $enableTwoFactoryCommand = new EnableTwoFactoryCommand(new UserRepository(DB::getEntityManager()), $user, $newSecret);
         $enableTwoFactoryCommand->execute();
 
         return Response::make(Redirect::to('/two-factory'));
@@ -148,14 +148,14 @@ class TotpController
         $userId = Session::get('user_id');
         $userId = is_int($userId) ? $userId : null;
 
-        $findUserQuery = new FindUserQuery(new UserRepositorie(DB::getEntityManager()), $userId);
+        $findUserQuery = new FindUserQuery(new UserRepository(DB::getEntityManager()), $userId);
         $user = $findUserQuery->handle();
 
         if ($user === null) {
             return Response::make(Redirect::to('/login'));
         }
 
-        $disableTwoFactoryCommand = new DisableTwoFactoryCommand(new UserRepositorie(DB::getEntityManager()), $user);
+        $disableTwoFactoryCommand = new DisableTwoFactoryCommand(new UserRepository(DB::getEntityManager()), $user);
         $disableTwoFactoryCommand->execute();
 
         return Response::make(Redirect::to('/two-factory'));
