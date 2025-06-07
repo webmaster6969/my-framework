@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\domain\Auth\Presentation\Middleware;
 
-use App\domain\Auth\Application\Repositories\UserRepositories;
+use App\domain\Auth\Application\Repositories\UserRepositorie;
 use App\domain\Auth\Application\UseCases\Queries\FindUserQuery;
+use Core\Database\DB;
 use Core\Http\Middleware\MiddlewareInterface;
 use Core\Routing\Redirect;
 use Core\Support\Session\Session;
@@ -23,7 +24,7 @@ class TwoFactoryMiddleware implements MiddlewareInterface
             return $next();
         }
 
-        $findUserQuery = new FindUserQuery(new UserRepositories(), $userId);
+        $findUserQuery = new FindUserQuery(new UserRepositorie(DB::getEntityManager()), $userId);
         $user = $findUserQuery->handle();
 
         if (!empty($user) && !empty($user->getGoogle2faSecret())) {

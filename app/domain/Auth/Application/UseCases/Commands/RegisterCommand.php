@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\domain\Auth\Application\UseCases\Commands;
 
-use App\domain\Auth\Application\Repositories\UserRepositories;
+use App\domain\Auth\Application\Repositories\UserRepositorie;
 use App\domain\Auth\Domain\Exceptions\RegisterException;
 use App\domain\Auth\Domain\Model\Entities\User;
 use App\domain\Common\Domain\CommandInterface;
@@ -15,16 +15,16 @@ use Doctrine\ORM\OptimisticLockException;
 class RegisterCommand implements CommandInterface
 {
     /**
-     * @param UserRepositories $userRepositories
+     * @param UserRepositorie $userRepositories
      * @param string $name
      * @param string $email
      * @param string $password
      */
     public function __construct(
-        private readonly UserRepositories $userRepositories,
-        private readonly string           $name,
-        private readonly string           $email,
-        private readonly string           $password,
+        private readonly UserRepositorie $userRepositories,
+        private readonly string          $name,
+        private readonly string          $email,
+        private readonly string          $password,
     )
     {
     }

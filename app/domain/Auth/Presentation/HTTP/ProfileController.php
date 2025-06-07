@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\domain\Auth\Presentation\HTTP;
 
-use App\domain\Auth\Application\Repositories\UserRepositories;
+use App\domain\Auth\Application\Repositories\UserRepositorie;
 use App\domain\Auth\Application\UseCases\Commands\UpdateUserCommand;
 use App\domain\Auth\Services\AuthService;
+use Core\Database\DB;
 use Core\Http\Request;
 use Core\Response\Response;
 use Core\Routing\Redirect;
@@ -65,7 +66,7 @@ class ProfileController
 
         $user->setName($name);
 
-        $command = new UpdateUserCommand(new UserRepositories(), $user);
+        $command = new UpdateUserCommand(new UserRepositorie(DB::getEntityManager()), $user);
         $command->execute();
 
         return Response::make(Redirect::to('/profile'));

@@ -6,33 +6,27 @@ namespace App\domain\Auth\Application\Repositories;
 
 use App\domain\Auth\Domain\Model\Entities\User;
 use App\domain\Auth\Domain\Repositories\UserRepositoryInterface;
-use Core\Database\DB;
+use DateMalformedStringException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
-use RuntimeException;
 
-class UserRepositories implements UserRepositoryInterface
+class UserRepositorie implements UserRepositoryInterface
 {
     /**
      * @var EntityManager
      */
     private EntityManagerInterface $em;
 
-    public function __construct()
+    public function __construct(EntityManagerInterface $em)
     {
-        $em = DB::getEntityManager();
-        if (!$em) {
-            throw new RuntimeException('EntityManager not initialized.');
-        }
-
         $this->em = $em;
     }
 
     /**
      * @throws OptimisticLockException
-     * @throws ORMException|\DateMalformedStringException
+     * @throws ORMException|DateMalformedStringException
      */
     public function create(string $name, string $email, string $password): User
     {

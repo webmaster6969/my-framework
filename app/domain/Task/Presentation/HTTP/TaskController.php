@@ -15,6 +15,7 @@ use App\domain\Task\Application\UseCases\Commands\{DeleteTaskCommand,
 use App\domain\Task\Domain\Exceptions\{NotCreateTaskException, NotDeleteTaskException};
 use App\domain\Task\Domain\Model\Entities\Task;
 use Core\{Cache\Cache,
+    Database\DB,
     Http\Request,
     Response\Response,
     Routing\Redirect,
@@ -49,7 +50,7 @@ class TaskController
 
         $cache = new Cache();
         $key = 'tasks_' . $user->getId();
-        $tasks = $cache->get($key) ?? new UserTaskCommand(new TaskRepository(), $user, 1)->execute();
+        $tasks = $cache->get($key) ?? new UserTaskCommand(new TaskRepository(DB::getEntityManager()), $user, 1)->execute();
         $cache->set($key, $tasks, 10);
 
         return Response::make(new View('tasks.index', compact('tasks')))
@@ -115,7 +116,7 @@ class TaskController
         $description = is_string($data['description']) ? $data['description'] : '';
 
         $task = new Task($user, $title, $description, $start, $end);
-        if (!new StoreTaskCommand(new TaskRepository(), $task)->execute()) {
+        if (!new StoreTaskCommand(new TaskRepository(DB::getEntityManager()), $task)->execute()) {
             throw new NotCreateTaskException('Task not created');
         }
 
@@ -134,7 +135,7 @@ class TaskController
         $id = Request::input('id');
         if (!is_numeric($id)) return Response::make(Redirect::to('/tasks'));
 
-        $task = new FindUserTaskCommand(new TaskRepository(), $user, (int)$id)->execute();
+        $task = new FindUserTaskCommand(new TaskRepository(DB::getEntityManager()), $user, (int)$id)->execute();
         if (!$task) return Response::make(Redirect::to('/tasks'));
 
         return Response::make(new View('tasks.edit', ['task' => $task, 'errors' => Session::error()]))
@@ -174,7 +175,7 @@ class TaskController
 
         if (!$start || !$end) throw new NotCreateTaskException('Invalid datetime format');
 
-        $task = new FindUserTaskCommand(new TaskRepository(), $user, (int)$id)->execute();
+        $task = new FindUserTaskCommand(new TaskRepository(DB::getEntityManager()), $user, (int)$id)->execute();
         if (!$task) return Response::make(Redirect::to('/tasks'));
 
         $title = is_string($data['title']) ? $data['title'] : '';
@@ -185,7 +186,7 @@ class TaskController
         $task->setStartTask($start);
         $task->setEndTask($end);
 
-        if (!new UpdateTaskCommand(new TaskRepository(), $user, $task)->execute()) {
+        if (!new UpdateTaskCommand(new TaskRepository(DB::getEntityManager()), $user, $task)->execute()) {
             throw new NotCreateTaskException('Task not updated');
         }
 
@@ -204,10 +205,10 @@ class TaskController
         $id = Request::input('id');
         if (!is_numeric($id)) return Response::make(Redirect::to('/tasks'));
 
-        $task = new FindUserTaskCommand(new TaskRepository(), $user, (int)$id)->execute();
+        $task = new FindUserTaskCommand(new TaskRepository(DB::getEntityManager()), $user, (int)$id)->execute();
         if (!$task) return Response::make(Redirect::to('/tasks'));
 
-        if (!new DeleteTaskCommand(new TaskRepository(), $user, $task)->execute()) {
+        if (!new DeleteTaskCommand(new TaskRepository(DB::getEntityManager()), $user, $task)->execute()) {
             throw new NotDeleteTaskException('Task not deleted');
         }
 

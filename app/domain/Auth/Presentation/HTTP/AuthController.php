@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\domain\Auth\Presentation\HTTP;
 
-use App\domain\Auth\Application\Repositories\UserRepositories;
+use App\domain\Auth\Application\Repositories\UserRepositorie;
 use App\domain\Auth\Application\UseCases\Commands\LoginCommand;
 use App\domain\Auth\Application\UseCases\Commands\LogoutCommand;
 use App\domain\Auth\Application\UseCases\Commands\RegisterCommand;
 use App\domain\Auth\Application\UseCases\Queries\FindUserByEmailQuery;
 use App\domain\Auth\Domain\Exceptions\LogoutException;
 use App\domain\Auth\Services\AuthService;
+use Core\Database\DB;
 use Core\Http\Request;
 use Core\Response\Response;
 use Core\Routing\Redirect;
@@ -73,7 +74,7 @@ class AuthController
                 ->withErrors($validator->errors()));
         }
 
-        $loginCommand = new LoginCommand(new UserRepositories(), $email, $password);
+        $loginCommand = new LoginCommand(new UserRepositorie(DB::getEntityManager()), $email, $password);
 
         if (!empty($loginCommand->execute())) {
             return Response::make(Redirect::to('/profile'));
@@ -118,7 +119,7 @@ class AuthController
         $email = is_string($data['email']) ? $data['email'] : '';
         $password = is_string($data['password']) ? $data['password'] : '';
 
-        $findUserQuery = new FindUserByEmailQuery(new UserRepositories(), $email);
+        $findUserQuery = new FindUserByEmailQuery(new UserRepositorie(DB::getEntityManager()), $email);
         if (!empty($findUserQuery->handle())) {
             return Response::make(
                 Redirect::to('/register')
@@ -126,10 +127,10 @@ class AuthController
                 ->withErrors(['email' => ['Пользователь с таким email уже существует']]));
         }
 
-        $registerCommand = new RegisterCommand(new UserRepositories(), $name, $email, $password);
+        $registerCommand = new RegisterCommand(new UserRepositorie(DB::getEntityManager()), $name, $email, $password);
         $registerCommand->execute();
 
-        $loginCommand = new LoginCommand(new UserRepositories(), $email, $password);
+        $loginCommand = new LoginCommand(new UserRepositorie(DB::getEntityManager()), $email, $password);
 
         if ($loginCommand->execute()) {
             return Response::make(Redirect::to('/profile'));
