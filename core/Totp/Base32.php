@@ -42,7 +42,6 @@ final class Base32
             $output .= self::CHARACTERS[bindec($chunk)];
         }
 
-        // Add padding if necessary
         $padding = strlen($output) % 8;
         if ($padding !== 0) {
             $output .= str_repeat(self::PADDING_CHAR, 8 - $padding);

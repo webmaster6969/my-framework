@@ -8,6 +8,7 @@ use App\domain\Auth\Application\Repositories\UserRepositories;
 use App\domain\Auth\Application\UseCases\Commands\DisableTwoFactoryCommand;
 use App\domain\Auth\Application\UseCases\Commands\EnableTwoFactoryCommand;
 use App\domain\Auth\Application\UseCases\Queries\FindUserQuery;
+use App\domain\Auth\Services\AuthService;
 use Core\Http\Request;
 use Core\Response\Response;
 use Core\Routing\Redirect;
@@ -42,7 +43,6 @@ class TotpController
         $findUserQuery = new FindUserQuery(new UserRepositories(), $userId);
         $user = $findUserQuery->handle();
 
-        $secretKey = '';
         if ($user !== null && !empty($user->getGoogle2faSecret())) {
             $secretKey = $user->getGoogle2faSecret();
         } else {
@@ -96,7 +96,6 @@ class TotpController
 
         $newSecret = Request::input('secret');
         if (!is_string($newSecret) || $newSecret === '') {
-            // Ошибка или редирект, например
             return Response::make(Redirect::to('/two-factory'));
         }
 
@@ -104,7 +103,6 @@ class TotpController
         $user = $findUserQuery->handle();
 
         if ($user === null) {
-            // Пользователь не найден — обработка ошибки
             return Response::make(Redirect::to('/login'));
         }
 
@@ -167,7 +165,7 @@ class TotpController
      */
     public function twoFactoryAuth(): Response
     {
-        $view = new View('two-factory.input');
+        $view = new View('two-factory.input', ['errors' => Session::error()]);
 
         return Response::make($view)->withHeaders([
             'Content-Type' => 'text/html',
@@ -179,16 +177,12 @@ class TotpController
      */
     public function twoFactoryAuthCheck(): Response
     {
-        $userId = Session::get('user_id');
-        $userId = is_int($userId) ? $userId : null;
-
         $secret = Request::input('secret');
         if (!is_string($secret) || $secret === '') {
             return Response::make(Redirect::to('/two-factory-auth'));
         }
 
-        $findUserQuery = new FindUserQuery(new UserRepositories(), $userId);
-        $user = $findUserQuery->handle();
+        $user = AuthService::getUser();
 
         if ($user === null) {
             return Response::make(Redirect::to('/login'));
@@ -201,8 +195,22 @@ class TotpController
             return Response::make(Redirect::to('/two-factory-auth'));
         }
 
-        if (!$totp->verifyCode($userSecret, $secret)) {
-            return Response::make(Redirect::to('/two-factory-auth'));
+        try {
+            if (!$totp->verifyCode($userSecret, $secret)) {
+                return Response::make(
+                    Redirect::to('/two-factory-auth')
+                        ->withErrors([
+                            'secret' => ['Invalid code'],
+                        ])
+                );
+            }
+        } catch (Exception $e) {
+            return Response::make(
+                Redirect::to('/two-factory-auth')
+                    ->withErrors([
+                        'secret' => [$e->getMessage()],
+                    ])
+            );
         }
 
         Session::set('two_factor_auth', true);

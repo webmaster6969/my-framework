@@ -71,7 +71,7 @@ class View
         $template = preg_replace_callback('/@include\s*\(\s*[\'"](.*?)[\'"]\s*\)/', function ($matches) {
             $includedPath = $this->viewsPath . '/' . str_replace('.', '/', $matches[1]) . '.php';
             if (!file_exists($includedPath)) {
-                return ''; // Или можно выбросить исключение
+                return '';
             }
             $included = file_get_contents($includedPath);
             if ($included === false) {

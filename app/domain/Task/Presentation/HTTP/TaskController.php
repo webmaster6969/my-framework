@@ -4,62 +4,56 @@ declare(strict_types=1);
 
 namespace App\domain\Task\Presentation\HTTP;
 
-use App\domain\Auth\Application\Repositories\UserRepositories;
-use App\domain\Auth\Application\UseCases\Queries\FindUserQuery;
+use App\domain\Auth\Services\AuthService;
 use App\domain\Common\Domain\Exceptions\ClearCacheException;
 use App\domain\Task\Application\Repositories\TaskRepository;
-use App\domain\Task\Application\UseCases\Commands\DeleteTaskCommand;
-use App\domain\Task\Application\UseCases\Commands\FindUserTaskCommand;
-use App\domain\Task\Application\UseCases\Commands\StoreTaskCommand;
-use App\domain\Task\Application\UseCases\Commands\UpdateTaskCommand;
-use App\domain\Task\Application\UseCases\Commands\UserTaskCommand;
-use App\domain\Task\Domain\Exceptions\NotCreateTaskException;
-use App\domain\Task\Domain\Exceptions\NotDeleteTaskException;
+use App\domain\Task\Application\UseCases\Commands\{DeleteTaskCommand,
+    FindUserTaskCommand,
+    StoreTaskCommand,
+    UpdateTaskCommand,
+    UserTaskCommand};
+use App\domain\Task\Domain\Exceptions\{NotCreateTaskException, NotDeleteTaskException};
 use App\domain\Task\Domain\Model\Entities\Task;
-use App\domain\Auth\Domain\Model\Entities\User;
-use Core\Cache\Cache;
-use Core\Http\Request;
-use Core\Response\Response;
-use Core\Routing\Redirect;
-use Core\Support\Session\Session;
-use Core\Validator\Validator;
-use Core\View\View;
+use Core\{Cache\Cache,
+    Http\Request,
+    Response\Response,
+    Routing\Redirect,
+    Support\Session\Session,
+    Validator\Validator,
+    View\View};
 use DateTime;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
-use Exception;
-
 
 class TaskController
 {
     /**
-     * @throws Exception
+     * @param string $input
+     * @return DateTime|null
+     */
+    private function parseDate(string $input): ?DateTime
+    {
+        $date = DateTime::createFromFormat('Y-m-d\TH:i:s', $input)
+            ?: DateTime::createFromFormat('Y-m-d\TH:i', $input);
+
+        return $date ?: null;
+    }
+
+    /**
+     * @return Response
      */
     public function index(): Response
     {
-        $userId = Session::get('user_id');
-        if (!is_int($userId)) {
-            return Response::make(Redirect::to('/login'));
-        }
-
-        $user = new FindUserQuery(new UserRepositories(), $userId)->handle();
-        if (!$user instanceof User) {
-            return Response::make(Redirect::to('/login'));
-        }
+        $user = AuthService::getUser();
+        if (!$user) return Response::make(Redirect::to('/login'));
 
         $cache = new Cache();
-        if ($cache->has('tasks_' . $user->getId())) {
-            $tasks = $cache->get('tasks_' . $user->getId());
-        }
+        $key = 'tasks_' . $user->getId();
+        $tasks = $cache->get($key) ?? new UserTaskCommand(new TaskRepository(), $user, 1)->execute();
+        $cache->set($key, $tasks, 10);
 
-        if (empty($tasks)){
-            $tasks = new UserTaskCommand(new TaskRepository(), $user, 1)->execute();
-            $cache->set('tasks_' . $user->getId(), $tasks, 10);
-        }
-
-        return Response::make(new View('tasks.index', ['tasks' => $tasks]))
-            ->withHeaders(['Content-Type' => 'text/html'])
-            ->withStatus(200);
+        return Response::make(new View('tasks.index', compact('tasks')))
+            ->withHeaders(['Content-Type' => 'text/html'])->withStatus(200);
     }
 
     /**
@@ -67,63 +61,35 @@ class TaskController
      */
     public function create(): Response
     {
-        $dataFlash = Session::flash('data');
-        $data = is_array($dataFlash) ? [
-            'title' => $dataFlash['title'] ?? '',
-            'description' => $dataFlash['description'] ?? '',
-            'start_task' => $dataFlash['start_task'] ?? '',
-            'end_task' => $dataFlash['end_task'] ?? '',
-        ] : ['title' => '', 'description' => '', 'start_task' => '', 'end_task' => ''];
+        $data = Session::flash('data');
+        $data = is_array($data) ? $data : [];
+        $defaults = ['title' => '', 'description' => '', 'start_task' => '', 'end_task' => ''];
+        $data = array_merge($defaults, $data);
 
         return Response::make(new View('tasks.create', ['data' => $data, 'errors' => Session::error()]))
-            ->withHeaders(['Content-Type' => 'text/html'])
-            ->withStatus(200);
-    }
-
-    public function clearCache(): void
-    {
-        $userId = Session::get('user_id');
-        if (!is_int($userId) && !is_null($userId)) {
-            $userId = is_numeric($userId) ? (int)$userId : null;
-        }
-
-        $findUserQuery = new FindUserQuery(new UserRepositories(), $userId);
-
-        $user = $findUserQuery->handle();
-
-        if (!$user instanceof User) {
-            throw new ClearCacheException('Clear cache: User not found');
-        }
-
-        $cache = new Cache();
-        $cache->delete('tasks_' . $user->getId());
+            ->withHeaders(['Content-Type' => 'text/html'])->withStatus(200);
     }
 
     /**
-     * @throws OptimisticLockException
-     * @throws ORMException
-     * @throws NotCreateTaskException
+     * @return void
+     */
+    public function clearCache(): void
+    {
+        $user = AuthService::getUser();
+        if (!$user) throw new ClearCacheException('Clear cache: User not found');
+
+        new Cache()->delete('tasks_' . $user->getId());
+    }
+
+    /**
+     * @throws NotCreateTaskException|ORMException|OptimisticLockException
      */
     public function store(): Response
     {
-        $userId = Session::get('user_id');
-        if (!is_int($userId)) return Response::make(Redirect::to('/login'));
+        $user = AuthService::getUser();
+        if (!$user) return Response::make(Redirect::to('/login'));
 
-        $user = new FindUserQuery(new UserRepositories(), $userId)->handle();
-        if (!$user instanceof User) return Response::make(Redirect::to('/login'));
-
-        $titleInput = Request::input('title');
-        $descriptionInput = Request::input('description');
-        $start_task = Request::input('start_task');
-        $end_task = Request::input('end_task');
-
-        $title = is_string($titleInput) ? $titleInput : '';
-        $description = is_string($descriptionInput) ? $descriptionInput : '';
-
-        $start_task = is_string($start_task) ? $start_task : '';
-        $end_task = is_string($end_task) ? $end_task : '';
-
-        $data = compact('title', 'description', 'start_task', 'end_task');
+        $data = Request::only(['title', 'description', 'start_task', 'end_task']);
 
         $validator = new Validator($data, [
             'title' => 'required|min:3|max:255',
@@ -133,89 +99,60 @@ class TaskController
         ]);
 
         if ($validator->fails()) {
-            return Response::make(Redirect::to('/tasks/create')->with('data', $data)->withErrors($validator->errors()));
+            return Response::make(
+                Redirect::to('/tasks/create')
+                    ->with('data', $data)
+                    ->withErrors($validator->errors())
+            );
         }
 
-        $startDate = DateTime::createFromFormat('Y-m-d\TH:i:s', $start_task);
-        if (!$startDate) {
-            $startDate = DateTime::createFromFormat('Y-m-d\TH:i', $start_task);
-        }
+        $start = isset($data['start_task']) && is_string($data['start_task']) ? $this->parseDate($data['start_task']) : null;
+        $end = isset($data['end_task']) && is_string($data['end_task']) ? $this->parseDate($data['end_task']) : null;
 
-        $endDate = DateTime::createFromFormat('Y-m-d\TH:i:s', $end_task);
-        if (!$endDate) {
-            $endDate = DateTime::createFromFormat('Y-m-d\TH:i', $end_task);
-        }
+        if (!$start || !$end) throw new NotCreateTaskException('Invalid datetime format');
 
-        if (!$startDate || !$endDate) {
-            throw new NotCreateTaskException('Invalid datetime format.');
-        }
+        $title = is_string($data['title']) ? $data['title'] : '';
+        $description = is_string($data['description']) ? $data['description'] : '';
 
-        $task = new Task($user, $title, $description, $startDate, $endDate);
+        $task = new Task($user, $title, $description, $start, $end);
         if (!new StoreTaskCommand(new TaskRepository(), $task)->execute()) {
             throw new NotCreateTaskException('Task not created');
         }
 
         $this->clearCache();
-
         return Response::make(Redirect::to('/tasks'));
     }
 
     /**
-     * @throws Exception
+     * @return Response
      */
     public function edit(): Response
     {
-        $task_id = Request::input('id');
-        if (!is_numeric($task_id)) return Response::make(Redirect::to('/tasks'));
+        $user = AuthService::getUser();
+        if (!$user) return Response::make(Redirect::to('/login'));
 
-        $userId = Session::get('user_id');
-        if (!is_int($userId)) return Response::make(Redirect::to('/login'));
+        $id = Request::input('id');
+        if (!is_numeric($id)) return Response::make(Redirect::to('/tasks'));
 
-        $user = new FindUserQuery(new UserRepositories(), $userId)->handle();
-        if (!$user instanceof User) return Response::make(Redirect::to('/login'));
-
-        $task = new FindUserTaskCommand(new TaskRepository(), $user, (int)$task_id)->execute();
-
+        $task = new FindUserTaskCommand(new TaskRepository(), $user, (int)$id)->execute();
         if (!$task) return Response::make(Redirect::to('/tasks'));
 
         return Response::make(new View('tasks.edit', ['task' => $task, 'errors' => Session::error()]))
-            ->withHeaders(['Content-Type' => 'text/html'])
-            ->withStatus(200);
+            ->withHeaders(['Content-Type' => 'text/html'])->withStatus(200);
     }
 
     /**
-     * @throws ORMException
-     * @throws OptimisticLockException
-     * @throws NotCreateTaskException
+     * @throws NotCreateTaskException|ORMException|OptimisticLockException
      */
     public function update(): Response
     {
-        $userId = Session::get('user_id');
-        if (!is_int($userId)) return Response::make(Redirect::to('/login'));
+        $user = AuthService::getUser();
+        if (!$user) return Response::make(Redirect::to('/login'));
 
-        $user = new FindUserQuery(new UserRepositories(), $userId)->handle();
-        if (!$user instanceof User) return Response::make(Redirect::to('/login'));
+        $id = Request::input('id');
+        if (!is_numeric($id)) return Response::make(Redirect::to('/tasks'));
 
-        $task_id = Request::input('id');
-        if (!is_numeric($task_id)) return Response::make(Redirect::to('/tasks'));
-
-        $titleInput = Request::input('title');
-        $descriptionInput = Request::input('description');
-        $start_task = Request::input('start_task');
-        $end_task = Request::input('end_task');
-
-        $title = is_string($titleInput) ? $titleInput : '';
-        $description = is_string($descriptionInput) ? $descriptionInput : '';
-
-        $start_task = is_string($start_task) ? $start_task : '';
-        $end_task = is_string($end_task) ? $end_task : '';
-
-        $data = [
-            'title' => $title,
-            'description' => $description,
-            'start_task' => $start_task,
-            'end_task' => $end_task,
-        ];
+        $data = Request::only(['title', 'description', 'start_task', 'end_task']);
 
         $validator = new Validator($data, [
             'title' => 'required|min:3|max:255',
@@ -225,59 +162,49 @@ class TaskController
         ]);
 
         if ($validator->fails()) {
-            return Response::make(Redirect::to('/tasks/edit/?id=' . (int)$task_id)
-                ->with('data', $data)
-                ->withErrors($validator->errors()));
+            return Response::make(
+                Redirect::to("/tasks/edit/?id=$id")
+                    ->with('data', $data)
+                    ->withErrors($validator->errors())
+            );
         }
 
-        $startDate = DateTime::createFromFormat('Y-m-d\TH:i:s', $start_task);
-        if (!$startDate) {
-            $startDate = DateTime::createFromFormat('Y-m-d\TH:i', $start_task);
-        }
+        $start = isset($data['start_task']) && is_string($data['start_task']) ? $this->parseDate($data['start_task']) : null;
+        $end = isset($data['end_task']) && is_string($data['end_task']) ? $this->parseDate($data['end_task']) : null;
 
-        $endDate = DateTime::createFromFormat('Y-m-d\TH:i:s', $end_task);
-        if (!$endDate) {
-            $endDate = DateTime::createFromFormat('Y-m-d\TH:i', $end_task);
-        }
+        if (!$start || !$end) throw new NotCreateTaskException('Invalid datetime format');
 
-        if (!$startDate || !$endDate) {
-            throw new NotCreateTaskException('Invalid datetime format.');
-        }
-
-        $task = new FindUserTaskCommand(new TaskRepository(), $user, (int)$task_id)->execute();
+        $task = new FindUserTaskCommand(new TaskRepository(), $user, (int)$id)->execute();
         if (!$task) return Response::make(Redirect::to('/tasks'));
 
-        $task->setTitle($data['title']);
-        $task->setDescription($data['description']);
-        $task->setStartTask($startDate);
-        $task->setEndTask($endDate);
+        $title = is_string($data['title']) ? $data['title'] : '';
+        $description = is_string($data['description']) ? $data['description'] : '';
+
+        $task->setTitle($title);
+        $task->setDescription($description);
+        $task->setStartTask($start);
+        $task->setEndTask($end);
 
         if (!new UpdateTaskCommand(new TaskRepository(), $user, $task)->execute()) {
             throw new NotCreateTaskException('Task not updated');
         }
 
         $this->clearCache();
-
         return Response::make(Redirect::to('/tasks'));
     }
 
     /**
-     * @throws ORMException
-     * @throws OptimisticLockException
-     * @throws NotDeleteTaskException
+     * @throws NotDeleteTaskException|ORMException|OptimisticLockException
      */
     public function delete(): Response
     {
-        $userId = Session::get('user_id');
-        if (!is_int($userId)) return Response::make(Redirect::to('/login'));
+        $user = AuthService::getUser();
+        if (!$user) return Response::make(Redirect::to('/login'));
 
-        $user = new FindUserQuery(new UserRepositories(), $userId)->handle();
-        if (!$user instanceof User) return Response::make(Redirect::to('/login'));
+        $id = Request::input('id');
+        if (!is_numeric($id)) return Response::make(Redirect::to('/tasks'));
 
-        $task_id = Request::input('id');
-        if (!is_numeric($task_id)) return Response::make(Redirect::to('/tasks'));
-
-        $task = new FindUserTaskCommand(new TaskRepository(), $user, (int)$task_id)->execute();
+        $task = new FindUserTaskCommand(new TaskRepository(), $user, (int)$id)->execute();
         if (!$task) return Response::make(Redirect::to('/tasks'));
 
         if (!new DeleteTaskCommand(new TaskRepository(), $user, $task)->execute()) {
@@ -285,7 +212,6 @@ class TaskController
         }
 
         $this->clearCache();
-
         return Response::make(Redirect::to('/tasks'));
     }
 }

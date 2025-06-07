@@ -2,6 +2,7 @@
 
 use Core\Support\Csrf\Csrf;
 
+/** @var array<string, mixed> $errors */
 $errors = is_array($errors ?? null) ? $errors : [];
 
 $token = Csrf::token();
@@ -43,34 +44,32 @@ $token = Csrf::token();
 
                                 <div class="form-group">
                                     <label for="title">Title</label>
-                                    <input type="text" name="title" value="{{ $task->getTitle() }}" class="form-control" id="title" placeholder="Enter title">
-                                    <?php if (!empty($errors['title']) && is_array($errors['title'])): ?>
-                                        <span class="text-danger"><?php echo implode(', ', $errors['title']); ?></span>
-                                    <?php endif; ?>
+                                    <input type="text" name="title" value="{{ $task->getTitle() }}" class="form-control"
+                                           id="title" placeholder="Enter title">
+                                    <?php showErrors('title', $errors); ?>
                                 </div>
 
                                 <div class="form-group">
                                     <label for="description">Description</label>
-                                    <input type="text" name="description" value="{{ $task->getDescription() }}" class="form-control" id="description" placeholder="Enter description">
-                                    <?php if (!empty($errors['description']) && is_array($errors['description'])): ?>
-                                        <span class="text-danger"><?php echo implode(', ', $errors['description']); ?></span>
-                                    <?php endif; ?>
+                                    <input type="text" name="description" value="{{ $task->getDescription() }}"
+                                           class="form-control" id="description" placeholder="Enter description">
+                                    <?php showErrors('description', $errors); ?>
                                 </div>
 
                                 <div class="form-group">
                                     <label for="start_task">Start task</label>
-                                    <input type="datetime-local" step="1" name="start_task" value="{{ $task->getStartTask()->format('Y-m-d\TH:i:s') }}" class="form-control" id="start_task" placeholder="Enter start task">
-                                    <?php if (!empty($errors['start_task']) && is_array($errors['start_task'])): ?>
-                                        <span class="text-danger"><?php echo implode(', ', $errors['start_task']); ?></span>
-                                    <?php endif; ?>
+                                    <input type="datetime-local" step="1" name="start_task"
+                                           value="{{ $task->getStartTask()->format('Y-m-d\TH:i:s') }}"
+                                           class="form-control" id="start_task" placeholder="Enter start task">
+                                    <?php showErrors('start_task', $errors); ?>
                                 </div>
 
                                 <div class="form-group">
                                     <label for="end_task">End task</label>
-                                    <input type="datetime-local" step="1" name="end_task" value="{{ $task->getEndTask()->format('Y-m-d\TH:i:s') }}" class="form-control" id="end_task" placeholder="Enter end task">
-                                    <?php if (!empty($errors['end_task']) && is_array($errors['end_task'])): ?>
-                                        <span class="text-danger"><?php echo implode(', ', $errors['end_task']); ?></span>
-                                    <?php endif; ?>
+                                    <input type="datetime-local" step="1" name="end_task"
+                                           value="{{ $task->getEndTask()->format('Y-m-d\TH:i:s') }}"
+                                           class="form-control" id="end_task" placeholder="Enter end task">
+                                    <?php showErrors('end_task', $errors); ?>
                                 </div>
                             </div>
 

@@ -8,15 +8,15 @@ use App\domain\Auth\Application\Repositories\UserRepositories;
 use App\domain\Auth\Domain\Model\Entities\User;
 use App\domain\Common\Domain\QueryInterface;
 
-class FindUserQuery implements QueryInterface
+class FindUserByEmailQuery implements QueryInterface
 {
     /**
      * @param UserRepositories $userRepositories
-     * @param int|null $userIid
+     * @param string $email
      */
     public function __construct(
         private readonly UserRepositories $userRepositories,
-        private readonly ?int             $userIid
+        private readonly string           $email
     )
     {
     }
@@ -26,10 +26,6 @@ class FindUserQuery implements QueryInterface
      */
     public function handle(): ?User
     {
-        if (empty($this->userIid)) {
-            return null;
-        }
-
-        return $this->userRepositories->findById($this->userIid);
+        return $this->userRepositories->findByEmail($this->email);
     }
 }

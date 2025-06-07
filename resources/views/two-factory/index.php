@@ -4,7 +4,6 @@ use Core\Support\Csrf\Csrf;
 
 $token = Csrf::token();
 
-// Убедимся, что переменные определены
 $image = $image ?? '';
 $secret = $secret ?? '';
 $newSecretKey = $newSecretKey ?? false;
@@ -15,9 +14,7 @@ $newSecretKey = $newSecretKey ?? false;
 @include('partials.navbar')
 @include('partials.sidebar')
 
-<!-- Content Wrapper. Contains page content -->
 <section class="content-wrapper">
-    <!-- Content Header (Page header) -->
     <section class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
@@ -31,7 +28,7 @@ $newSecretKey = $newSecretKey ?? false;
                     </ol>
                 </div>
             </div>
-        </div><!-- /.container-fluid -->
+        </div>
     </section>
 
     <section class="content">

@@ -59,7 +59,7 @@ abstract class AbstractTotp
      */
     protected function getCurrentTimeSlice(): int
     {
-        return (int) floor(time() / $this->period);
+        return (int)floor(time() / $this->period);
     }
 
     /**
@@ -82,7 +82,6 @@ abstract class AbstractTotp
      */
     protected function extractCodeFromHash(string $hash, int $offset): int
     {
-        // Extract the hash values
         $hash1 = ord($hash[$offset]) & 0x7f;
         $hash2 = ord($hash[$offset + 1]) & 0xff;
         $hash3 = ord($hash[$offset + 2]) & 0xff;

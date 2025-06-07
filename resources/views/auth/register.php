@@ -1,12 +1,11 @@
 <?php
 
-$token = \Core\Support\Csrf\Csrf::token();
+use Core\Support\Csrf\Csrf;
 
-// Гарантируем тип массива для $errors
+$token = Csrf::token();
+$data = (isset($data) && is_array($data)) ? array_filter($data, fn($k) => is_string($k), ARRAY_FILTER_USE_KEY) : [];
+/** @var array<string, mixed> $errors */
 $errors = isset($errors) && is_array($errors) ? $errors : [];
-$nameErrors = isset($errors['name']) ? (array) $errors['name'] : [];
-$emailErrors = isset($errors['email']) ? (array) $errors['email'] : [];
-$passwordErrors = isset($errors['password']) ? (array) $errors['password'] : [];
 
 ?>
 
@@ -15,36 +14,34 @@ $passwordErrors = isset($errors['password']) ? (array) $errors['password'] : [];
 <div class="register-page">
     <div class="card register-box">
         <div class="card-body register-card-body">
-            <p class="login-box-msg">Register a new membership</p>
+            <p class="login-box-msg">Register</p>
 
             <form action="/register" method="post">
                 <input type="hidden" name="csrf_token" value="<?php echo $token; ?>">
 
-                <div class="input-group mb-3">
-                    <input type="text" name="name" class="form-control" placeholder="Full name">
+                <div class="input-group">
+                    <input type="text" name="name" value="<?php echo old('name', $data); ?>" class="form-control"
+                           placeholder="Full name">
                     <div class="input-group-append">
                         <div class="input-group-text">
                             <span class="fas fa-user"></span>
                         </div>
                     </div>
                 </div>
-                <?php if (!empty($nameErrors)): ?>
-                    <div class="text-danger mb-2"><?php echo implode(', ', $nameErrors); ?></div>
-                <?php endif; ?>
+                <?php showErrors('name', $errors); ?>
 
-                <div class="input-group mb-3">
-                    <input type="email" name="email" class="form-control" placeholder="Email">
+                <div class="input-group mt-3">
+                    <input type="email" name="email" value="<?php echo old('email', $data); ?>" class="form-control"
+                           placeholder="Email">
                     <div class="input-group-append">
                         <div class="input-group-text">
                             <span class="fas fa-envelope"></span>
                         </div>
                     </div>
                 </div>
-                <?php if (!empty($emailErrors)): ?>
-                    <div class="text-danger mb-2"><?php echo implode(', ', $emailErrors); ?></div>
-                <?php endif; ?>
+                <?php showErrors('email', $errors); ?>
 
-                <div class="input-group mb-3">
+                <div class="input-group mt-3 mb-3">
                     <input type="password" name="password" class="form-control" placeholder="Password">
                     <div class="input-group-append">
                         <div class="input-group-text">
@@ -52,9 +49,7 @@ $passwordErrors = isset($errors['password']) ? (array) $errors['password'] : [];
                         </div>
                     </div>
                 </div>
-                <?php if (!empty($passwordErrors)): ?>
-                    <div class="text-danger mb-2"><?php echo implode(', ', $passwordErrors); ?></div>
-                <?php endif; ?>
+                <?php showErrors('password', $errors); ?>
 
                 <div class="col-4">
                     <button type="submit" class="btn btn-primary btn-block">Register</button>

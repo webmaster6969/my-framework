@@ -113,4 +113,16 @@ class Request
     {
         return static::instance()->body;
     }
+
+    /**
+     * @param array<int, string> $keys
+     * @return array<string, mixed>
+     */
+    public static function only(array $keys): array
+    {
+        $request = static::instance();
+        return array_filter($request->all(), function ($value, $key) use ($keys) {
+            return in_array($key, $keys, true);
+        }, ARRAY_FILTER_USE_BOTH);
+    }
 }

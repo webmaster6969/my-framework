@@ -35,13 +35,12 @@ class File implements IFile
 
         $file = $_FILES[$key];
 
-        // Валидация ключей и типов
         if (
             !isset($file['name'], $file['tmp_name'], $file['type'], $file['size']) ||
             !is_string($file['name']) ||
             !is_string($file['tmp_name']) ||
             !is_string($file['type']) ||
-            !is_int($file['size']) // Важно: иногда приходит string, проверка может быть строже
+            !is_int($file['size'])
         ) {
             return null;
         }
@@ -86,7 +85,6 @@ class File implements IFile
             $size         = $files['size'][$i] ?? null;
             $error        = $files['error'][$i] ?? null;
 
-            // Проверка типов
             if (
                 !is_string($originalName) ||
                 !is_string($tmpName) ||
@@ -130,7 +128,7 @@ class File implements IFile
     public function move(string $destinationPath): bool
     {
         if (rename($this->tmpPath, $destinationPath)) {
-            $this->tmpPath = $destinationPath; // обновляем путь
+            $this->tmpPath = $destinationPath;
             return true;
         }
         return false;

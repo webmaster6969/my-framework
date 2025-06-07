@@ -37,7 +37,6 @@ new Crypt($encryptionKey);
 
 ExceptionHandler::register();
 
-// Create a simple "default" Doctrine ORM configuration for Attributes
 $config = ORMSetup::createAttributeMetadataConfiguration(
     paths: [
         __DIR__ . '/../app/domain/Auth/Domain/Model/Entities',
@@ -47,7 +46,6 @@ $config = ORMSetup::createAttributeMetadataConfiguration(
     isDevMode: true,
 );
 
-// Получаем переменные окружения с проверками и преобразованием типов
 $dbHost = Env::get('DB_HOST');
 if (!is_string($dbHost)) {
     throw new \RuntimeException('DB_HOST environment variable is not set or not a string');
@@ -77,10 +75,9 @@ $dbPort = Env::get('DB_PORT');
 if (!is_string($dbPort) && !is_int($dbPort)) {
     throw new \RuntimeException('DB_PORT environment variable is not set or not a string/int');
 }
-// Приводим порт к int, если строка
+
 $dbPort = is_string($dbPort) ? (int)$dbPort : $dbPort;
 
-// configuring the database connection
 $connection = DriverManager::getConnection([
     'driver' => 'pdo_mysql',
     'host' => $dbHost,
@@ -91,7 +88,6 @@ $connection = DriverManager::getConnection([
     'port' => $dbPort,
 ], $config);
 
-// obtaining the entity manager
 $entityManager = new EntityManager($connection, $config);
 DB::setEntityManager($entityManager);
 

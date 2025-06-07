@@ -6,6 +6,7 @@ namespace Core\Support\Exception;
 
 use Core\Logger\Logger;
 use ErrorException;
+use Throwable;
 
 class ExceptionHandler
 {
@@ -19,10 +20,10 @@ class ExceptionHandler
     }
 
     /**
-     * @param \Throwable $e
+     * @param Throwable $e
      * @return void
      */
-    public static function handleException(\Throwable $e): void
+    public static function handleException(Throwable $e): void
     {
         http_response_code(500);
 

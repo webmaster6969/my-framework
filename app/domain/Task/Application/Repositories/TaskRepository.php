@@ -8,6 +8,7 @@ use App\domain\Auth\Domain\Model\Entities\User;
 use App\domain\Task\Domain\Model\Entities\Task;
 use App\domain\Task\Domain\Repositories\TaskRepositoryInterface;
 use Core\Database\DB;
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
@@ -15,13 +16,10 @@ use Doctrine\ORM\OptimisticLockException;
 class TaskRepository implements TaskRepositoryInterface
 {
     /**
-     * @var EntityManagerInterface|\Doctrine\ORM\EntityManager|null
+     * @var EntityManager|EntityManagerInterface|null
      */
-    private ?EntityManagerInterface $em;
+    private EntityManagerInterface|EntityManager|null $em;
 
-    /**
-     *
-     */
     public function __construct()
     {
         $this->em = DB::getEntityManager();

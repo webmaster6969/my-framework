@@ -8,8 +8,9 @@ use App\domain\Auth\Application\Repositories\UserRepositories;
 use App\domain\Auth\Application\UseCases\Commands\LoginCommand;
 use App\domain\Auth\Application\UseCases\Commands\LogoutCommand;
 use App\domain\Auth\Application\UseCases\Commands\RegisterCommand;
-use App\domain\Auth\Application\UseCases\Queries\FindUserQuery;
+use App\domain\Auth\Application\UseCases\Queries\FindUserByEmailQuery;
 use App\domain\Auth\Domain\Exceptions\LogoutException;
+use App\domain\Auth\Services\AuthService;
 use Core\Http\Request;
 use Core\Response\Response;
 use Core\Routing\Redirect;
@@ -28,19 +29,22 @@ class AuthController
      */
     public function index(): Response
     {
-        $userId = Session::get('user_id');
-        if (!is_int($userId) && !is_null($userId)) {
-            // Попытка привести к int, если возможно
-            $userId = is_numeric($userId) ? (int)$userId : null;
-        }
+        $user = AuthService::getUser();
 
-        $user = new FindUserQuery(new UserRepositories(), $userId);
-
-        if (!empty($user->handle())) {
+        if (!empty($user)) {
             return Response::make(Redirect::to('/profile'));
         }
 
-        $view = new View('auth.login');
+        $data = Session::flash('data');
+        $data = is_array($data) ? $data : [];
+        $defaults = ['email' => '',];
+        $data = array_merge($defaults, $data);
+
+        $view = new View('auth.login', [
+                'data' => $data,
+                'errors' => Session::error()
+            ]
+        );
 
         return Response::make($view)->withHeaders([
             'Content-Type' => 'text/html',
@@ -52,12 +56,22 @@ class AuthController
      */
     public function login(): Response
     {
-        $email = Request::input('email');
-        $password = Request::input('password');
+        $data = Request::only(['email', 'password']);
 
-        // Приведение к строкам или установка пустой строки, если null
-        $email = is_string($email) ? $email : '';
-        $password = is_string($password) ? $password : '';
+        $email = is_string($data['email']) ? $data['email'] : '';
+        $password = is_string($data['password']) ? $data['password'] : '';
+
+        $validator = new Validator($data, [
+            'email' => 'required|min:4|max:150',
+            'password' => 'required|min:4|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return Response::make(
+                Redirect::to('/login')
+                ->with('data', $data)
+                ->withErrors($validator->errors()));
+        }
 
         $loginCommand = new LoginCommand(new UserRepositories(), $email, $password);
 
@@ -65,7 +79,16 @@ class AuthController
             return Response::make(Redirect::to('/profile'));
         }
 
-        return Response::make(Redirect::to('/login'));
+        return Response::make(
+            Redirect::to('/login')
+                ->with('data', $data)
+                ->withErrors(
+                    [
+                        'email' => ['Введенные данные неверны'],
+                        'password' => ['Введенные данные неверны'],
+                    ]
+                )
+        );
     }
 
     /**
@@ -75,20 +98,7 @@ class AuthController
      */
     public function register(): Response
     {
-        $name = Request::input('name');
-        $email = Request::input('email');
-        $password = Request::input('password');
-
-        // Приведение к строкам или установка пустой строки, если null
-        $name = is_string($name) ? $name : '';
-        $email = is_string($email) ? $email : '';
-        $password = is_string($password) ? $password : '';
-
-        $data = [
-            'name' => $name,
-            'email' => $email,
-            'password' => $password,
-        ];
+        $data = Request::only(['name', 'email', 'password']);
 
         $rules = [
             'name' => 'required|min:3|max:150',
@@ -98,9 +108,22 @@ class AuthController
 
         $validator = new Validator($data, $rules);
         if ($validator->fails()) {
-            return Response::make(Redirect::to('/register')
+            return Response::make(
+                Redirect::to('/register')
                 ->with('data', $data)
                 ->withErrors($validator->errors()));
+        }
+
+        $name = is_string($data['name']) ? $data['name'] : '';
+        $email = is_string($data['email']) ? $data['email'] : '';
+        $password = is_string($data['password']) ? $data['password'] : '';
+
+        $findUserQuery = new FindUserByEmailQuery(new UserRepositories(), $email);
+        if (!empty($findUserQuery->handle())) {
+            return Response::make(
+                Redirect::to('/register')
+                ->with('data', $data)
+                ->withErrors(['email' => ['Пользователь с таким email уже существует']]));
         }
 
         $registerCommand = new RegisterCommand(new UserRepositories(), $name, $email, $password);
@@ -112,7 +135,16 @@ class AuthController
             return Response::make(Redirect::to('/profile'));
         }
 
-        return Response::make(Redirect::to('/login'));
+        return Response::make(
+            Redirect::to('/login')
+                ->with('data', $data)
+                ->withErrors(
+                    [
+                        'email' => ['Введенные данные неверны'],
+                        'password' => ['Введенные данные неверны'],
+                    ]
+                )
+        );
     }
 
     /**
@@ -120,7 +152,12 @@ class AuthController
      */
     public function registerForm(): Response
     {
-        $view = new View('auth.register', ['errors' => Session::error()]);
+        $data = Session::flash('data');
+        $data = is_array($data) ? $data : [];
+        $defaults = ['title' => '', 'description' => '', 'start_task' => '', 'end_task' => ''];
+        $data = array_merge($defaults, $data);
+
+        $view = new View('auth.register', ['data' => $data, 'errors' => Session::error()]);
 
         return Response::make($view)->withHeaders([
             'Content-Type' => 'text/html',

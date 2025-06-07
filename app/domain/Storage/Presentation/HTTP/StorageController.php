@@ -46,7 +46,8 @@ class StorageController
         $validator = new Validator($data, $rules);
 
         if ($validator->fails()) {
-            return Response::make(Redirect::to('/storage')
+            return Response::make(
+                Redirect::to('/storage')
                 ->with('data', $data)
                 ->withErrors($validator->errors()));
         }

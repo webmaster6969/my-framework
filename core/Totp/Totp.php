@@ -75,8 +75,8 @@ final class Totp extends AbstractTotp implements TotpInterface
     /**
      * Generates a secret key for TOTP.
      *
-     * @throws Exception If an error occurs generating the secret key.
      * @return string The generated secret key in Base32 format.
+     * @throws Exception If an error occurs generating the secret key.
      */
     public function generateSecret(): string
     {
@@ -88,8 +88,8 @@ final class Totp extends AbstractTotp implements TotpInterface
      *
      * @param string $secret The secret key in Base32 format.
      * @param int|null $timeSlice The time slice to generate the code for. Defaults to the current time slice.
-     * @throws TotpException If the secret key is invalid.
      * @return string The generated TOTP code.
+     * @throws TotpException If the secret key is invalid.
      */
     public function getCode(string $secret, ?int $timeSlice = null): string
     {
@@ -104,7 +104,7 @@ final class Totp extends AbstractTotp implements TotpInterface
 
         $code = $this->extractCodeFromHash($hash, $offset);
 
-        return str_pad((string) $code, $this->digits, '0', STR_PAD_LEFT);
+        return str_pad((string)$code, $this->digits, '0', STR_PAD_LEFT);
     }
 
     /**
@@ -114,8 +114,8 @@ final class Totp extends AbstractTotp implements TotpInterface
      * @param string $code The code to verify.
      * @param int $discrepancy The allowed discrepancy in the code. Defaults to 1.
      * @param int|null $timeSlice The time slice to verify the code for. Defaults to the current time slice.
-     * @throws TotpException If the secret key is invalid.
      * @return bool True if the code is valid, false otherwise.
+     * @throws TotpException If the secret key is invalid.
      */
     public function verifyCode(string $secret, string $code, int $discrepancy = 1, ?int $timeSlice = null): bool
     {
@@ -139,8 +139,8 @@ final class Totp extends AbstractTotp implements TotpInterface
      * @param string $secret The secret key in Base32 format.
      * @param string $label The label for the account (e.g., user@example.com).
      * @param string $issuer The issuer of the TOTP (e.g., the service name).
-     * @throws TotpException If the secret key is invalid.
      * @return string The TOTP URI in the format `otpauth://totp/{label}?secret={secret}&issuer={issuer}&algorithm={algorithm}&digits={digits}&period={period}`.
+     * @throws TotpException If the secret key is invalid.
      */
     public function generateUri(string $secret, string $label, string $issuer): string
     {

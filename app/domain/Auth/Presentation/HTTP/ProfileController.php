@@ -6,7 +6,7 @@ namespace App\domain\Auth\Presentation\HTTP;
 
 use App\domain\Auth\Application\Repositories\UserRepositories;
 use App\domain\Auth\Application\UseCases\Commands\UpdateUserCommand;
-use App\domain\Auth\Application\UseCases\Queries\FindUserQuery;
+use App\domain\Auth\Services\AuthService;
 use Core\Http\Request;
 use Core\Response\Response;
 use Core\Routing\Redirect;
@@ -24,13 +24,7 @@ class ProfileController
      */
     public function index(): Response
     {
-        $userId = Session::get('user_id');
-        if (!is_int($userId)) {
-            // если в сессии нет корректного id — редирект на логин
-            return Response::make(Redirect::to('/login'));
-        }
-
-        $user = new FindUserQuery(new UserRepositories(), $userId)->handle();
+        $user = AuthService::getUser();
 
         if ($user === null) {
             return Response::make(Redirect::to('/login'));
@@ -49,11 +43,6 @@ class ProfileController
      */
     public function update(): Response
     {
-        $userId = Session::get('user_id');
-        if (!is_int($userId)) {
-            return Response::make(Redirect::to('/login'));
-        }
-
         $name = Request::input('name');
 
         $data = ['name' => $name];
@@ -61,24 +50,23 @@ class ProfileController
 
         $validator = new Validator($data, $rules);
         if ($validator->fails()) {
-            Redirect::to('/profile')
-                ->with('data', $data)
-                ->withErrors($validator->errors())
-                ->send();
+            return Response::make(
+                Redirect::to('/profile')
+                    ->with('data', $data)
+                    ->withErrors($validator->errors())
+            );
         }
 
-        $user = new FindUserQuery(new UserRepositories(), $userId)->handle();
+        $user = AuthService::getUser();
 
-        if ($user === null) {
+        if ($user === null || !is_string($name)) {
             return Response::make(Redirect::to('/login'));
         }
 
-        if (!is_string($name)) {
-            return Response::make(Redirect::to('/profile'));
-        }
-
         $user->setName($name);
-        $user = new UpdateUserCommand(new UserRepositories(), $user)->execute();
+
+        $command = new UpdateUserCommand(new UserRepositories(), $user);
+        $command->execute();
 
         return Response::make(Redirect::to('/profile'));
     }

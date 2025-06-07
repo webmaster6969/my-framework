@@ -11,7 +11,7 @@ class Crypt
     /**
      * @var string
      */
-    protected static string $ENCRYPTION_KEY = 'your-32-byte-secret-key-goes-here-123!'; // длина должна быть 32 байта
+    protected static string $ENCRYPTION_KEY = 'your-32-byte-secret-key-goes-here-123!';
     /**
      * @var string
      */
@@ -40,8 +40,8 @@ class Crypt
      */
     public static function encrypt(string $data): string
     {
-        $key = hash('sha256', static::$ENCRYPTION_KEY, true); // 32 байта
-        $iv = openssl_random_pseudo_bytes(16); // 16 байт для AES-256-CBC
+        $key = hash('sha256', static::$ENCRYPTION_KEY, true);
+        $iv = openssl_random_pseudo_bytes(16);
 
         $cipherText = openssl_encrypt($data, static::$ENCRYPTION_METHOD, $key, OPENSSL_RAW_DATA, $iv);
 
@@ -49,7 +49,6 @@ class Crypt
             throw new RuntimeException('Encryption failed.');
         }
 
-        // Возвращаем base64 строку, содержащую IV + зашифрованный текст
         return base64_encode($iv . $cipherText);
     }
 

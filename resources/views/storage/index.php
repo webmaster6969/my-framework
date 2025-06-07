@@ -4,9 +4,8 @@ use Core\Support\Csrf\Csrf;
 
 $token = Csrf::token();
 
-// Гарантируем, что $errors — массив и $errors['file'] — массив или пустой
 $errors = isset($errors) && is_array($errors) ? $errors : [];
-$fileErrors = isset($errors['file']) ? (array) $errors['file'] : [];
+$fileErrors = isset($errors['file']) ? (array)$errors['file'] : [];
 
 ?>
 
@@ -28,7 +27,7 @@ $fileErrors = isset($errors['file']) ? (array) $errors['file'] : [];
                     </ol>
                 </div>
             </div>
-        </div><!-- /.container-fluid -->
+        </div>
     </section>
 
     <section class="content">

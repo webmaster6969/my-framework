@@ -4,9 +4,8 @@ use Core\Support\Csrf\Csrf;
 
 $token = Csrf::token();
 
-// Гарантируем, что $errors — массив
+/** @var array<string, mixed> $errors */
 $errors = isset($errors) && is_array($errors) ? $errors : [];
-$nameErrors = isset($errors['name']) ? (array) $errors['name'] : [];
 
 ?>
 
@@ -36,7 +35,6 @@ $nameErrors = isset($errors['name']) ? (array) $errors['name'] : [];
             <div class="row">
                 <div class="col-md-4">
 
-                    <!-- Profile Image -->
                     <div class="card card-primary card-outline">
                         <div class="card-body box-profile">
                             <div class="text-center">
@@ -77,11 +75,7 @@ $nameErrors = isset($errors['name']) ? (array) $errors['name'] : [];
                                                        placeholder="Name">
                                             </div>
 
-                                            <?php if (!empty($nameErrors)): ?>
-                                                <div class="offset-sm-2 col-sm-10">
-                                                    <span class="text-danger"><?php echo implode(', ', $nameErrors); ?></span>
-                                                </div>
-                                            <?php endif; ?>
+                                            <?php showErrors('name', $errors); ?>
                                         </div>
 
                                         <div class="form-group row">
@@ -94,8 +88,8 @@ $nameErrors = isset($errors['name']) ? (array) $errors['name'] : [];
                             </div>
                         </div>
                     </div>
-                </div> <!-- /.col -->
-            </div> <!-- /.row -->
+                </div>
+            </div>
         </div>
     </section>
 </div>

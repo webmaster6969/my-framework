@@ -39,7 +39,7 @@ class Validator
         $this->errors = [];
 
         foreach ($this->rules as $field => $rules) {
-            $rules = is_array($rules) ? $rules : explode('|', (string) $rules);
+            $rules = is_array($rules) ? $rules : explode('|', (string)$rules);
             $value = $this->data[$field] ?? null;
 
             foreach ($rules as $rule) {
@@ -72,13 +72,13 @@ class Validator
     protected function addError(string $field, string $rule, array $params = []): void
     {
         $messages = [
-            'required'    => 'Поле :field обязательно для заполнения.',
-            'email'       => 'Поле :field должно быть валидным email адресом.',
-            'min'         => 'Поле :field должно содержать минимум :param символов.',
-            'max'         => 'Поле :field должно содержать максимум :param символов.',
+            'required' => 'Поле :field обязательно для заполнения.',
+            'email' => 'Поле :field должно быть валидным email адресом.',
+            'min' => 'Поле :field должно содержать минимум :param символов.',
+            'max' => 'Поле :field должно содержать максимум :param символов.',
             'date_format' => 'Поле :field должно быть в формате :param.',
-            'mimes'       => 'Файл в поле :field должен быть одного из следующих типов: :param.',
-            'mimetypes'   => 'Файл в поле :field должен иметь MIME-тип: :param.',
+            'mimes' => 'Файл в поле :field должен быть одного из следующих типов: :param.',
+            'mimetypes' => 'Файл в поле :field должен иметь MIME-тип: :param.',
         ];
 
         $message = $messages[$rule] ?? "Ошибка в поле :field.";
@@ -98,8 +98,6 @@ class Validator
     {
         return $this->errors;
     }
-
-    // === Валидации ===
 
     /**
      * @param mixed $value
@@ -126,7 +124,7 @@ class Validator
      */
     protected function validateMin(mixed $value, string $min): bool
     {
-        return is_string($value) && mb_strlen($value) >= (int) $min;
+        return is_string($value) && mb_strlen($value) >= (int)$min;
     }
 
     /**
@@ -136,7 +134,7 @@ class Validator
      */
     protected function validateMax(mixed $value, string $max): bool
     {
-        return is_string($value) && mb_strlen($value) <= (int) $max;
+        return is_string($value) && mb_strlen($value) <= (int)$max;
     }
 
     /**

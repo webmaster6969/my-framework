@@ -3,9 +3,11 @@
     "psr-4": {
       "App\\": "app/",
       "Core\\": "core/",
-      "Domain\\": "app/domain/",
       "Database\\": "database/"
-    }
+    },
+    "files": [
+      "app/Support/Helpers/ArrayHelper.php"
+    ]
   },
   "require": {
     "ext-pdo": "*",

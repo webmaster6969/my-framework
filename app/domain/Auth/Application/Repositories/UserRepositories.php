@@ -52,7 +52,10 @@ class UserRepositories implements UserRepositoryInterface
      */
     public function findByEmailAndPassword(string $email, string $password): ?User
     {
-        $user = $this->em->getRepository(User::class)->findOneBy(['email' => $email]);
+        $user = $this
+            ->em
+            ->getRepository(User::class)
+            ->findOneBy(['email' => $email]);
 
         if ($user && password_verify($password, $user->getPassword())) {
             return $user;
@@ -67,8 +70,24 @@ class UserRepositories implements UserRepositoryInterface
      */
     public function findById(int $id): ?User
     {
-        return $this->em->getRepository(User::class)->find($id);
+        return $this
+            ->em
+            ->getRepository(User::class)
+            ->find($id);
     }
+
+    /**
+     * @param string $email
+     * @return User|null
+     */
+    public function findByEmail(string $email): ?User
+    {
+        return $this
+            ->em
+            ->getRepository(User::class)
+            ->findOneBy(['email' => $email]);
+    }
+
 
     /**
      * @throws OptimisticLockException

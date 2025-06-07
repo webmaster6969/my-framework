@@ -7,7 +7,7 @@ namespace App\domain\Task\Application\UseCases\Commands;
 use App\domain\Auth\Domain\Model\Entities\User;
 use App\domain\Common\Domain\CommandInterface;
 use App\domain\Task\Application\Repositories\TaskRepository;
-use App\domain\Task\Domain\Model\Entities\Task; // пример, если есть сущность Task
+use App\domain\Task\Domain\Model\Entities\Task;
 
 class FindUserAllTaskCommand implements CommandInterface
 {
