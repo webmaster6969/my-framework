@@ -21,9 +21,6 @@ class Auth
     public static function register(string $name, string $email, string $password): bool
     {
         $em = DB::getEntityManager();
-        if ($em === null) {
-            throw new \RuntimeException('EntityManager is not available.');
-        }
 
         $user = new User($name, $email, $password);
         $em->persist($user);
@@ -39,9 +36,6 @@ class Auth
     public static function user(): ?User
     {
         $em = DB::getEntityManager();
-        if ($em === null) {
-            throw new \RuntimeException('EntityManager is not available.');
-        }
 
         if (empty(Session::get('user_id'))) {
             return null;
@@ -75,9 +69,6 @@ class Auth
     public static function auth(string $email, string $password): bool
     {
         $em = DB::getEntityManager();
-        if ($em === null) {
-            throw new \RuntimeException('EntityManager is not available.');
-        }
 
         $user = $em->getRepository(User::class)->findOneBy(['email' => $email]);
 

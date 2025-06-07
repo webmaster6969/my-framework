@@ -4,8 +4,8 @@ use Core\Support\Csrf\Csrf;
 
 $token = Csrf::token();
 
+/** @var array<string, mixed> $errors */
 $errors = isset($errors) && is_array($errors) ? $errors : [];
-$fileErrors = isset($errors['file']) ? (array)$errors['file'] : [];
 
 ?>
 
@@ -37,12 +37,11 @@ $fileErrors = isset($errors['file']) ? (array)$errors['file'] : [];
                     <div class="card card-primary card-outline p-2">
                         <form action="/storage" method="post" enctype="multipart/form-data">
                             <input type="hidden" name="csrf_token" value="<?php echo $token; ?>">
-                            <input type="file" name="file">
-
-                            <?php if (!empty($fileErrors)): ?>
-                                <span class="text-danger"><?php echo implode(', ', $fileErrors); ?></span>
-                            <?php endif; ?>
-                            <button type="submit">Upload</button>
+                            <input type="file" name="file" class="form-control mb-1">
+                            <div class="form-errors">
+                                <?php showErrors('file', $errors); ?>
+                            </div>
+                            <button type="submit" class="btn btn-primary mt-3">Upload</button>
                         </form>
                     </div>
                 </div>
