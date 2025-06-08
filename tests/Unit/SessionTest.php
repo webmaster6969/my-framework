@@ -1,12 +1,15 @@
 <?php
 
-namespace Tests\Unit;
+namespace Unit;
 
 use Core\Support\Session\Session;
 use PHPUnit\Framework\TestCase;
 
 class SessionTest extends TestCase
 {
+    /**
+     * @return void
+     */
     public function testSession()
     {
         Session::start();
@@ -15,6 +18,9 @@ class SessionTest extends TestCase
         $this->assertEquals('test', Session::get('test'));
     }
 
+    /**
+     * @return void
+     */
     public function testSessionDestroy()
     {
         Session::start();
