@@ -52,9 +52,7 @@ $errors = (isset($errors) && is_array($errors)) ? array_filter($errors, fn($k) =
 
                                 <div class="form-group">
                                     <label for="description">Description</label>
-                                    <input type="text" name="description"
-                                           value="<?php echo old('description', $data); ?>" class="form-control"
-                                           id="description" placeholder="Enter description">
+                                    <textarea type="text" name="description" class="form-control" id="description" placeholder="Enter description"><?php echo old('description', $data); ?></textarea>
                                     <?php showErrors('description', $errors); ?>
                                 </div>
 

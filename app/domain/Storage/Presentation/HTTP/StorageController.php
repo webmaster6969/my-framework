@@ -59,14 +59,16 @@ class StorageController
         }
 
         $uplodeCommand = new UplodeCommand(new StorageRepository(), $file);
+        $uplodeCommandExecute = $uplodeCommand->execute();
 
-        if (empty($uplodeCommand->execute())) {
+        if (!$uplodeCommandExecute) {
             throw new NotUplodeFileException('Not upload file');
         }
 
         $moveCommand = new MoveCommand(new StorageRepository(), $file, 'app');
+        $moveExecute = $moveCommand->execute();
 
-        if (empty($moveCommand->execute())) {
+        if (!$moveExecute) {
             throw new NotUplodeFileException('Not upload file');
         }
 

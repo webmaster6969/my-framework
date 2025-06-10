@@ -17,7 +17,6 @@ class LoggerTest extends TestCase
      */
     protected function setUp(): void
     {
-        // Создаем временный файл
         $this->tempLogFile = sys_get_temp_dir() . '/test_logger.log';
         if (file_exists($this->tempLogFile)) {
             unlink($this->tempLogFile);
@@ -31,7 +30,6 @@ class LoggerTest extends TestCase
      */
     protected function tearDown(): void
     {
-        // Удаляем временный файл
         if (file_exists($this->tempLogFile)) {
             unlink($this->tempLogFile);
         }

@@ -20,10 +20,8 @@ final class RequestTest extends TestCase
         $_SERVER = ['REQUEST_METHOD' => 'post', 'REQUEST_URI' => '/test/path?query=1'];
         $_COOKIE = ['session' => 'abc123'];
         $_FILES = ['upload' => ['name' => 'file.txt']];
-        // set test body
         file_put_contents('php://memory', 'test body');
 
-        // manually instantiate the request to populate static::$request
         new Request();
     }
 
@@ -32,11 +30,10 @@ final class RequestTest extends TestCase
      */
     protected function tearDown(): void
     {
-        // clear static instance for test isolation
         $ref = new \ReflectionClass(Request::class);
         $prop = $ref->getProperty('request');
         $prop->setAccessible(true);
-        $prop->setValue(null);
+        $prop->setValue(null, null);
     }
 
     /**
@@ -88,7 +85,6 @@ final class RequestTest extends TestCase
      */
     public function testHeader(): void
     {
-        // simulate header (not always available in CLI)
         $ref = new \ReflectionClass(Request::class);
         $headersProp = $ref->getProperty('headers');
         $headersProp->setAccessible(true);
@@ -108,7 +104,6 @@ final class RequestTest extends TestCase
      */
     public function testBody(): void
     {
-        // мы не можем переписать php://input напрямую, поэтому используем рефлексию
         $ref = new \ReflectionClass(Request::class);
         $bodyProp = $ref->getProperty('body');
         $bodyProp->setAccessible(true);
@@ -135,11 +130,10 @@ final class RequestTest extends TestCase
      */
     public function testInstanceNotInitialized(): void
     {
-        // Reset instance
         $ref = new \ReflectionClass(Request::class);
         $prop = $ref->getProperty('request');
         $prop->setAccessible(true);
-        $prop->setValue(null);
+        $prop->setValue(null, null);
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Request is not initialized.');

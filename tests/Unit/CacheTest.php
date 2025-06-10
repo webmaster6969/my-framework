@@ -100,7 +100,7 @@ class CacheTest extends TestCase
      */
     public function testExpiration(): void
     {
-        $this->cache->set('expiring', 'value', 1); // 1 second TTL
+        $this->cache->set('expiring', 'value', 1);
         sleep(2);
         $this->assertNull($this->cache->get('expiring'));
     }

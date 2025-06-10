@@ -51,8 +51,7 @@ $token = Csrf::token();
 
                                 <div class="form-group">
                                     <label for="description">Description</label>
-                                    <input type="text" name="description" value="{{ $task->getDescription() }}"
-                                           class="form-control" id="description" placeholder="Enter description">
+                                    <textarea type="text" name="description" class="form-control" id="description" placeholder="Enter description">{{ $task->getDescription() }}</textarea>
                                     <?php showErrors('description', $errors); ?>
                                 </div>
 

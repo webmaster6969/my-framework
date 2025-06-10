@@ -70,13 +70,14 @@ class AuthController
         if ($validator->fails()) {
             return Response::make(
                 Redirect::to('/login')
-                ->with('data', $data)
-                ->withErrors($validator->errors()));
+                    ->with('data', $data)
+                    ->withErrors($validator->errors()));
         }
 
         $loginCommand = new LoginCommand(new UserRepository(DB::getEntityManager()), $email, $password);
+        $loginCommandExecute = $loginCommand->execute();
 
-        if (!empty($loginCommand->execute())) {
+        if (!$loginCommandExecute) {
             return Response::make(Redirect::to('/profile'));
         }
 
@@ -111,8 +112,8 @@ class AuthController
         if ($validator->fails()) {
             return Response::make(
                 Redirect::to('/register')
-                ->with('data', $data)
-                ->withErrors($validator->errors()));
+                    ->with('data', $data)
+                    ->withErrors($validator->errors()));
         }
 
         $name = is_string($data['name']) ? $data['name'] : '';
@@ -120,19 +121,22 @@ class AuthController
         $password = is_string($data['password']) ? $data['password'] : '';
 
         $findUserQuery = new FindUserByEmailQuery(new UserRepository(DB::getEntityManager()), $email);
-        if (!empty($findUserQuery->handle())) {
+        $user = $findUserQuery->handle();
+
+        if ($user) {
             return Response::make(
                 Redirect::to('/register')
-                ->with('data', $data)
-                ->withErrors(['email' => ['Пользователь с таким email уже существует']]));
+                    ->with('data', $data)
+                    ->withErrors(['email' => ['Пользователь с таким email уже существует']]));
         }
 
         $registerCommand = new RegisterCommand(new UserRepository(DB::getEntityManager()), $name, $email, $password);
         $registerCommand->execute();
 
         $loginCommand = new LoginCommand(new UserRepository(DB::getEntityManager()), $email, $password);
+        $loginExecute = $loginCommand->execute();
 
-        if ($loginCommand->execute()) {
+        if ($loginExecute) {
             return Response::make(Redirect::to('/profile'));
         }
 

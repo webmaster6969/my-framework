@@ -28,7 +28,7 @@ class StorageTest extends TestCase
         $this->tempDir = sys_get_temp_dir() . '/storage_test_' . uniqid();
         mkdir($this->tempDir, 0777, true);
         $this->storage = new Storage($this->tempDir);
-        Storage::init(); // можно инициализировать тут, если нужны настройки
+        Storage::init();
         $this->overrideStaticDisk($this->storage);
     }
 

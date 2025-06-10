@@ -2,6 +2,7 @@
 
 namespace Unit;
 
+use Core\Logger\Logger;
 use Core\Support\Exception\ExceptionHandler;
 use ErrorException;
 use Exception;
@@ -15,6 +16,19 @@ class ExceptionHandlerTest extends TestCase
     protected function setUp(): void
     {
         putenv('APP_ENV=development');
+        Logger::setLogFile(__DIR__ . '/../../logs/logs_test.log');
+        Logger::info('Test log');
+    }
+
+    /**
+     * @return void
+     */
+    protected function tearDown(): void
+    {
+        putenv('APP_ENV=development');
+        if (file_exists(__DIR__ . '/../../logs/logs_test.log')) {
+            unlink(__DIR__ . '/../../logs/logs_test.log');
+        }
     }
 
     /**

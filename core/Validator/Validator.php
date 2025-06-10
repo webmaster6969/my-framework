@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Core\Validator;
 
+use App\domain\Common\Domain\Exceptions\ValidationNoFindMethodException;
+
 class Validator
 {
     /**
@@ -57,6 +59,8 @@ class Validator
                     if (!$this->$method($value, ...$params)) {
                         $this->addError($field, $ruleName, $params);
                     }
+                } else {
+                    throw new ValidationNoFindMethodException('Method ' . $method . ' does not exist.');
                 }
             }
         }

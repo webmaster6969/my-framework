@@ -21,7 +21,12 @@ Logger::setLogFile(__DIR__ . '/../logs/logs.log');
 
 Session::start();
 
-Env::load();
+try {
+    Env::load();
+} catch (Exception $e) {
+    Logger::error($e->getMessage());
+    throw new Exception($e->getMessage());
+}
 
 $appPath = Env::get('APP_PATH');
 if (!is_string($appPath)) {

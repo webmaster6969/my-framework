@@ -22,7 +22,6 @@ class FileTest extends TestCase
      */
     protected function setUp(): void
     {
-        // Создаем временный файл
         $tmpPath = tempnam(sys_get_temp_dir(), 'file_test_');
         if ($tmpPath === false) {
             $this->fail('Не удалось создать временный файл');
