@@ -9,41 +9,17 @@ use RuntimeException;
 class Crypt
 {
     /**
-     * @var string
-     */
-    protected static string $ENCRYPTION_KEY = 'your-32-byte-secret-key-goes-here-123!';
-    /**
-     * @var string
-     */
-    protected static string $ENCRYPTION_METHOD = 'AES-256-CBC';
-
-    /**
-     * @var Crypt
-     */
-    protected static Crypt $instance;
-
-    /**
-     * @param string $ENCRYPTION_KEY
-     * @param string $ENCRYPTION_METHOD
-     */
-    public function __construct(string $ENCRYPTION_KEY, string $ENCRYPTION_METHOD = 'AES-256-CBC')
-    {
-        static::$ENCRYPTION_KEY = $ENCRYPTION_KEY;
-        static::$ENCRYPTION_METHOD = $ENCRYPTION_METHOD;
-
-        static::$instance = $this;
-    }
-
-    /**
      * @param string $data
+     * @param string $encryptionKey
+     * @param string $encryptionMethod
      * @return string
      */
-    public static function encrypt(string $data): string
+    public static function encrypt(string $data, string $encryptionKey, string $encryptionMethod = 'AES-256-CBC'): string
     {
-        $key = hash('sha256', static::$ENCRYPTION_KEY, true);
+        $key = hash('sha256', $encryptionKey, true);
         $iv = openssl_random_pseudo_bytes(16);
 
-        $cipherText = openssl_encrypt($data, static::$ENCRYPTION_METHOD, $key, OPENSSL_RAW_DATA, $iv);
+        $cipherText = openssl_encrypt($data, $encryptionMethod, $key, OPENSSL_RAW_DATA, $iv);
 
         if ($cipherText === false) {
             throw new RuntimeException('Encryption failed.');
@@ -54,9 +30,11 @@ class Crypt
 
     /**
      * @param string $encryptedData
+     * @param string $encryptionKey
+     * @param string $encryptionMethod
      * @return string
      */
-    public static function decrypt(string $encryptedData): string
+    public static function decrypt(string $encryptedData, string $encryptionKey, string $encryptionMethod = 'AES-256-CBC'): string
     {
         $data = base64_decode($encryptedData, true);
 
@@ -67,9 +45,9 @@ class Crypt
         $iv = substr($data, 0, 16);
         $cipherText = substr($data, 16);
 
-        $key = hash('sha256', static::$ENCRYPTION_KEY, true);
+        $key = hash('sha256', $encryptionKey, true);
 
-        $plainText = openssl_decrypt($cipherText, static::$ENCRYPTION_METHOD, $key, OPENSSL_RAW_DATA, $iv);
+        $plainText = openssl_decrypt($cipherText, $encryptionMethod, $key, OPENSSL_RAW_DATA, $iv);
 
         if ($plainText === false) {
             throw new RuntimeException('Decryption failed.');

@@ -41,7 +41,7 @@ $errors = isset($errors) && is_array($errors) ? $errors : [];
                 </div>
                 <?php showErrors('email', $errors); ?>
 
-                <div class="input-group mt-3 mb-3">
+                <div class="input-group mt-3">
                     <input type="password" name="password" class="form-control" placeholder="Password">
                     <div class="input-group-append">
                         <div class="input-group-text">
@@ -51,7 +51,7 @@ $errors = isset($errors) && is_array($errors) ? $errors : [];
                 </div>
                 <?php showErrors('password', $errors); ?>
 
-                <div class="col-4">
+                <div class="col-4 mt-3">
                     <button type="submit" class="btn btn-primary btn-block">Register</button>
                 </div>
             </form>

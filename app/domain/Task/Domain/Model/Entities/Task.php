@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\domain\Task\Domain\Model\Entities;
 
 use App\domain\Auth\Domain\Model\Entities\User;
+use App\domain\Common\Domain\Exceptions\EncryptionKeyIsNotFindException;
+use Core\Support\Crypt\Crypt;
+use Core\Support\Env\Env;
 use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
@@ -106,16 +109,21 @@ class Task
      * @param DateTime $end_task
      */
     public function __construct(
-        User      $user,
-        string    $title,
-        string    $description,
+        User     $user,
+        string   $title,
+        string   $description,
         DateTime $start_task,
         DateTime $end_task,
     )
     {
+        $encryptionKey = Env::get('ENCRYPTION_KEY');
+        if (empty($encryptionKey) || !is_string($encryptionKey)) {
+            throw new EncryptionKeyIsNotFindException('ENCRYPTION_KEY environment variable is not set');
+        }
+
         $this->user = $user;
         $this->title = $title;
-        $this->description = $description;
+        $this->description = !empty($description) ? Crypt::encrypt($description, $encryptionKey) : null;
         $this->start_task = $start_task;
         $this->end_task = $end_task;
         $this->status = self::STATUS_PENDING;
@@ -178,7 +186,12 @@ class Task
      */
     public function getDescription(): ?string
     {
-        return $this->description;
+        $encryptionKey = Env::get('ENCRYPTION_KEY');
+        if (empty($encryptionKey) || !is_string($encryptionKey)) {
+            throw new EncryptionKeyIsNotFindException('ENCRYPTION_KEY environment variable is not set');
+        }
+
+        return !empty($this->description) ? Crypt::decrypt($this->description, $encryptionKey) : null;
     }
 
     /**
@@ -187,7 +200,12 @@ class Task
      */
     public function setDescription(?string $desc): void
     {
-        $this->description = $desc;
+        $encryptionKey = Env::get('ENCRYPTION_KEY');
+        if (empty($encryptionKey) || !is_string($encryptionKey)) {
+            throw new EncryptionKeyIsNotFindException('ENCRYPTION_KEY environment variable is not set');
+        }
+
+        $this->description = !empty($desc) ? Crypt::encrypt($desc, $encryptionKey) : null;
     }
 
     /**

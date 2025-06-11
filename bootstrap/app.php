@@ -5,7 +5,6 @@ declare(strict_types=1);
 use Core\Database\DB;
 use Core\Logger\Logger;
 use Core\Support\App\App;
-use Core\Support\Crypt\Crypt;
 use Core\Support\Env\Env;
 use Core\Support\Exception\ExceptionHandler;
 use Core\Support\Session\Session;
@@ -38,7 +37,6 @@ $encryptionKey = Env::get('ENCRYPTION_KEY');
 if (!is_string($encryptionKey)) {
     throw new \RuntimeException('ENCRYPTION_KEY environment variable is not set or not a string');
 }
-new Crypt($encryptionKey);
 
 ExceptionHandler::register();
 

@@ -11,7 +11,7 @@ $errors = isset($errors) && is_array($errors) ? $errors : [];
 @include('partials.header')
 
 <div class="login-page">
-    <form method="post" action="/two-factory-auth-check" >
+    <form method="post" action="/two-factory-auth-check">
         <input type="hidden" name="csrf_token" value="<?php echo $token; ?>">
         <div class="form-group">
             <label>

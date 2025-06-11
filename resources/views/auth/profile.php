@@ -73,9 +73,8 @@ $errors = isset($errors) && is_array($errors) ? $errors : [];
                                             <div class="col-sm-10">
                                                 <input type="text" name="name" class="form-control" id="inputName"
                                                        placeholder="Name">
+                                                <?php showErrors('name', $errors); ?>
                                             </div>
-
-                                            <?php showErrors('name', $errors); ?>
                                         </div>
 
                                         <div class="form-group row">
