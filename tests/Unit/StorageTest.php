@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Unit;
 
 use PHPUnit\Framework\TestCase;
@@ -28,7 +30,18 @@ class StorageTest extends TestCase
         $this->tempDir = sys_get_temp_dir() . '/storage_test_' . uniqid();
         mkdir($this->tempDir, 0777, true);
         $this->storage = new Storage($this->tempDir);
-        Storage::init();
+        Storage::init($this->tempDir, [
+            'default' => 'local',
+
+            'disks' => [
+                'local' => [
+                    'root' => __DIR__ . '/../storage/app',
+                ],
+                'public' => [
+                    'root' => __DIR__ . '/../storage/public',
+                ],
+            ],
+        ]);
         $this->overrideStaticDisk($this->storage);
     }
 

@@ -76,16 +76,16 @@ class Validator
     protected function addError(string $field, string $rule, array $params = []): void
     {
         $messages = [
-            'required' => 'Поле :field обязательно для заполнения.',
-            'email' => 'Поле :field должно быть валидным email адресом.',
-            'min' => 'Поле :field должно содержать минимум :param символов.',
-            'max' => 'Поле :field должно содержать максимум :param символов.',
-            'date_format' => 'Поле :field должно быть в формате :param.',
-            'mimes' => 'Файл в поле :field должен быть одного из следующих типов: :param.',
-            'mimetypes' => 'Файл в поле :field должен иметь MIME-тип: :param.',
+            'required' => 'Field :field is required',
+            'email' => 'The :field must be a valid email address',
+            'min' => 'The :field must contain at least :param characters',
+            'max' => 'The :field must contain a maximum of :param characters.',
+            'date_format' => 'The :field field must be in the :param format',
+            'mimes' => 'The file in the :field must be one of the following types: :param',
+            'mimetypes' => 'The file in the :field must have a MIME type of: :param',
         ];
 
-        $message = $messages[$rule] ?? "Ошибка в поле :field.";
+        $message = t($messages[$rule] ?? "Error in field :field");
         $message = str_replace(':field', $field, $message);
 
         if (!empty($params)) {

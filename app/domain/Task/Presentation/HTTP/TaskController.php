@@ -19,12 +19,12 @@ use App\domain\Task\Domain\Exceptions\{
     NotDeleteTaskException
 };
 use App\domain\Task\Domain\Model\Entities\Task;
-use Core\{
-    Cache\Cache,
+use Core\{Cache\Cache,
     Database\DB,
     Http\Request,
     Response\Response,
     Routing\Redirect,
+    Support\App\App,
     Support\Session\Session,
     Validator\Validator,
     View\View
@@ -66,7 +66,7 @@ class TaskController
             return Response::make(Redirect::to('/login'));
         }
 
-        $cache = new Cache();
+        $cache = $this->getCache();
         $key = 'tasks_' . $user->getId();
         $tasks = $cache->get($key);
 
@@ -104,7 +104,7 @@ class TaskController
             throw new ClearCacheException('Clear cache: User not found');
         }
 
-        $cache = new Cache();
+        $cache = $this->getCache();
         $cache->delete('tasks_' . $user->getId());
     }
 
@@ -335,5 +335,10 @@ class TaskController
 
         $this->clearCache();
         return Response::make(Redirect::to('/tasks'));
+    }
+
+    private function getCache(): Cache
+    {
+        return new Cache(App::getBasePath() . DIRECTORY_SEPARATOR . 'storage/cache');
     }
 }

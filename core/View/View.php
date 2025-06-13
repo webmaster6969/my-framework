@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Core\View;
 
+use Core\Support\App\App;
 use Exception;
 
 class View
@@ -28,9 +29,9 @@ class View
      * @param array<string, mixed> $data
      * @param string $viewsPath
      */
-    public function __construct(string $view = '', array $data = [], string $viewsPath = __DIR__ . '/../../resources/views')
+    public function __construct(string $view = '', array $data = [], string $viewsPath = '/../../resources/views')
     {
-        $this->viewsPath = rtrim($viewsPath, '/');
+        $this->viewsPath = __DIR__ . rtrim($viewsPath, '/');
         $this->view = $view;
         $this->data = $data;
     }

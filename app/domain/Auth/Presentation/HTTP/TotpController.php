@@ -201,7 +201,7 @@ class TotpController
                 return Response::make(
                     Redirect::to('/two-factory-auth')
                         ->withErrors([
-                            'secret' => ['Invalid code'],
+                            'secret' => [t('Invalid code')],
                         ])
                 );
             }
@@ -209,7 +209,7 @@ class TotpController
             return Response::make(
                 Redirect::to('/two-factory-auth')
                     ->withErrors([
-                        'secret' => [$e->getMessage()],
+                        'secret' => [t($e->getMessage())],
                     ])
             );
         }

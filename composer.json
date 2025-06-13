@@ -6,7 +6,10 @@
       "Database\\": "database/"
     },
     "files": [
-      "app/Support/Helpers/ArrayHelper.php"
+      "app/Support/Helpers/ArrayHelper.php",
+      "app/Support/Helpers/TranslatorHelper.php",
+      "app/Support/Helpers/LanguageHelper.php",
+      "app/Support/Helpers/RouteHelper.php"
     ]
   },
   "require": {

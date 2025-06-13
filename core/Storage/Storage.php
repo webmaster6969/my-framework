@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Core\Storage;
 
+use Core\Support\App\App;
 use Exception;
 
 class Storage
@@ -29,15 +30,12 @@ class Storage
     protected string $root;
 
     /**
-     * @return void
+     * @param string $directory
+     * @param array{disks: array<string, array<string, mixed>>, default: string} $config
      */
-    public static function init(): void
+    public static function init(string $directory, array $config): void
     {
-        $disk = new Storage(__DIR__ . '/../../storage');
-
-        /** @var array{disks: array<string, array<string, mixed>>, default: string} $config */
-        $config = require __DIR__ . '/../../config/filesystems.php';
-
+        $disk = new Storage($directory);
         $disk->disks = $config['disks'];
         $disk->defaultDisk = $config['default'];
         static::$disk = $disk;

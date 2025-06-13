@@ -15,14 +15,14 @@ $errors = isset($errors) && is_array($errors) ? $errors : [];
         <input type="hidden" name="csrf_token" value="<?php echo $token; ?>">
         <div class="form-group">
             <label>
-                <strong>Ключ:</strong>
+                <strong><?php echo t('Key'); ?>:</strong>
                 <input type="text" name="secret" class="form-control" autofocus>
             </label>
             <div class="form-errors">
                 <?php showErrors('secret', $errors); ?>
             </div>
         </div>
-        <button type="submit">Login</button>
+        <button type="submit"><?php echo t('Login'); ?></button>
     </form>
 </div>
 

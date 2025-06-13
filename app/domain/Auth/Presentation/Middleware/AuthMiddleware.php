@@ -4,12 +4,9 @@ declare(strict_types=1);
 
 namespace App\domain\Auth\Presentation\Middleware;
 
-use App\domain\Auth\Application\Repositories\UserRepository;
-use App\domain\Auth\Application\UseCases\Queries\FindUserQuery;
-use Core\Database\DB;
+use App\domain\Auth\Services\AuthService;
 use Core\Http\Middleware\MiddlewareInterface;
 use Core\Routing\Redirect;
-use Core\Support\Session\Session;
 
 class AuthMiddleware implements MiddlewareInterface
 {
@@ -19,17 +16,12 @@ class AuthMiddleware implements MiddlewareInterface
      */
     public function handle(callable $next): mixed
     {
-        $userId = Session::get('user_id');
-        if (empty($userId) || !is_int($userId)) {
+        $user = AuthService::getUser();
+        if (!empty($user)) {
             return $next();
         }
 
-        $findUserQuery = new FindUserQuery(new UserRepository(DB::getEntityManager()), $userId);
-        $user = $findUserQuery->handle();
-
-        if (empty($user)) {
-            Redirect::to('/login')->send();
-        }
+        Redirect::to('/login')->send();
 
         return $next();
     }

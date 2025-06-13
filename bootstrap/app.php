@@ -8,6 +8,7 @@ use Core\Support\App\App;
 use Core\Support\Env\Env;
 use Core\Support\Exception\ExceptionHandler;
 use Core\Support\Session\Session;
+use Core\Translator\Translator;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMSetup;
@@ -16,12 +17,8 @@ date_default_timezone_set('Europe/Moscow');
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-Logger::setLogFile(__DIR__ . '/../logs/logs.log');
-
-Session::start();
-
 try {
-    Env::load();
+    Env::load(__DIR__ . '/../.env');
 } catch (Exception $e) {
     Logger::error($e->getMessage());
     throw new Exception($e->getMessage());
@@ -31,7 +28,21 @@ $appPath = Env::get('APP_PATH');
 if (!is_string($appPath)) {
     throw new \RuntimeException('APP_PATH environment variable is not set or not a string');
 }
+
 App::init($appPath);
+
+Logger::setLogFile(App::getBasePath() . DIRECTORY_SEPARATOR . 'logs/logs.log');
+
+Session::start();
+
+$appLocale = Env::get('APP_LOCALE');
+if (!is_string($appLocale)) {
+    throw new \RuntimeException('APP_LOCALE environment variable is not set or not a string');
+}
+
+$language = language($appLocale);
+
+Translator::init(App::getBasePath() . DIRECTORY_SEPARATOR . 'lang', $language);
 
 $encryptionKey = Env::get('ENCRYPTION_KEY');
 if (!is_string($encryptionKey)) {
@@ -42,9 +53,9 @@ ExceptionHandler::register();
 
 $config = ORMSetup::createAttributeMetadataConfiguration(
     paths: [
-        __DIR__ . '/../app/domain/Auth/Domain/Model/Entities',
-        __DIR__ . '/../app/domain/Notification/Domain/Model/Entities',
-        __DIR__ . '/../app/domain/Task/Domain/Model/Entities',
+        App::getBasePath() . DIRECTORY_SEPARATOR . '/../app/domain/Auth/Domain/Model/Entities',
+        App::getBasePath() . DIRECTORY_SEPARATOR . '/../app/domain/Notification/Domain/Model/Entities',
+        App::getBasePath() . DIRECTORY_SEPARATOR . '/../app/domain/Task/Domain/Model/Entities',
     ],
     isDevMode: true,
 );
@@ -94,4 +105,4 @@ $connection = DriverManager::getConnection([
 $entityManager = new EntityManager($connection, $config);
 DB::setEntityManager($entityManager);
 
-require __DIR__ . '/../app/Http/Routes/web.php';
+require App::getBasePath() . DIRECTORY_SEPARATOR . 'app/Http/Routes/web.php';

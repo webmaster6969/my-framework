@@ -2,12 +2,14 @@
 
 namespace Core\Logger;
 
+use Core\Support\App\App;
+
 class Logger
 {
     /**
      * @var string
      */
-    protected static string $logFile = '/../logs/logs.log';
+    protected static string $logFile = 'logs/logs.log';
 
     /**
      * @param string $file

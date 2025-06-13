@@ -36,7 +36,7 @@ $router->group([
 
     $router->get('/logout', [AuthController::class, 'logout']);
     $router->get('/two-factory', [TotpController::class, 'index']);
-    $router->post('/two-factory-enable', [TotpController::class, 'enableTwoFactor'])->middleware([CsrfMiddleware::class]);;
+    $router->post('/two-factory-enable', [TotpController::class, 'enableTwoFactor'])->middleware([CsrfMiddleware::class]);
     $router->post('/two-factory-enable-new', [TotpController::class, 'newAndEnableTwoFactor'])->middleware([CsrfMiddleware::class]);;
     $router->post('/two-factory-disable', [TotpController::class, 'disableTwoFactor'])->middleware([CsrfMiddleware::class]);;
 });

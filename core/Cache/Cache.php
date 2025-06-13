@@ -17,7 +17,7 @@ class Cache
      * @param string $cachePath
      * @param int $defaultTtl
      */
-    public function __construct(string $cachePath = __DIR__ . '/../../storage/cache', int $defaultTtl = 3600)
+    public function __construct(string $cachePath = 'storage/cache', int $defaultTtl = 3600)
     {
         $this->cachePath = rtrim($cachePath, '/');
         $this->defaultTtl = $defaultTtl;

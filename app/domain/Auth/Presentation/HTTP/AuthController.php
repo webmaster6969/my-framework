@@ -77,7 +77,7 @@ class AuthController
         $loginCommand = new LoginCommand(new UserRepository(DB::getEntityManager()), $email, $password);
         $loginCommandExecute = $loginCommand->execute();
 
-        if (!$loginCommandExecute) {
+        if ($loginCommandExecute) {
             return Response::make(Redirect::to('/profile'));
         }
 
@@ -86,8 +86,8 @@ class AuthController
                 ->with('data', $data)
                 ->withErrors(
                     [
-                        'email' => ['Введенные данные неверны'],
-                        'password' => ['Введенные данные неверны'],
+                        'email' => [t('The entered data is incorrect')],
+                        'password' => [t('The entered data is incorrect')],
                     ]
                 )
         );
