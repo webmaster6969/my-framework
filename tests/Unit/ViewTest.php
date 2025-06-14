@@ -21,4 +21,16 @@ class ViewTest extends TestCase
 
         $this->assertStringContainsString('<title>Test</title>', $output);
     }
+
+    /**
+     * @return void
+     * @throws Exception
+     */
+    public function testRenderWithView()
+    {
+        $view = new View('tests.index')->with('title', 'Test');
+        $output = $view->render();
+
+        $this->assertStringContainsString('<title>Test</title>', $output);
+    }
 }

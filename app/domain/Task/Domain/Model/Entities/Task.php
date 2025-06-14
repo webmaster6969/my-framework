@@ -112,6 +112,7 @@ class Task
         User     $user,
         string   $title,
         string   $description,
+        string   $status,
         DateTime $start_task,
         DateTime $end_task,
     )
@@ -126,7 +127,7 @@ class Task
         $this->description = !empty($description) ? Crypt::encrypt($description, $encryptionKey) : null;
         $this->start_task = $start_task;
         $this->end_task = $end_task;
-        $this->status = self::STATUS_PENDING;
+        $this->status = $status;
         $this->notified = false;
     }
 
@@ -325,5 +326,18 @@ class Task
     public function onPreUpdate(): void
     {
         $this->updated_at = new DateTimeImmutable();
+    }
+
+    /**
+     * @return string[]
+     */
+    public static function getAllStatuses(): array
+    {
+        return [
+            self::STATUS_PENDING,
+            self::STATUS_IN_PROGRESS,
+            self::STATUS_DONE,
+            self::STATUS_CANCELED
+        ];
     }
 }

@@ -111,4 +111,18 @@ class ValidatorTest extends TestCase
 
         fclose($tmpFile);
     }
+
+    /**
+     * @return void
+     */
+    public function testInValidation(): void
+    {
+        $validator = new Validator(['status' => 'active'], ['status' => 'in:active,inactive,pending']);
+        $this->assertFalse($validator->fails());
+        $this->assertEmpty($validator->errors());
+
+        $validator = new Validator(['status' => 'archived'], ['status' => 'in:active,inactive,pending']);
+        $this->assertTrue($validator->fails());
+        $this->assertArrayHasKey('status', $validator->errors());
+    }
 }

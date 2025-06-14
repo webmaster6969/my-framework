@@ -45,11 +45,11 @@ class AuthController
                 'data' => $data,
                 'errors' => Session::error()
             ]
-        );
+        )->with('title', t('Login'));
 
-        return Response::make($view)->withHeaders([
-            'Content-Type' => 'text/html',
-        ])->withStatus(200);
+        return Response::make($view)
+            ->withHeaders(['Content-Type' => 'text/html',])
+            ->withStatus(200);
     }
 
     /**
@@ -162,11 +162,12 @@ class AuthController
         $defaults = ['title' => '', 'description' => '', 'start_task' => '', 'end_task' => ''];
         $data = array_merge($defaults, $data);
 
-        $view = new View('auth.register', ['data' => $data, 'errors' => Session::error()]);
+        $view = new View('auth.register', ['data' => $data, 'errors' => Session::error()])
+            ->with('title', t('Register'));
 
-        return Response::make($view)->withHeaders([
-            'Content-Type' => 'text/html',
-        ])->withStatus(200);
+        return Response::make($view)
+            ->withHeaders(['Content-Type' => 'text/html',])
+            ->withStatus(200);
     }
 
     /**

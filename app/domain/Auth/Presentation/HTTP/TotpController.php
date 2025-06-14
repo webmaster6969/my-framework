@@ -79,11 +79,11 @@ class TotpController
             'image' => $imageString,
             'secret' => $secretKey,
             'newSecretKey' => $newSecretKey,
-        ]);
+        ])->with('title', t('Two factor authentication'));
 
-        return Response::make($view)->withHeaders([
-            'Content-Type' => 'text/html',
-        ])->withStatus(200);
+        return Response::make($view)
+            ->withHeaders(['Content-Type' => 'text/html',])
+            ->withStatus(200);
     }
 
     /**
@@ -166,11 +166,12 @@ class TotpController
      */
     public function twoFactoryAuth(): Response
     {
-        $view = new View('two-factory.input', ['errors' => Session::error()]);
+        $view = new View('two-factory.input', ['errors' => Session::error()])
+            ->with('title', t('Two factor'));
 
-        return Response::make($view)->withHeaders([
-            'Content-Type' => 'text/html',
-        ])->withStatus(200);
+        return Response::make($view)
+            ->withHeaders(['Content-Type' => 'text/html',])
+            ->withStatus(200);
     }
 
     /**

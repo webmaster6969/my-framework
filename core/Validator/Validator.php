@@ -83,13 +83,15 @@ class Validator
             'date_format' => 'The :field field must be in the :param format',
             'mimes' => 'The file in the :field must be one of the following types: :param',
             'mimetypes' => 'The file in the :field must have a MIME type of: :param',
+            'in' => 'The :field must be one of the following values: :param',
         ];
 
         $message = t($messages[$rule] ?? "Error in field :field");
-        $message = str_replace(':field', $field, $message);
+        $message = str_replace(':field', t($field), $message);
 
         if (!empty($params)) {
-            $message = str_replace(':param', $params[0], $message);
+            $translatedParams = array_map(fn($p) => t($p), $params);
+            $message = str_replace(':param', implode(', ', $translatedParams), $message);
         }
 
         $this->errors[$field][] = $message;
@@ -191,5 +193,15 @@ class Validator
         finfo_close($fInfo);
 
         return $mime !== false && in_array($mime, $mimetypes, true);
+    }
+
+    /**
+     * @param mixed $value
+     * @param string ...$allowed
+     * @return bool
+     */
+    protected function validateIn(mixed $value, string ...$allowed): bool
+    {
+        return is_string($value) && in_array($value, $allowed, true);
     }
 }

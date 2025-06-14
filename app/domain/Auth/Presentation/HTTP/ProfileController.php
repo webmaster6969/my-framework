@@ -31,11 +31,12 @@ class ProfileController
             return Response::make(Redirect::to('/login'));
         }
 
-        $view = new View('auth.profile', ['user' => $user, 'errors' => Session::error()]);
+        $view = new View('auth.profile', ['user' => $user, 'errors' => Session::error()])
+            ->with('title', t('Profile'));
 
-        return Response::make($view)->withHeaders([
-            'Content-Type' => 'text/html',
-        ])->withStatus(200);
+        return Response::make($view)
+            ->withHeaders(['Content-Type' => 'text/html',])
+            ->withStatus(200);
     }
 
     /**

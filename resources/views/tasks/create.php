@@ -1,5 +1,6 @@
 <?php
 
+use App\domain\Task\Domain\Model\Entities\Task;
 use Core\Support\Csrf\Csrf;
 
 $token = Csrf::token();
@@ -55,6 +56,16 @@ $errors = (isset($errors) && is_array($errors)) ? array_filter($errors, fn($k) =
                                     <textarea type="text" name="description" class="form-control" id="description"
                                               placeholder="<?php echo t('Enter description'); ?>"><?php echo old('description', $data); ?></textarea>
                                     <?php showErrors('description', $errors); ?>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="status"><?php echo t('Status'); ?></label>
+                                    <select name="status" class="form-control" id="status">
+                                        <?php foreach (Task::getAllStatuses() as $status) { ?>
+                                            <option value="<?php echo $status; ?>"><?php echo t($status); ?></option>
+                                        <?php } ?>
+                                    </select>
+                                    <?php showErrors('status', $errors); ?>
                                 </div>
 
                                 <div class="form-group">

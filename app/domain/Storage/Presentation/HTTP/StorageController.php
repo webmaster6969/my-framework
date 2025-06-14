@@ -23,11 +23,12 @@ class StorageController
      */
     public function index(): Response
     {
-        $view = new View('storage.index', ['errors' => Session::error()]);
+        $view = new View('storage.index', ['errors' => Session::error()])
+            ->with('title', t('Storage'));
 
-        return Response::make($view)->withHeaders([
-            'Content-Type' => 'text/html',
-        ])->withStatus(200);
+        return Response::make($view)
+            ->withHeaders(['Content-Type' => 'text/html',])
+            ->withStatus(200);
     }
 
     /**

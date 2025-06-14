@@ -97,4 +97,15 @@ class View
         $template = preg_replace('/@foreach\s*\((.*?)\)/', '<?php foreach ($1): ?>', $template) ?? '';
         return preg_replace('/@endforeach/', '<?php endforeach; ?>', $template) ?? '';
     }
+
+    /**
+     * @param string $key
+     * @param mixed $value
+     * @return $this
+     */
+    public function with(string $key, mixed $value): View
+    {
+        $this->data[$key] = $value;
+        return $this;
+    }
 }

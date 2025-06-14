@@ -76,8 +76,9 @@ class TaskController
             $cache->set($key, $tasks, 10);
         }
 
-        return Response::make(new View('tasks.index', compact('tasks')))
-            ->withHeaders(['Content-Type' => 'text/html'])->withStatus(200);
+        return Response::make(
+            new View('tasks.index', compact('tasks'))->with('title', t('Tasks'))
+        )->withHeaders(['Content-Type' => 'text/html'])->withStatus(200);
     }
 
     /**
@@ -90,8 +91,9 @@ class TaskController
         $defaults = ['title' => '', 'description' => '', 'start_task' => '', 'end_task' => ''];
         $data = array_merge($defaults, $data);
 
-        return Response::make(new View('tasks.create', ['data' => $data, 'errors' => Session::error()]))
-            ->withHeaders(['Content-Type' => 'text/html'])->withStatus(200);
+        return Response::make(
+            new View('tasks.create', ['data' => $data, 'errors' => Session::error()])->with('title', t('Create task'))
+        )->withHeaders(['Content-Type' => 'text/html'])->withStatus(200);
     }
 
     /**
@@ -119,9 +121,10 @@ class TaskController
         }
 
         /** @var array<string, mixed> $data */
-        $data = Request::only(['title', 'description', 'start_task', 'end_task']);
+        $data = Request::only(['title', 'description', 'start_task', 'status', 'end_task']);
         $title = isset($data['title']) && is_string($data['title']) ? $data['title'] : '';
         $description = isset($data['description']) && is_string($data['description']) ? $data['description'] : '';
+        $status = isset($data['status']) && is_string($data['status']) ? $data['status'] : '';
         $startInput = isset($data['start_task']) && is_string($data['start_task']) ? $data['start_task'] : '';
         $endInput = isset($data['end_task']) && is_string($data['end_task']) ? $data['end_task'] : '';
 
@@ -149,12 +152,14 @@ class TaskController
             [
                 'title' => $title,
                 'description' => $description,
+                'status' => $status,
                 'start_task' => $startInput,
                 'end_task' => $endInput,
             ],
             [
                 'title' => 'required|min:3|max:255',
                 'description' => 'required|min:3|max:255',
+                'status' => 'required|in:pending,in_progress,done,canceled',
                 'start_task' => 'required|dateFormat:' . $formatStartTask,
                 'end_task' => 'required|dateFormat:' . $formatEndTask,
             ]
@@ -176,7 +181,7 @@ class TaskController
             ]));
         }
 
-        $task = new Task($user, $title, $description, $start, $end);
+        $task = new Task($user, $title, $description, $status, $start, $end);
         $command = new StoreTaskCommand(new TaskRepository(DB::getEntityManager()), $task);
 
         if (!$command->execute()) {
@@ -209,8 +214,9 @@ class TaskController
             return Response::make(Redirect::to('/tasks'));
         }
 
-        return Response::make(new View('tasks.edit', ['task' => $task, 'errors' => Session::error()]))
-            ->withHeaders(['Content-Type' => 'text/html'])->withStatus(200);
+        return Response::make(
+            new View('tasks.edit', ['task' => $task, 'errors' => Session::error()])->with('title', t('Edit task'))
+        )->withHeaders(['Content-Type' => 'text/html'])->withStatus(200);
     }
 
     /**
@@ -229,9 +235,10 @@ class TaskController
         }
 
         /** @var array<string, mixed> $data */
-        $data = Request::only(['title', 'description', 'start_task', 'end_task']);
+        $data = Request::only(['title', 'description', 'status', 'start_task', 'end_task']);
         $title = isset($data['title']) && is_string($data['title']) ? $data['title'] : '';
         $description = isset($data['description']) && is_string($data['description']) ? $data['description'] : '';
+        $status = isset($data['status']) && is_string($data['status']) ? $data['status'] : '';
         $startInput = isset($data['start_task']) && is_string($data['start_task']) ? $data['start_task'] : '';
         $endInput = isset($data['end_task']) && is_string($data['end_task']) ? $data['end_task'] : '';
 
@@ -256,11 +263,13 @@ class TaskController
         $validator = new Validator([
             'title' => $title,
             'description' => $description,
+            'status' => $status,
             'start_task' => $startInput,
             'end_task' => $endInput,
         ], [
             'title' => 'required|min:3|max:255',
             'description' => 'required|min:3|max:255',
+            'status' => 'required|in:pending,in_progress,done,canceled',
             'start_task' => 'required|dateFormat:' . $formatStartTask,
             'end_task' => 'required|dateFormat:' . $formatEndTask,
         ]);
@@ -290,6 +299,7 @@ class TaskController
 
         $task->setTitle($title);
         $task->setDescription($description);
+        $task->setStatus($status);
         $task->setStartTask($start);
         $task->setEndTask($end);
 
