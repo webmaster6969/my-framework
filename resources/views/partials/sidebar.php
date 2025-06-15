@@ -8,6 +8,15 @@ if (!empty($user)) {
     $name = $user->getName();
 }
 
+/**
+ * @param string $path
+ * @return string
+ */
+function active(string $path): string
+{
+    return $_SERVER['REQUEST_URI'] === $path ? 'active' : '';
+}
+
 ?>
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <a href="./" class="brand-link">
@@ -49,31 +58,31 @@ if (!empty($user)) {
                     </a>
                     <ul class="nav nav-treeview">
                         <li class="nav-item">
-                            <a href="/tasks" class="nav-link">
+                            <a href="/tasks" class="nav-link <?php echo active('/tasks'); ?>">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p><?php echo t('Tasks'); ?></p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="/profile" class="nav-link">
+                            <a href="/profile" class="nav-link <?php echo active('/profile'); ?>">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p><?php echo t('Profile'); ?></p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="/storage" class="nav-link">
+                            <a href="/storage" class="nav-link <?php echo active('/storage'); ?>">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p><?php echo t('Uplode file'); ?></p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="/two-factory" class="nav-link">
+                            <a href="/two-factory" class="nav-link <?php echo active('/two-factory'); ?>">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p><?php echo t('Two factory'); ?></p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="/logout" class="nav-link">
+                            <a href="/logout" class="nav-link <?php echo active('/logout'); ?>">
                                 <i class="far fa-circle nav-icon"></i>
                                 <p><?php echo t('Logout'); ?></p>
                             </a>
