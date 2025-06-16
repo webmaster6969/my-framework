@@ -18,7 +18,7 @@ use App\domain\Task\Domain\Model\Entities\Task;
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="#"><?php echo t('Home'); ?></a></li>
+                        <li class="breadcrumb-item"><a href="/"><?php echo t('Home'); ?></a></li>
                         <li class="breadcrumb-item active"><?php echo t('Tasks'); ?></li>
                     </ol>
                 </div>

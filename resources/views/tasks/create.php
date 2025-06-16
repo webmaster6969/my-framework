@@ -23,7 +23,7 @@ $errors = (isset($errors) && is_array($errors)) ? array_filter($errors, fn($k) =
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="#"><?php echo t('Home'); ?></a></li>
+                        <li class="breadcrumb-item"><a href="/"><?php echo t('Home'); ?></a></li>
                         <li class="breadcrumb-item active"><?php echo t('Home'); ?></li>
                     </ol>
                 </div>
