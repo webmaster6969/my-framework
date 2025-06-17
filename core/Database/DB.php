@@ -64,4 +64,41 @@ class DB
         $conn = self::em()->getConnection();
         return $conn->executeStatement($sql, $params);
     }
+
+    /**
+     * @return void
+     * @throws Exception
+     */
+    public static function beginTransaction(): void
+    {
+        self::em()->getConnection()->beginTransaction();
+    }
+
+    /**
+     * @return void
+     * @throws Exception
+     */
+    public static function commit(): void
+    {
+        self::em()->getConnection()->commit();
+    }
+
+    /**
+     * Откатить транзакцию
+     *
+     * @return void
+     * @throws Exception
+     */
+    public static function rollback(): void
+    {
+        self::em()->getConnection()->rollBack();
+    }
+
+    /**
+     * @return bool
+     */
+    public static function inTransaction(): bool
+    {
+        return self::em()->getConnection()->isTransactionActive();
+    }
 }

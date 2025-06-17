@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\domain\Auth\Domain\Model\Entities;
 
 use App\domain\Task\Domain\Model\Entities\Task;
-use DateMalformedStringException;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -43,6 +42,12 @@ class User
     private string $password;
 
     /**
+     * @var ?string
+     */
+    #[ORM\Column(type: "string", length: 255)]
+    private ?string $encryption_key;
+
+    /**
      * @var string|null
      */
     #[ORM\Column(type: "string", length: 255, nullable: true)]
@@ -57,7 +62,7 @@ class User
     /**
      * @var Collection<int, Task>
      */
-    #[ORM\OneToMany(mappedBy: "user", targetEntity: Task::class, cascade: ["persist", "remove"])]
+    #[ORM\OneToMany(targetEntity: Task::class, mappedBy: "user", cascade: ["persist", "remove"])]
     private Collection $tasks;
 
     /**
@@ -73,13 +78,17 @@ class User
     private DateTimeImmutable $updated_at;
 
     /**
-     * @throws DateMalformedStringException
+     * @param string $name
+     * @param string $email
+     * @param string $password
+     * @param string|null $encryptionKey
      */
-    public function __construct(string $name, string $email, string $password)
+    public function __construct(string $name, string $email, string $password, ?string $encryptionKey = null)
     {
         $this->name = $name;
         $this->email = $email;
-        $this->password   = $password;
+        $this->password = $password;
+        $this->encryption_key = $encryptionKey;
         $this->telegramChatId = null;
         $this->tasks = new ArrayCollection();
     }
@@ -222,5 +231,22 @@ class User
     public function onPreUpdate(): void
     {
         $this->updated_at = new DateTimeImmutable();
+    }
+
+    /**
+     * @return ?string
+     */
+    public function getEncryptionKey(): ?string
+    {
+        return $this->encryption_key;
+    }
+
+    /**
+     * @param ?string $encryptionKey
+     * @return void
+     */
+    public function setEncryptionKey(?string $encryptionKey): void
+    {
+        $this->encryption_key = $encryptionKey;
     }
 }

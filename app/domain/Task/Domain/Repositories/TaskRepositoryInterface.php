@@ -47,9 +47,15 @@ interface TaskRepositoryInterface
 
     /**
      * @param User $user
+     * @return mixed
+     */
+    public function findByUserAll(User $user): mixed;
+
+    /**
+     * @param User $user
      * @param int $page
      * @param int $limit
      * @return mixed
      */
-    public function findByUserAll(User $user, int $page = 1, int $limit = 10): mixed;
+    public function findByUserPage(User $user, int $page = 1, int $limit = 10): mixed;
 }

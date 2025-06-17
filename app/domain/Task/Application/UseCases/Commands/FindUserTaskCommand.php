@@ -18,7 +18,7 @@ class FindUserTaskCommand implements CommandInterface
      */
     public function __construct(
         private readonly TaskRepository $taskRepository,
-        private readonly User $user,
+        private readonly User           $user,
         private readonly int            $task_id
     )
     {

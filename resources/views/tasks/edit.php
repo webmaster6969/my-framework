@@ -1,6 +1,7 @@
 <?php
 
 use App\domain\Task\Domain\Model\Entities\Task;
+use App\domain\Task\Services\TaskServices;
 use Core\Support\Csrf\Csrf;
 
 /** @var array<string, mixed> $errors */
@@ -55,7 +56,7 @@ $task = $task ?? null;
 
                                 <div class="form-group">
                                     <label for="description"><?php echo t('Description'); ?></label>
-                                    <textarea type="text" name="description" class="form-control" id="description" placeholder="<?php echo t('Enter description'); ?>">{{ $task->getDescription() }}</textarea>
+                                    <textarea type="text" name="description" class="form-control" id="description" placeholder="<?php echo t('Enter description'); ?>"><?php echo TaskServices::DecryptDescription($task); ?></textarea>
                                     <?php showErrors('description', $errors); ?>
                                 </div>
 

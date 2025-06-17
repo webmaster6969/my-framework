@@ -1,11 +1,18 @@
 <?php
 
+use App\domain\Auth\Domain\Exceptions\UserNotFoundException;
+use App\domain\Auth\Domain\Model\Entities\User;
 use Core\Support\Csrf\Csrf;
 
 $token = Csrf::token();
 
 /** @var array<string, mixed> $errors */
 $errors = isset($errors) && is_array($errors) ? $errors : [];
+
+/** @var ?User $user */
+if (empty($user)) {
+    throw new UserNotFoundException('User not found');
+}
 
 ?>
 
@@ -67,16 +74,23 @@ $errors = isset($errors) && is_array($errors) ? $errors : [];
                                 <div class="active tab-pane" id="settings">
                                     <form method="post" action="/profile/update" class="form-horizontal">
                                         <input type="hidden" name="csrf_token" value="<?php echo $token; ?>">
-
                                         <div class="form-group row">
-                                            <label for="inputName" class="col-sm-2 col-form-label"><?php echo t('Name'); ?></label>
+                                            <label for="name" class="col-sm-2 col-form-label"><?php echo t('Name'); ?></label>
                                             <div class="col-sm-10">
-                                                <input type="text" name="name" class="form-control" id="inputName"
+                                                <input type="text" name="name" class="form-control" id="name" value="{{ $user->getName() }}"
                                                        placeholder="<?php echo t('Enter name'); ?>">
                                                 <?php showErrors('name', $errors); ?>
                                             </div>
                                         </div>
 
+                                        <div class="form-group row">
+                                            <label for="encryptionKey" class="col-sm-2 col-form-label"><?php echo t('Encryption key'); ?></label>
+                                            <div class="col-sm-10">
+                                                <input type="text" name="encryption_key" class="form-control" id="encryptionKey" value="<?php echo $user->getEncryptionKey() ?? ''; ?>"
+                                                       placeholder="<?php echo t('Enter encryption key'); ?>">
+                                                <?php showErrors('encryption_key', $errors); ?>
+                                            </div>
+                                        </div>
                                         <div class="form-group row">
                                             <div class="offset-sm-2 col-sm-10">
                                                 <button type="submit" class="btn btn-danger"><?php echo t('Save'); ?></button>

@@ -84,12 +84,6 @@ class Task
     private string $status;
 
     /**
-     * @var bool
-     */
-    #[ORM\Column(type: "boolean")]
-    private bool $notified = false;
-
-    /**
      * @var DateTimeImmutable
      */
     #[ORM\Column(type: "datetime_immutable")]
@@ -117,18 +111,12 @@ class Task
         DateTime $end_task,
     )
     {
-        $encryptionKey = Env::get('ENCRYPTION_KEY');
-        if (empty($encryptionKey) || !is_string($encryptionKey)) {
-            throw new EncryptionKeyIsNotFindException('ENCRYPTION_KEY environment variable is not set');
-        }
-
         $this->user = $user;
         $this->title = $title;
-        $this->description = !empty($description) ? Crypt::encrypt($description, $encryptionKey) : null;
+        $this->description = $description;
         $this->start_task = $start_task;
         $this->end_task = $end_task;
         $this->status = $status;
-        $this->notified = false;
     }
 
     /**
@@ -187,26 +175,16 @@ class Task
      */
     public function getDescription(): ?string
     {
-        $encryptionKey = Env::get('ENCRYPTION_KEY');
-        if (empty($encryptionKey) || !is_string($encryptionKey)) {
-            throw new EncryptionKeyIsNotFindException('ENCRYPTION_KEY environment variable is not set');
-        }
-
-        return !empty($this->description) ? Crypt::decrypt($this->description, $encryptionKey) : null;
+        return $this->description;
     }
 
     /**
-     * @param string|null $desc
+     * @param string|null $description
      * @return void
      */
-    public function setDescription(?string $desc): void
+    public function setDescription(?string $description): void
     {
-        $encryptionKey = Env::get('ENCRYPTION_KEY');
-        if (empty($encryptionKey) || !is_string($encryptionKey)) {
-            throw new EncryptionKeyIsNotFindException('ENCRYPTION_KEY environment variable is not set');
-        }
-
-        $this->description = !empty($desc) ? Crypt::encrypt($desc, $encryptionKey) : null;
+        $this->description = $description;
     }
 
     /**
@@ -266,22 +244,6 @@ class Task
             throw new \InvalidArgumentException("Invalid status");
         }
         $this->status = $status;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isNotified(): bool
-    {
-        return $this->notified;
-    }
-
-    /**
-     * @return void
-     */
-    public function markNotified(): void
-    {
-        $this->notified = true;
     }
 
     /**

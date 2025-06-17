@@ -98,7 +98,7 @@ class TaskRepository implements TaskRepositoryInterface
      * @return Task[]
      * @phpstan-return array<Task>
      */
-    public function findByUserAll(User $user, int $page = 1, int $limit = 10): array
+    public function findByUserPage(User $user, int $page = 1, int $limit = 10): array
     {
         $page = max(1, $page);
         $offset = ($page - 1) * $limit;
@@ -113,6 +113,26 @@ class TaskRepository implements TaskRepositoryInterface
             ->orderBy('t.id', 'ASC')
             ->setFirstResult($offset)
             ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+
+        return $tasks;
+    }
+
+    /**
+     * @param User $user
+     * @return Task[]
+     */
+    public function findByUserAll(User $user): array
+    {
+        /** @var Task[] $tasks */
+        $tasks = $this->em
+            ->createQueryBuilder()
+            ->select('t')
+            ->from(Task::class, 't')
+            ->where('t.user = :userId')
+            ->setParameter('userId', $user->getId())
+            ->orderBy('t.id', 'ASC')
             ->getQuery()
             ->getResult();
 

@@ -7,12 +7,13 @@ namespace App\domain\Task\Presentation\HTTP;
 use App\domain\Auth\Services\AuthService;
 use App\domain\Common\Domain\Exceptions\ClearCacheException;
 use App\domain\Task\Application\Repositories\TaskRepository;
+use App\domain\Task\Services\TaskServices;
 use App\domain\Task\Application\UseCases\Commands\{
     DeleteTaskCommand,
     FindUserTaskCommand,
     StoreTaskCommand,
     UpdateTaskCommand,
-    UserTaskCommand
+    UserTaskPageCommand
 };
 use App\domain\Task\Domain\Exceptions\{
     NotCreateTaskException,
@@ -71,7 +72,7 @@ class TaskController
         $tasks = $cache->get($key);
 
         if (empty($tasks)) {
-            $command = new UserTaskCommand(new TaskRepository(DB::getEntityManager()), $user, 1);
+            $command = new UserTaskPageCommand(new TaskRepository(DB::getEntityManager()), $user, 1);
             $tasks = $command->execute();
             $cache->set($key, $tasks, 10);
         }
@@ -182,6 +183,7 @@ class TaskController
         }
 
         $task = new Task($user, $title, $description, $status, $start, $end);
+        TaskServices::EncryptDescription($task);
         $command = new StoreTaskCommand(new TaskRepository(DB::getEntityManager()), $task);
 
         if (!$command->execute()) {
@@ -299,6 +301,7 @@ class TaskController
 
         $task->setTitle($title);
         $task->setDescription($description);
+        TaskServices::EncryptDescription($task);
         $task->setStatus($status);
         $task->setStartTask($start);
         $task->setEndTask($end);

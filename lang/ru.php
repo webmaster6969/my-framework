@@ -89,4 +89,6 @@ return [
     'The :field must be one of the following values: :param' => ':field должен иметь одно из следующих значений: :param',
     'Storage' => 'Хранилище',
     'Two factor authentication' => 'Двухфакторная аутентификация',
+    'Encryption key' => 'Ключ шифрования',
+    'Enter encryption key' => 'Введите ключ шифрования',
 ];

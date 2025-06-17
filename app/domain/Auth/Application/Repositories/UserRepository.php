@@ -6,7 +6,6 @@ namespace App\domain\Auth\Application\Repositories;
 
 use App\domain\Auth\Domain\Model\Entities\User;
 use App\domain\Auth\Domain\Repositories\UserRepositoryInterface;
-use DateMalformedStringException;
 use Doctrine\ORM\EntityManagerInterface;
 
 class UserRepository implements UserRepositoryInterface
@@ -25,7 +24,10 @@ class UserRepository implements UserRepositoryInterface
     }
 
     /**
-     * @throws DateMalformedStringException
+     * @param string $name
+     * @param string $email
+     * @param string $password
+     * @return User
      */
     public function create(string $name, string $email, string $password): User
     {

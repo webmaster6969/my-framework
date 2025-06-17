@@ -41,11 +41,15 @@ class Validator
         $this->errors = [];
 
         foreach ($this->rules as $field => $rules) {
-            $rules = is_array($rules) ? $rules : explode('|', (string)$rules);
+            $rules = is_array($rules) ? $rules : explode('|', $rules);
+            $valueExists = array_key_exists($field, $this->data);
             $value = $this->data[$field] ?? null;
+
+            $hasRequired = in_array('required', $rules);
 
             foreach ($rules as $rule) {
                 $params = [];
+
                 if (str_contains($rule, ':')) {
                     [$ruleName, $paramStr] = explode(':', $rule, 2);
                     $params = explode(',', $paramStr);
@@ -55,12 +59,20 @@ class Validator
 
                 $method = 'validate' . ucfirst($ruleName);
 
-                if (method_exists($this, $method)) {
-                    if (!$this->$method($value, ...$params)) {
-                        $this->addError($field, $ruleName, $params);
+                if (!method_exists($this, $method)) {
+                    throw new ValidationNoFindMethodException("Method {$method} does not exist.");
+                }
+
+                if (!$hasRequired && (!$valueExists || empty($value))) {
+                    break;
+                }
+
+                if (!$this->$method($value, ...$params)) {
+                    $this->addError($field, $ruleName, $params);
+
+                    if ($ruleName === 'required') {
+                        break;
                     }
-                } else {
-                    throw new ValidationNoFindMethodException('Method ' . $method . ' does not exist.');
                 }
             }
         }

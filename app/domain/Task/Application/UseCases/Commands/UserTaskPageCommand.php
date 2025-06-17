@@ -9,7 +9,7 @@ use App\domain\Common\Domain\CommandInterface;
 use App\domain\Task\Application\Repositories\TaskRepository;
 use App\domain\Task\Domain\Model\Entities\Task;
 
-class FindUserAllTaskCommand implements CommandInterface
+class UserTaskPageCommand implements CommandInterface
 {
     /**
      * @param TaskRepository $taskRepository
@@ -19,16 +19,14 @@ class FindUserAllTaskCommand implements CommandInterface
     public function __construct(
         private readonly TaskRepository $taskRepository,
         private readonly User           $user,
-        private readonly int            $page
-    )
-    {
-    }
+        private readonly int            $page,
+    ) {}
 
     /**
      * @return Task[]
      */
     public function execute(): array
     {
-        return $this->taskRepository->findByUserAll($this->user, $this->page);
+        return $this->taskRepository->findByUserPage($this->user, $this->page);
     }
 }

@@ -9,17 +9,15 @@ use App\domain\Common\Domain\CommandInterface;
 use App\domain\Task\Application\Repositories\TaskRepository;
 use App\domain\Task\Domain\Model\Entities\Task;
 
-class UserTaskCommand implements CommandInterface
+class UserTaskAllCommand implements CommandInterface
 {
     /**
      * @param TaskRepository $taskRepository
      * @param User $user
-     * @param int $page
      */
     public function __construct(
         private readonly TaskRepository $taskRepository,
         private readonly User           $user,
-        private readonly int            $page
     ) {}
 
     /**
@@ -27,8 +25,6 @@ class UserTaskCommand implements CommandInterface
      */
     public function execute(): array
     {
-        /** @var Task[] $tasks */
-        $tasks = $this->taskRepository->findByUserAll($this->user, $this->page);
-        return $tasks;
+        return $this->taskRepository->findByUserAll($this->user);
     }
 }
