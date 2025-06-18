@@ -63,7 +63,7 @@ class AuthController
         $password = is_string($data['password']) ? $data['password'] : '';
 
         $validator = new Validator($data, [
-            'email' => 'required|min:4|max:150',
+            'email' => 'required|min:4|max:255',
             'password' => 'required|min:4|max:255',
         ]);
 
@@ -86,8 +86,8 @@ class AuthController
                 ->with('data', $data)
                 ->withErrors(
                     [
-                        'email' => [t('The entered data is incorrect')],
-                        'password' => [t('The entered data is incorrect')],
+                        'email' => [t('Incorrect email address or password')],
+                        'password' => [t('Incorrect email address or password')],
                     ]
                 )
         );
@@ -103,8 +103,8 @@ class AuthController
         $data = Request::only(['name', 'email', 'password']);
 
         $rules = [
-            'name' => 'required|min:3|max:150',
-            'email' => 'required|min:4|max:150',
+            'name' => 'required|min:3|max:100',
+            'email' => 'required|min:4|max:255',
             'password' => 'required|min:4|max:255',
         ];
 

@@ -64,7 +64,8 @@ if (empty($user)) {
                         <div class="card-header p-2">
                             <ul class="nav nav-pills">
                                 <li class="nav-item">
-                                    <a class="nav-link active" href="#settings" data-toggle="tab"><?php echo t('Settings'); ?></a>
+                                    <a class="nav-link active" href="#settings"
+                                       data-toggle="tab"><?php echo t('Settings'); ?></a>
                                 </li>
                             </ul>
                         </div>
@@ -75,25 +76,41 @@ if (empty($user)) {
                                     <form method="post" action="/profile/update" class="form-horizontal">
                                         <input type="hidden" name="csrf_token" value="<?php echo $token; ?>">
                                         <div class="form-group row">
-                                            <label for="name" class="col-sm-2 col-form-label"><?php echo t('Name'); ?></label>
+                                            <label for="name"
+                                                   class="col-sm-2 col-form-label"><?php echo t('Name'); ?></label>
                                             <div class="col-sm-10">
-                                                <input type="text" name="name" class="form-control" id="name" value="{{ $user->getName() }}"
+                                                <input type="text" name="name" class="form-control" id="name"
+                                                       value="{{ $user->getName() }}"
                                                        placeholder="<?php echo t('Enter name'); ?>">
                                                 <?php showErrors('name', $errors); ?>
                                             </div>
                                         </div>
 
                                         <div class="form-group row">
-                                            <label for="encryptionKey" class="col-sm-2 col-form-label"><?php echo t('Encryption key'); ?></label>
+                                            <label for="encryptionKey"
+                                                   class="col-sm-2 col-form-label"><?php echo t('Encryption key'); ?></label>
                                             <div class="col-sm-10">
-                                                <input type="text" name="encryption_key" class="form-control" id="encryptionKey" value="<?php echo $user->getEncryptionKey() ?? ''; ?>"
+                                                <input type="text" name="encryption_key" class="form-control"
+                                                       id="encryptionKey"
+                                                       value="<?php echo $user->getEncryptionKey() ?? ''; ?>"
                                                        placeholder="<?php echo t('Enter encryption key'); ?>">
-                                                <?php showErrors('encryption_key', $errors); ?>
+                                                <div class="text-danger mt-1">
+                                                    <?php showErrors('encryption_key', $errors); ?>
+                                                </div>
+                                                <button type="button" class="btn btn-success mt-2"
+                                                        onclick="generateEncryptionKey()">
+                                                    <?php echo t('Generate encryption key'); ?>
+                                                </button>
+                                                <button type="button" class="btn btn-warning mt-2"
+                                                        onclick="location.reload()">
+                                                    <?php echo t('Restore default encryption key'); ?>
+                                                </button>
                                             </div>
                                         </div>
                                         <div class="form-group row">
                                             <div class="offset-sm-2 col-sm-10">
-                                                <button type="submit" class="btn btn-danger"><?php echo t('Save'); ?></button>
+                                                <button type="submit"
+                                                        class="btn btn-danger"><?php echo t('Save'); ?></button>
                                             </div>
                                         </div>
                                     </form>
@@ -106,5 +123,17 @@ if (empty($user)) {
         </div>
     </section>
 </div>
+
+<script>
+    function generateEncryptionKey() {
+        const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        const length = 32;
+        let key = '';
+        for (let i = 0; i < length; i++) {
+            key += charset.charAt(Math.floor(Math.random() * charset.length));
+        }
+        document.getElementById('encryptionKey').value = key;
+    }
+</script>
 
 @include('partials.footer')

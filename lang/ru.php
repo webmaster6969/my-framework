@@ -82,7 +82,6 @@ return [
     'Error in field :field' => 'Ошибка в поле :field',
     'Invalid code' => 'Неверный код',
     'The code must be a 6-digit number' => 'Код должен состоять из 6 цифр',
-    'The entered data is incorrect' => 'Введенные данные неверны',
     'In_progress' => 'В процессе',
     'Done' => 'Выполнено',
     'Canceled' => 'Отменено',
@@ -91,4 +90,7 @@ return [
     'Two factor authentication' => 'Двухфакторная аутентификация',
     'Encryption key' => 'Ключ шифрования',
     'Enter encryption key' => 'Введите ключ шифрования',
+    'Generate encryption key' => 'Сгенерировать ключ шифрования',
+    'Restore default encryption key' => 'Восстановить ключ шифрования по умолчанию',
+    'Incorrect email address or password' => 'Неверная электронная почта или пароль',
 ];

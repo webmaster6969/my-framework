@@ -60,7 +60,7 @@ class ProfileController
         ];
 
         $rules = [
-            'name' => 'required|min:3|max:255',
+            'name' => 'required|min:3|max:100',
             'encryption_key' => 'min:10|max:255',
         ];
 
