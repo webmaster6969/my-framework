@@ -8,7 +8,7 @@ use App\domain\Common\Domain\CommandInterface;
 use App\domain\Storage\Application\Repositories\StorageRepository;
 use Core\Storage\File;
 
-class UplodeCommand implements CommandInterface
+class UploadCommand implements CommandInterface
 {
     /**
      * @param StorageRepository $storageRepository
@@ -26,6 +26,6 @@ class UplodeCommand implements CommandInterface
      */
     public function execute(): bool
     {
-        return $this->storageRepository->uplode($this->file);
+        return $this->storageRepository->upload($this->file);
     }
 }

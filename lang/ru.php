@@ -4,7 +4,6 @@ return [
     'Register' => 'Регистрация',
     'Profile' => 'Профиль',
     'Tasks' => 'Задачи',
-    'Uplode file' => 'Загрузить файл',
     'Two factory' => 'Двухфакторная аутентификация',
     'Logout' => 'Выйти',
     'Edit' => 'Редактировать',
@@ -93,4 +92,5 @@ return [
     'Generate encryption key' => 'Сгенерировать ключ шифрования',
     'Restore default encryption key' => 'Восстановить ключ шифрования по умолчанию',
     'Incorrect email address or password' => 'Неверная электронная почта или пароль',
+    'Working with files' => 'Работа с файлами',
 ];

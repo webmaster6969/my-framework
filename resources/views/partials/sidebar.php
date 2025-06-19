@@ -72,7 +72,7 @@ function active(string $path): string
                         <li class="nav-item">
                             <a href="/storage" class="nav-link <?php echo active('/storage'); ?>">
                                 <i class="far fa-circle nav-icon"></i>
-                                <p><?php echo t('Uplode file'); ?></p>
+                                <p><?php echo t('Working with files'); ?></p>
                             </a>
                         </li>
                         <li class="nav-item">

@@ -12,7 +12,7 @@ interface StorageRepositoryInterface
      * @param File $file
      * @return bool
      */
-    public function uplode(File $file): bool;
+    public function upload(File $file): bool;
 
     /**
      * @param File $file

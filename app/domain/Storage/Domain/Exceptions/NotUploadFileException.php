@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\domain\Storage\Domain\Exceptions;
 
-class NotUplodeFileException extends \DomainException
+class NotUploadFileException extends \DomainException
 {
     /**
      * @param string $message

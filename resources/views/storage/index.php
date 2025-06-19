@@ -18,12 +18,12 @@ $errors = isset($errors) && is_array($errors) ? $errors : [];
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1><?php echo t('Upload file'); ?></h1>
+                    <h1><?php echo t('Working with files'); ?></h1>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="/"><?php echo t('Home'); ?></a></li>
-                        <li class="breadcrumb-item active"><?php echo t('Upload file'); ?></li>
+                        <li class="breadcrumb-item active"><?php echo t('Working with files'); ?></li>
                     </ol>
                 </div>
             </div>

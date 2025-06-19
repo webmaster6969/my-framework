@@ -6,8 +6,8 @@ namespace App\domain\Storage\Presentation\HTTP;
 
 use App\domain\Storage\Application\Repositories\StorageRepository;
 use App\domain\Storage\Application\UseCases\Commands\MoveCommand;
-use App\domain\Storage\Application\UseCases\Commands\UplodeCommand;
-use App\domain\Storage\Domain\Exceptions\NotUplodeFileException;
+use App\domain\Storage\Application\UseCases\Commands\UploadCommand;
+use App\domain\Storage\Domain\Exceptions\NotUploadFileException;
 use Core\Response\Response;
 use Core\Routing\Redirect;
 use Core\Storage\File;
@@ -24,7 +24,7 @@ class StorageController
     public function index(): Response
     {
         $view = new View('storage.index', ['errors' => Session::error()])
-            ->with('title', t('Storage'));
+            ->with('title', t('Working with files'));
 
         return Response::make($view)
             ->withHeaders(['Content-Type' => 'text/html',])
@@ -34,7 +34,7 @@ class StorageController
     /**
      * @return Response
      */
-    public function uplode(): Response
+    public function upload(): Response
     {
         $data = [
             'file' => $_FILES['file'] ?? null,
@@ -56,21 +56,21 @@ class StorageController
         $file = File::fromGlobals('file');
 
         if ($file === null) {
-            throw new NotUplodeFileException('File not uploaded or invalid');
+            throw new NotUploadFileException('File not uploaded or invalid');
         }
 
-        $uplodeCommand = new UplodeCommand(new StorageRepository(), $file);
-        $uplodeCommandExecute = $uplodeCommand->execute();
+        $uploadCommand = new UploadCommand(new StorageRepository(), $file);
+        $uploadCommandExecute = $uploadCommand->execute();
 
-        if (!$uplodeCommandExecute) {
-            throw new NotUplodeFileException('Not upload file');
+        if (!$uploadCommandExecute) {
+            throw new NotUploadFileException('Not upload file');
         }
 
         $moveCommand = new MoveCommand(new StorageRepository(), $file, 'app');
         $moveExecute = $moveCommand->execute();
 
         if (!$moveExecute) {
-            throw new NotUplodeFileException('Not upload file');
+            throw new NotUploadFileException('Not upload file');
         }
 
         return Response::make(Redirect::to('/storage'));

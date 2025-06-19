@@ -11,7 +11,7 @@ use Core\Support\App\App;
 
 class StorageRepository implements StorageRepositoryInterface
 {
-    public function uplode(File $file): bool
+    public function upload(File $file): bool
     {
         return $this->move($file, 'temporary');
     }

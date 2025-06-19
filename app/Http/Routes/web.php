@@ -21,7 +21,7 @@ $router->group([
     'middleware' => [AuthMiddleware::class, TwoFactoryMiddleware::class],
 ], function (Router $router) {
     $router->get('/storage', [StorageController::class, 'index']);
-    $router->post('/storage', [StorageController::class, 'uplode'])->middleware([CsrfMiddleware::class]);;
+    $router->post('/storage', [StorageController::class, 'upload'])->middleware([CsrfMiddleware::class]);;
     $router->get('/profile', [ProfileController::class, 'index']);
     $router->post('/profile/update', [ProfileController::class, 'update'])->middleware([CsrfMiddleware::class]);;
 

@@ -158,6 +158,8 @@ class TotpController
         $disableTwoFactoryCommand = new DisableTwoFactoryCommand(new UserRepository(DB::getEntityManager()), $user);
         $disableTwoFactoryCommand->execute();
 
+        Session::set('two_factor_auth', false);
+
         return Response::make(Redirect::to('/two-factory'));
     }
 
