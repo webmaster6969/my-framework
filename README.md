@@ -98,15 +98,30 @@
 
 ```
 my-framework/
-├── app/                # Контроллеры, сервисы и т.п.
+├── apache/             # Настройки Apache
+├── app/                # Контроллеры, сервисы и т.п
+├── bootstrap/          # Загрузка зависимостей и обработка данных от клиента
+├── config/             # Конфигурации фреймворка
+├── core/               # Ядро фреймворка
+├── lang/               # Языковые файлы
+├── logs/               # Логи
+├── migrations/         # Миграции
+├── php/                # PHP конфигурации
 ├── public/             # Корневая директория (index.php)
-├── config/             # Конфигурации
-├── routes/             # Определения маршрутов
-├── src/                # Вспомогательные классы и библиотеки
-├── .env.example
-├── Dockerfile
-├── docker-compose.yml
-└── README.md
+├── resources/          # Ресурсы и views
+├── storage/            # Хранилище
+├── tests/              # Тесты
+├── .env.example        # Файл окружения
+├── .env-test           # Файл окружения для тестов
+├── .gitattributes      # Файл атрибутов Git
+├── .gitignore          # Файл игнорирования Git
+├── cli-doctrine.php    # Консоль Doctrine
+├── composer.json       # Файл конфигурации Composer
+├── composer.lock       # Файл с зависимостями Composer
+├── docker-compose.yml  # Docker-compose
+├── Dockerfile          # Dockerfile
+├── phpstan.neon        # PHPStan конфигурация
+└── README.md           # README файл
 ```
 
 ---

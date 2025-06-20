@@ -93,7 +93,7 @@ class Validator
             'min' => 'The :field must contain at least :param characters',
             'max' => 'The :field must contain a maximum of :param characters.',
             'date_format' => 'The :field field must be in the :param format',
-            'mimes' => 'The file in the :field must be one of the following types: :param',
+            'mimes' => 'The file in the :field must be one of the following formats: :param',
             'mimetypes' => 'The file in the :field must have a MIME type of: :param',
             'in' => 'The :field must be one of the following values: :param',
         ];
