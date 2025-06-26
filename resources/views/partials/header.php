@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
     <link rel="stylesheet" href="/plugins/adminlte/css/adminlte.min.css">
     <link rel="stylesheet" href="/plugins/flag-icon-css/css/flag-icon.min.css">
+    <link rel="stylesheet" href="/plugins/select2/css/select2.min.css">
 
 </head>
 <body class="hold-transition">

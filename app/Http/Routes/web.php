@@ -27,6 +27,7 @@ $router->group([
 
     $router->get('/', [TaskController::class, 'index']);
     $router->get('/tasks', [TaskController::class, 'index']);
+    $router->post('/tasks/search', [TaskController::class, 'filterTasks']);
     $router->get('/tasks/create', [TaskController::class, 'create']);
     $router->get('/tasks/edit/', [TaskController::class, 'edit']);
     $router->get('/tasks/delete/', [TaskController::class, 'delete']);

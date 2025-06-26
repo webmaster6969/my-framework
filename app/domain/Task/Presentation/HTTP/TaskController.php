@@ -8,8 +8,8 @@ use App\domain\Auth\Services\AuthService;
 use App\domain\Common\Domain\Exceptions\ClearCacheException;
 use App\domain\Task\Application\Repositories\TaskRepository;
 use App\domain\Task\Services\TaskServices;
-use App\domain\Task\Application\UseCases\Commands\{
-    DeleteTaskCommand,
+use App\domain\Task\Application\UseCases\Commands\{DeleteTaskCommand,
+    SearchUserTaskCommand,
     FindUserTaskCommand,
     StoreTaskCommand,
     UpdateTaskCommand,
@@ -80,6 +80,44 @@ class TaskController
         return Response::make(
             new View('tasks.index', compact('tasks'))->with('title', t('Tasks'))
         )->withHeaders(['Content-Type' => 'text/html'])->withStatus(200);
+    }
+
+    /**
+     * @return Response
+     */
+    public function filterTasks(): Response
+    {
+        $user = AuthService::getUser();
+        if (empty($user)) {
+            return Response::make(Redirect::to('/login'));
+        }
+
+        /** @var array<string,mixed> $data */
+        $data = Request::only(['search_title', 'search_status']);
+
+        $searchTitle = is_string($data['search_title'] ?? null)
+            ? $data['search_title']
+            : '';
+
+        /** @var list<string> $searchStatus */
+        $searchStatus = isset($data['search_status']) && is_array($data['search_status'])
+            ? array_values(array_filter($data['search_status'], 'is_string'))
+            : [];
+
+        $command = new SearchUserTaskCommand(
+            new TaskRepository(DB::getEntityManager()),
+            $user,
+            $searchTitle,
+            $searchStatus
+        );
+
+        $tasks = $command->execute();
+
+        return Response::make(
+            new View('tasks.index', ['tasks' => $tasks, 'data' => $data])
+                ->with('title', t('Tasks'))
+        )->withHeaders(['Content-Type' => 'text/html'])
+            ->withStatus(200);
     }
 
     /**
@@ -350,6 +388,9 @@ class TaskController
         return Response::make(Redirect::to('/tasks'));
     }
 
+    /**
+     * @return Cache
+     */
     private function getCache(): Cache
     {
         return new Cache(App::getBasePath() . DIRECTORY_SEPARATOR . 'storage/cache');

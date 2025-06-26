@@ -5,9 +5,6 @@ declare(strict_types=1);
 namespace App\domain\Task\Domain\Model\Entities;
 
 use App\domain\Auth\Domain\Model\Entities\User;
-use App\domain\Common\Domain\Exceptions\EncryptionKeyIsNotFindException;
-use Core\Support\Crypt\Crypt;
-use Core\Support\Env\Env;
 use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
@@ -99,6 +96,7 @@ class Task
      * @param User $user
      * @param string $title
      * @param string $description
+     * @param string $status
      * @param DateTime $start_task
      * @param DateTime $end_task
      */

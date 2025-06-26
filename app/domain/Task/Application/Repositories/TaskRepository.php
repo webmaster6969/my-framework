@@ -147,4 +147,35 @@ class TaskRepository implements TaskRepositoryInterface
     {
         return $this->em->getRepository(Task::class)->find($id);
     }
+
+    /**
+     * @param User $user
+     * @param string|null $title
+     * @param list<string>|null $status
+     * @return Task[]
+     */
+    public function searchByUser(User $user, ?string $title, ?array $status): array
+    {
+        $em = $this->em;
+        $qb = $em->createQueryBuilder();
+        $qb->select('t')
+            ->from(Task::class, 't')
+            ->where('t.user = :userId')
+            ->setParameter('userId', $user->getId());
+
+        if ($title) {
+            $qb->andWhere('t.title LIKE :title')
+                ->setParameter('title', "%$title%");
+        }
+
+        if ($status) {
+            $qb->andWhere('t.status IN (:status)')
+                ->setParameter('status', $status);
+        }
+
+        /** @var Task[] $tasks */
+        $tasks = $qb->getQuery()->getResult();
+
+        return $tasks;
+    }
 }

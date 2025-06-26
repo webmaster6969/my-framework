@@ -27,6 +27,7 @@ use App\domain\Task\Domain\Model\Entities\Task;
     </section>
 
     <section class="content">
+        @include('tasks.filter')
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title"><?php echo t('Tasks'); ?></h3>
@@ -40,7 +41,7 @@ use App\domain\Task\Domain\Model\Entities\Task;
                     <thead>
                     <tr>
                         <th style="width: 1%">#</th>
-                        <th style="width: 20%"><?php echo t('Task Name'); ?></th>
+                        <th style="width: 20%"><?php echo t('Task title'); ?></th>
                         <th style="width: 8%" class="text-center"><?php echo t('Status'); ?></th>
                         <th style="width: 20%"></th>
                     </tr>
@@ -90,3 +91,9 @@ use App\domain\Task\Domain\Model\Entities\Task;
 </div>
 
 @include('partials.footer')
+
+<script>
+    $(function () {
+        $('.select2').select2()
+    });
+</script>

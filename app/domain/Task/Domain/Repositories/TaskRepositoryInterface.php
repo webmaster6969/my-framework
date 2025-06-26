@@ -33,29 +33,33 @@ interface TaskRepositoryInterface
      */
     public function find(int $id): ?Task;
 
-    /**
-     * @return Task[]
-     */
+    /** @return list<Task> */
     public function findAll(): array;
 
     /**
      * @param User $user
-     * @param int $task_id
-     * @return mixed
+     * @param int  $task_id
+     * @return Task|null
      */
-    public function findByUser(User $user, int $task_id): mixed;
+    public function findByUser(User $user, int $task_id): ?Task;
 
     /**
-     * @param User $user
-     * @return mixed
+     * @param User              $user
+     * @param string|null       $title
+     * @param list<string>|null $status
+     * @return list<Task>
      */
-    public function findByUserAll(User $user): mixed;
+    public function searchByUser(User $user, ?string $title, ?array $status): array;
+
+    /** @return list<Task> */
+    public function findByUserAll(User $user): array;
 
     /**
-     * @param User $user
-     * @param int $page
-     * @param int $limit
-     * @return mixed
+     * @return list<Task>
      */
-    public function findByUserPage(User $user, int $page = 1, int $limit = 10): mixed;
+    public function findByUserPage(
+        User $user,
+        int $page = 1,
+        int $limit = 10
+    ): array;
 }

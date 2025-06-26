@@ -10,7 +10,7 @@ return [
     'Delete' => 'Удалить',
     'Delete task' => 'Удалить задачу',
     'Dashboard' => 'Панель управления',
-    'Task Name' => 'Название задачи',
+    'Task title' => 'Название задачи',
     'Status' => 'Статус',
     'Add new task' => 'Добавить задачу',
     'No tasks found' => 'Задачи не найдены',
@@ -93,4 +93,7 @@ return [
     'Restore default encryption key' => 'Восстановить ключ шифрования по умолчанию',
     'Incorrect email address or password' => 'Неверная электронная почта или пароль',
     'Working with files' => 'Работа с файлами',
+    'Search by title' => 'Поиск по названию',
+    'Search by status' => 'Поиск по статусу',
+    'Any' => 'Все',
 ];
