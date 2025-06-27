@@ -44,6 +44,7 @@ $statuses = isset($data['search_status']) && is_array($data['search_status']) ? 
                 <div class="col-12">
                     <div class="form-group">
                         <button type="submit" class="btn btn-primary"><?php echo t('Search'); ?></button>
+                        <a href="/tasks" class="btn btn-default"><?php echo t('Reset search'); ?></a>
                     </div>
                 </div>
             </div>

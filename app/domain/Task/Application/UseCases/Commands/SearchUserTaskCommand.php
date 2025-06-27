@@ -21,7 +21,7 @@ class SearchUserTaskCommand implements CommandInterface
         private readonly TaskRepository $taskRepository,
         private readonly User           $user,
         private readonly ?string        $title,
-        private readonly ?array         $status,   // ← тип “array”, но PHPDoc уточняет «list<string>|null»
+        private readonly ?array         $status,
     )
     {
     }

@@ -96,4 +96,5 @@ return [
     'Search by title' => 'Поиск по названию',
     'Search by status' => 'Поиск по статусу',
     'Any' => 'Все',
+    'Reset search' => 'Сбросить поиск',
 ];

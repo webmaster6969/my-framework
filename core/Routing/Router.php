@@ -121,23 +121,31 @@ class Router
     public function dispatch(Request $request): void
     {
         foreach ($this->routes as $route) {
-            if ($route->method === $request->method() && $route->uri === $request->path()) {
+
+            $sameMethod = $route->method === $request->method();
+            $samePath = $this->normalizePath($route->uri) === $this->normalizePath($request->path());
+
+            if ($sameMethod && $samePath) {
+
                 $params = $route->match($request->path());
+
 
                 if ($params !== false) {
                     $handler = function () use ($route, $params): mixed {
                         [$class, $method] = $route->action;
-                        return new $class()->$method(...array_values($params));
+                        return (new $class())->$method(...array_values($params));
                     };
 
-                    $middlewares = array_map(function (string $middlewareClass): MiddlewareInterface {
-                        $middleware = new $middlewareClass();
-                        if (!$middleware instanceof MiddlewareInterface) {
-                            throw new \RuntimeException("Middleware must implement MiddlewareInterface");
-                        }
-                        return $middleware;
-                    }, $route->middleware);
-
+                    $middlewares = array_map(
+                        static function (string $class): MiddlewareInterface {
+                            $m = new $class();
+                            if (!$m instanceof MiddlewareInterface) {
+                                throw new \RuntimeException('Middleware must implement MiddlewareInterface');
+                            }
+                            return $m;
+                        },
+                        $route->middleware
+                    );
 
                     $kernel = new Kernel($middlewares);
                     $response = $kernel->handle($handler);
@@ -146,15 +154,25 @@ class Router
                         $response->send();
                     } else {
                         http_response_code(500);
-                        echo "Invalid response from handler.";
+                        echo 'Invalid response from handler.';
                     }
-
                     return;
                 }
             }
         }
 
         http_response_code(404);
-        echo "404 Not Found";
+        echo '404 Not Found';
+    }
+
+    /**
+     * @param string $path
+     * @return string
+     */
+    private function normalizePath(string $path): string
+    {
+        $path = rtrim((string)parse_url($path, PHP_URL_PATH), '/');
+
+        return $path === '' ? '/' : '/' . $path;
     }
 }

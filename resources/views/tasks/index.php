@@ -27,7 +27,7 @@ use App\domain\Task\Domain\Model\Entities\Task;
     </section>
 
     <section class="content">
-        @include('tasks.filter')
+        @include('tasks.search')
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title"><?php echo t('Tasks'); ?></h3>

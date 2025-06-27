@@ -49,8 +49,17 @@ class Route
      */
     public function match(string $requestUri): array|false
     {
-        $pattern = preg_replace('#\{([\w]+)\}#', '(?P<$1>[^/]+)', $this->uri);
-        $pattern = '#^' . $pattern . '$#';
+        $requestUri = parse_url($requestUri, PHP_URL_PATH);
+
+        if ($requestUri === false || $requestUri === null) {
+            $requestUri = '/';
+        }
+
+        $requestUri = rtrim($requestUri, '/') ?: '/';
+        $routePath = rtrim($this->uri, '/') ?: '/';
+
+        $pattern = preg_replace('#\{([\w]+)}#', '(?P<$1>[^/]+)', $routePath);
+        $pattern = '#^' . $pattern . '/?$#';
 
         if (preg_match($pattern, $requestUri, $matches)) {
             return array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
@@ -58,6 +67,4 @@ class Route
 
         return false;
     }
-
-
 }
