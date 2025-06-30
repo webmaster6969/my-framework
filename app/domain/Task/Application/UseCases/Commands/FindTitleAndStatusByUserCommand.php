@@ -9,7 +9,7 @@ use App\domain\Common\Domain\CommandInterface;
 use App\domain\Task\Application\Repositories\TaskRepository;
 use App\domain\Task\Domain\Model\Entities\Task;
 
-class SearchUserTaskCommand implements CommandInterface
+class FindTitleAndStatusByUserCommand implements CommandInterface
 {
     /**
      * @param TaskRepository $taskRepository
@@ -33,7 +33,7 @@ class SearchUserTaskCommand implements CommandInterface
     {
         /** @var list<Task> $tasks */
         $tasks = $this->taskRepository
-            ->searchByUser($this->user, $this->title, $this->status);
+            ->findTitleAndStatusByUser($this->user, $this->title, $this->status);
 
         return $tasks;
     }

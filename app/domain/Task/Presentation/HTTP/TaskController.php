@@ -9,7 +9,7 @@ use App\domain\Common\Domain\Exceptions\ClearCacheException;
 use App\domain\Task\Application\Repositories\TaskRepository;
 use App\domain\Task\Services\TaskServices;
 use App\domain\Task\Application\UseCases\Commands\{DeleteTaskCommand,
-    SearchUserTaskCommand,
+    FindTitleAndStatusByUserCommand,
     FindUserTaskCommand,
     StoreTaskCommand,
     UpdateTaskCommand,
@@ -104,7 +104,7 @@ class TaskController
             ? array_values(array_filter($data['search_status'], 'is_string'))
             : [];
 
-        $command = new SearchUserTaskCommand(
+        $command = new FindTitleAndStatusByUserCommand(
             new TaskRepository(DB::getEntityManager()),
             $user,
             $searchTitle,

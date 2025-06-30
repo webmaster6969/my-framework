@@ -7,6 +7,7 @@ namespace App\domain\Task\Application\Repositories;
 use App\domain\Auth\Domain\Model\Entities\User;
 use App\domain\Task\Domain\Model\Entities\Task;
 use App\domain\Task\Domain\Repositories\TaskRepositoryInterface;
+use DateTimeInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
 class TaskRepository implements TaskRepositoryInterface
@@ -154,7 +155,7 @@ class TaskRepository implements TaskRepositoryInterface
      * @param list<string>|null $status
      * @return Task[]
      */
-    public function searchByUser(User $user, ?string $title, ?array $status): array
+    public function findTitleAndStatusByUser(User $user, ?string $title, ?array $status): array
     {
         $em = $this->em;
         $qb = $em->createQueryBuilder();
@@ -172,6 +173,28 @@ class TaskRepository implements TaskRepositoryInterface
             $qb->andWhere('t.status IN (:status)')
                 ->setParameter('status', $status);
         }
+
+        /** @var Task[] $tasks */
+        $tasks = $qb->getQuery()->getResult();
+
+        return $tasks;
+    }
+
+    /**
+     * @param DateTimeInterface $endTask
+     * @param list<string> $status
+     * @return Task[]
+     */
+    public function findEndTaskAndStatus(DateTimeInterface $endTask, array $status): array
+    {
+        $em = $this->em;
+        $qb = $em->createQueryBuilder();
+        $qb->select('t')
+            ->from(Task::class, 't')
+            ->where('t.end_task <= :endTask')
+            ->andWhere('t.status IN (:status)')
+            ->setParameter('endTask', $endTask->format('Y-m-d H:i:s'))
+            ->setParameter('status', $status);
 
         /** @var Task[] $tasks */
         $tasks = $qb->getQuery()->getResult();

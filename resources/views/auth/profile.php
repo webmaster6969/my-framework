@@ -49,12 +49,8 @@ if (empty($user)) {
                                      src="/plugins/adminlte/img/user4-128x128.jpg"
                                      alt="User profile picture">
                             </div>
-
                             <h3 class="profile-username text-center">{{ $user->getName() }}</h3>
-
                             <p class="text-muted text-center"><?php echo t('Profile'); ?></p>
-
-                            <a href="#" class="btn btn-primary btn-block"><b><?php echo t('Follow'); ?></b></a>
                         </div>
                     </div>
                 </div>
@@ -97,7 +93,7 @@ if (empty($user)) {
                                                 <div class="text-danger mt-1">
                                                     <?php showErrors('encryption_key', $errors); ?>
                                                 </div>
-                                                <button type="button" class="btn btn-success mt-2"
+                                                <button type="button" class="btn btn-info mt-2"
                                                         onclick="generateEncryptionKey()">
                                                     <?php echo t('Generate encryption key'); ?>
                                                 </button>
@@ -110,7 +106,7 @@ if (empty($user)) {
                                         <div class="form-group row">
                                             <div class="offset-sm-2 col-sm-10">
                                                 <button type="submit"
-                                                        class="btn btn-danger"><?php echo t('Save'); ?></button>
+                                                        class="btn btn-success"><?php echo t('Save'); ?></button>
                                             </div>
                                         </div>
                                     </form>
