@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\domain\Task\Application\UseCases\Commands;
+namespace App\domain\Task\Application\UseCases\Queries;
 
 use App\domain\Auth\Domain\Model\Entities\User;
 use App\domain\Common\Domain\CommandInterface;

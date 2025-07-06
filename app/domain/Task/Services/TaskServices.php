@@ -8,7 +8,7 @@ use App\domain\Auth\Services\AuthService;
 use App\domain\Common\Domain\Exceptions\EncryptionKeyIsNotFindException;
 use App\domain\Task\Application\Repositories\TaskRepository;
 use App\domain\Task\Application\UseCases\Commands\UpdateTaskCommand;
-use App\domain\Task\Application\UseCases\Commands\UserTaskAllCommand;
+use App\domain\Task\Application\UseCases\Queries\UserTaskAllCommand;
 use App\domain\Task\Domain\Exceptions\NotCreateTaskException;
 use App\domain\Task\Domain\Model\Entities\Task;
 use Core\Database\DB;
@@ -16,7 +16,6 @@ use Core\Support\Crypt\Crypt;
 use Core\Support\Env\Env;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
-use Mockery\Exception;
 
 class TaskServices
 {

@@ -3,7 +3,7 @@
 namespace App\domain\Task\Application\ConsoleCommand;
 
 use App\domain\Task\Application\Repositories\TaskRepository;
-use App\domain\Task\Application\UseCases\Commands\FindStatusAndEndTaskCommand;
+use App\domain\Task\Application\UseCases\Queries\FindStatusAndEndTaskCommand;
 use App\domain\Task\Domain\Model\Entities\Task;
 use Core\Console\Command;
 use Core\Database\DB;

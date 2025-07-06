@@ -7,19 +7,13 @@ namespace App\domain\Task\Presentation\HTTP;
 use App\domain\Auth\Services\AuthService;
 use App\domain\Common\Domain\Exceptions\ClearCacheException;
 use App\domain\Task\Application\Repositories\TaskRepository;
-use App\domain\Task\Services\TaskServices;
-use App\domain\Task\Application\UseCases\Commands\{DeleteTaskCommand,
-    FindTitleAndStatusByUserCommand,
-    FindUserTaskCommand,
-    StoreTaskCommand,
-    UpdateTaskCommand,
-    UserTaskPageCommand
-};
-use App\domain\Task\Domain\Exceptions\{
-    NotCreateTaskException,
-    NotDeleteTaskException
-};
+use App\domain\Task\Application\UseCases\Commands\{DeleteTaskCommand, StoreTaskCommand, UpdateTaskCommand};
+use App\domain\Task\Application\UseCases\Queries\FindTitleAndStatusByUserCommand;
+use App\domain\Task\Application\UseCases\Queries\FindUserTaskCommand;
+use App\domain\Task\Application\UseCases\Queries\UserTaskPageCommand;
+use App\domain\Task\Domain\Exceptions\{NotCreateTaskException, NotDeleteTaskException};
 use App\domain\Task\Domain\Model\Entities\Task;
+use App\domain\Task\Services\TaskServices;
 use Core\{Cache\Cache,
     Database\DB,
     Http\Request,
@@ -28,8 +22,7 @@ use Core\{Cache\Cache,
     Support\App\App,
     Support\Session\Session,
     Validator\Validator,
-    View\View
-};
+    View\View};
 use DateTime;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
